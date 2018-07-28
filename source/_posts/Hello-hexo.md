@@ -1,7 +1,7 @@
 ---
-title: Hello hexo
-date: 2018-07-28 20:26:59
+title: 你好！Hexo！
+date: 2018-07-28 21:00:00
 tags:
 ---
 
-Interesting
+测试Hexo框架哦！
