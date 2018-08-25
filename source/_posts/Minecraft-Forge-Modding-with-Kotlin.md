@@ -38,3 +38,5 @@ apply plugin: 'kotlin'
 现在只需要点击你IDE上的Gradle项目刷新按钮就可以使用Kotlin开发Forge模组啦！
 
 参考文献：[http://couchdoescode.blogspot.com/2018/01/minecraft-modding-tutorial-with-kotlin.html](http://couchdoescode.blogspot.com/2018/01/minecraft-modding-tutorial-with-kotlin.html)
+
+Forgelin项目地址：[GitHub](https://github.com/shadowfacts/Forgelin)
