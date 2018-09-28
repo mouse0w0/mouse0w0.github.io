@@ -1,7 +1,7 @@
 ---
 title: 用Kotlin开发Forge模组
 date: 2018-08-24 20:19:00
-tags: Forge
+tags: [Forge, Kotlin]
 ---
 
 首先打开ForgeMdk目录下的`build.gradle`文件，在其中添加仓库：
