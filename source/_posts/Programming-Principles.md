@@ -6,9 +6,9 @@ tags: Programming
 
 > **本文翻译自[Programming Principles](http://java-design-patterns.com/principles/)。**
 
-每个程序员都可以从理解编程原理和模式中受益。这篇概述用于我自己参考，同时我也把它放在这。也许这在设计、讨论或复查中对你有所帮助。但请注意，这还远远没有完成，你常常需要在相互矛盾的原则直接做出权衡。
+每个程序员都可以从理解编程原理和模式中受益。这篇概述用于我个人参考，同时我也把它放在这。也许这在设计、讨论或复查中对你有所帮助。但请注意，这还远远不够，你常常需要在相互矛盾的原则之间做出权衡。
 
-本文受[The Principles of Good Programming](http://www.artima.com/weblogs/viewpost.jsp?thread=331531)启发。我觉得这份列表很足够了，但并不完全符合我个人的想法。此外，我还需要更多的论证、细节以及其他资源的链接。如果您有任何反馈或者改进的建议，[请让我知道](https://github.com/webpro/programming-principles/issues)。
+本文受[The Principles of Good Programming](http://www.artima.com/weblogs/viewpost.jsp?thread=331531)启发。我觉得这份列表已经足够了，但这并不完全符合我个人的想法。此外，我还需要更多的论证、细节以及其他资料的链接。如果您有任何反馈或者改进的建议，[请让我知道](https://github.com/webpro/programming-principles/issues)。
 
 ## 目录
 
