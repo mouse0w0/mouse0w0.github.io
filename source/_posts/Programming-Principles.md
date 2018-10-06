@@ -14,8 +14,8 @@ tags: Programming
 
 ### 通用
 
-* [KISS (Keep It Simple Stupid)](#kiss)
-* [YAGNI](#yagni)
+* [KISS (Keep It Simple Stupid)](#KISS)
+* [YAGNI](#YAGNI)
 * [Do The Simplest Thing That Could Possibly Work](#do-the-simplest-thing-that-could-possibly-work)
 * [Separation of Concerns](#separation-of-concerns)
 * [Keep Things DRY](#keep-things-dry)
@@ -48,13 +48,13 @@ tags: Programming
 
 大多数系统如果保持简单而不是复杂，效果最好。
 
-为什么
+为什么？
 
 * 更少的代码可以花更少的时间去写，Bug更少，并且更容易修改。
 * 简单是复杂的最高境界。
 * 完美境地，非冗杂，而不遗。
 
-> 译注：第二句话为达·芬奇所说的名言，原文为“Simplicity is the ultimate sophistication.”；第三句话为安东尼·德·圣-埃克苏佩里的名言，原文为“It seems that perfection is reached not when there is nothing left to add, but when there is nothing left to take away.”。
+> 译注：第二句话来自达·芬奇，原文为“Simplicity is the ultimate sophistication.”；第三句话来自安东尼·德·圣-埃克苏佩里，原文为“It seems that perfection is reached not when there is nothing left to add, but when there is nothing left to take away.”。
 
 相关资料
 
@@ -63,18 +63,18 @@ tags: Programming
 
 ## YAGNI
 
-YAGNI stands for "you aren't gonna need it": don't implement something until it is necessary.
+YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情。
 
-Why
+为什么？
 
-* Any work that's only used for a feature that's needed tomorrow, means losing effort from features that need to be done for the current iteration.
-* It leads to code bloat; the software becomes larger and more complicated.
+* 去做任何仅在未来需要的特性，意味着从当前迭代需要完成的功能中分出精力。
+* 它使代码膨胀；软件变得更大和更复杂。
 
-How
+怎么做？
 
-* Always implement things when you actually need them, never when you just foresee that you need them.
+* 在当你真正需要它们的时候，才实现它们，而不是在你预见到你需要它们的时候。
 
-Resources
+相关资料
 
 * [You Arent Gonna Need It](http://c2.com/xp/YouArentGonnaNeedIt.html)
 * [You’re NOT gonna need it!](http://www.xprogramming.com/Practices/PracNotNeed.html)
