@@ -16,8 +16,8 @@ tags: Programming
 
 * [KISS (Keep It Simple Stupid)](#KISS)
 * [YAGNI](#YAGNI)
-* [Do The Simplest Thing That Could Possibly Work](#do-the-simplest-thing-that-could-possibly-work)
-* [Separation of Concerns](#separation-of-concerns)
+* [做最简单的事情](#做最简单的事情)
+* [关注点分离](#关注点分离)
 * [Keep Things DRY](#keep-things-dry)
 * [Code For The Maintainer](#code-for-the-maintainer)
 * [Avoid Premature Optimization](#avoid-premature-optimization)
@@ -80,38 +80,38 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 * [You’re NOT gonna need it!](http://www.xprogramming.com/Practices/PracNotNeed.html)
 * [You ain't gonna need it](http://en.wikipedia.org/wiki/You_ain't_gonna_need_it)
 
-## Do The Simplest Thing That Could Possibly Work
+## 做最简单的事情
 
-Why
+为什么？
 
-* Real progress against the real problem is maximized if we just work on what the problem really is.
+* 仅有当我们只解决问题本身时，才能最大化地解决实际问题。
 
-How
+怎么做？
 
-* Ask yourself: "What is the simplest thing that could possibly work?"
+* 扪心自问：“最简单的事情是什么？”。
 
-Resources
+相关资料
 
 * [Do The Simplest Thing That Could Possibly Work](http://c2.com/xp/DoTheSimplestThingThatCouldPossiblyWork.html)
 
-## Separation of Concerns
+## 关注点分离
 
-Separation of concerns is a design principle for separating a computer program into distinct sections, such that each section addresses a separate concern. For example the business logic of the application is a concern and the user interface is another concern. Changing the user interface should not require changes to business logic and vice versa.
+关注点分离是一种将计算机程序分离成不同部分的设计原则，以便每个部分专注于单个关注点。例如，应用程序的业务逻辑是一个关注点而用户界面是另一个关注点。更改用户界面不应要求更改业务逻辑，反之亦然。
 
-Quoting [Edsger W. Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra) (1974):
+引用 [Edsger W. Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra) (1974):
 
 > It is what I sometimes have called "the separation of concerns", which, even if not perfectly possible, is yet the only available technique for effective ordering of one's thoughts, that I know of. This is what I mean by "focusing one's attention upon some aspect": it does not mean ignoring the other aspects, it is just doing justice to the fact that from this aspect's point of view, the other is irrelevant.
 
-Why
+为什么？
 
-* Simplify development and maintenance of software applications.
-* When concerns are well-separated, individual sections can be reused, as well as developed and updated independently.
+* 简化软件应用程序的开发与维护。
+* 当关注点很好地分开时，各个部分可以被重用，并且可以独立开发和更新。
 
-How
+怎么做？
 
-* Break program functionality into separate modules that overlap as little as possible.
+* 将程序功能分成联系部分尽可能少的模块。
 
-Resources
+相关资料
 
 * [Separation of Concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
 
