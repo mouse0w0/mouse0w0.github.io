@@ -1,7 +1,8 @@
 ##### Menu
 menu:
-  博文: /archives
+  全部博文: /archives
   捐助作者: https://afdian.net/@mouse
+  反馈建议: https://github.com/Mouse0w0/mouse0w0.github.io/issues/new
 ## you can create `tags` and `categories` folders in `../source`.
 ## And create a `index.md` file in each of them.
 ## set `front-matter`as
