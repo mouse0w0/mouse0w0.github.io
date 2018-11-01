@@ -74,7 +74,7 @@ _**这不是一篇教程** 本介绍并非教程，有关Mixin实现的更多详
 
 为了理解接口如何影响我们与类的交互，让我们看看在例子中创建一个包含一些方法的接口，让后通过接口访问这些方法会发生什么。
 
-旁注：*是的，这完全偏离了UML的轨道，但UML对于表示此处的概念并不真的有用，这个框图的 __底部__ 从其他任何对象来看都是“可视区域”，该接口实际上位于公共类“之前”，并给出它的一个子集。*
+旁注：*是的，这完全偏离了UML的轨道，但UML对于表示此处的概念并不真的有用，这个框图的**底部**从其他任何对象来看都是“可视区域”，该接口实际上位于公共类“之前”，并给出它的一个子集。*
 
 ![图4 - 一个让UML爱好者讨厌的图](mixin_tut_3.png)
 
@@ -124,7 +124,7 @@ public void method() {
     int level = lev.getLevel();
 } 
 ```
-上节中我们知道，`EntityPlayer`的方法`getLevel()`**能**愉快地实现接口在不改变的情况下，但`implements`子句没有显式声明接口这一事实导致在运行时转换是吧。如果我们可以在运行时以某种方式应用`implements`字句，那么最终有一种可行的方法来使用接口在Java中实现*鸭子类型（Duck typing）*。
+上节中我们知道，`EntityPlayer`的方法`getLevel()`**能**愉快地在不改变类的情况下实现接口，但`implements`子句没有显式声明接口这一事实导致在运行时转换失败。如果我们可以在运行时以某种方式添加`implements`字句，那么最终有一种可行的方法以使用接口在Java中实现*鸭子类型（Duck typing）*。
 
 > “实现什么？”<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 可能是你说的
 
@@ -203,7 +203,7 @@ public abstract class MixinEntityPlayer
 
 **图7 - Mixin层次结构（应用前）**
 
-虽然这个图代表了我们将创建的类的实际层次结构，但它实际上更用于（并且在一些更复杂的情况下，至关重要）*认识到Mixin __不是真正的类__。*在运行时，Mixin将被应用到**目标类**，因此，认为Mixin*存在于 __目标类内__*反而更有利于良好的思考过程。
+虽然这个图代表了我们将创建的类的实际层次结构，但它实际上更用于（并且在一些更复杂的情况下，至关重要）*认识到Mixin**不是真正的类**。*在运行时，Mixin将被应用到**目标类**，因此，认为Mixin*存在于**目标类内***反而更有利于良好的思考过程。
 
 在Mixin应用之后，新的类层次看起来像这样：
 
@@ -271,22 +271,22 @@ public abstract class MixinEntityPlayer
 
 现在，当应用Mixin时，新方法也将被添加到**目标类**：
 
-![图11 - 类层次结构（应用后）](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_10.png)
+![图11 - 类层次结构（应用后）](mixin_tut_10.png)
 
 **图11 - 类层次结构（应用后）**
 
 我们修改的目标类现在完全实现了所有声明的接口，我们可以看到想目标类添加新方法是多么容易。但目前我们的新方法实际上没有做任何事情，我们将在下一节中看到如何修复。
 
-### 5. To light a candle is to cast a Shadow
-So we now have a way to inject new methods into our **target class**, but we will fairly quickly encounter a problem with implementing the body of our freshly-injected method: In an ideal world we'd like our new `setLevel()` implementation to be able to access the `level` variable in `EntityPlayer`, but there's a problem... it can't.
+### 5. 点燃蜡烛就将投下Shadow
+因此，现在我们有办法将新方法注入**目标类**，但是在实现新注入的方法体时，我们就很快遇到一个问题：在理想情况下，我们希望新的`setLevel()`实现能够访问`EntityPlayer`中的`level`变量。但有一个问题是……它不能。
 
-![Figure 12 - impossible access](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_11.png)
+![图12 - 不可能的访问](mixin_tut_11.png)
 
-**Figure 12 - impossible access**
+**图12 - 不可能的访问**
 
-We can't access a member of the **target class** because until the mixin is actually applied, the field doesn't exist! Because the superclass of the mixin is `Entity`, it doesn't even help if the field is `protected`: as far as the Java compiler is concerned, the field is nowhere to be seen.
+我们不能访问**目标类**的成员，因为在实际应用Mixin之前，字段不存在！因为Mixin类的父类是`Entity`，如果字段是`protected`，它甚至没用：对Java编译器而言，字段是不可视的。
 
-However **we know** that when the mixin is applied that the field **will be there**, what we need is some way of telling Java *"hey, this field __will__ exist, let me access it"*. Fortunately mixins provide a mechanism for doing exactly this, via the `@Shadow` annotation:
+但**我们知道**当Mixin被应用时，字段**将在那里**，我们需要的是一种方法告诉Java*“嘿，这个字段**将**会存在，让我访问它”*。幸运的是，Mixin提供了一个机制，通过`@Shadow`注释做到这一点：
 
 ```java
 @Mixin(EntityPlayer.class)
@@ -299,19 +299,19 @@ public abstract class MixinEntityPlayer
     
     @Override
     public void setLevel(int newLevel) {
-        // Refers to the shadow field above, but will refer
-        // to the REAL field when the mixin is applied
+        // 引用上面的影子字段，但将引用
+        // 应用Mixin后的真正的字段
         this.level = newLevel;
     }
 }
 ```
-The `@Shadow` annotation creates a "virtual field" in the mixin which mirrors its **target class** counterpart:
+`@Shadow`注释在Mixin中创建一个“虚拟字段”，它反映了**目标类**的对应部分：
 
-![Figure 13 - me and my shadow](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_12.png)
+![图13 - 我和我的影子](mixin_tut_12.png)
 
-**Figure 13 - me and my shadow**
+**图13 - 我和我的影子**
 
-It is also possible to apply `@Shadow` to methods as well, in order to invoke methods which are only defined in the target class, for example say we wanted to call the `update()` method immediately after setting the level, we can easily shadow the method and then invoke it from our new `setLevel()` method body:
+还可以将`@Shadow`使用在方法上，一遍调用只在目标类中定义的方法，例如，在设置等级后立刻调用`update()`方法，我们可以轻松的影射方法，然后从新的`setLevel()`方法体中调用它：
 
 ```java
 @Mixin(EntityPlayer.class)
@@ -327,60 +327,60 @@ public abstract class MixinEntityPlayer
     
     @Override
     public void setLevel(int newLevel) {
-        // Set the level value
+        // 设置等级的值
         this.level = newLevel;
         
-        // Invoke the shadowed method to update the object state
+        // 调用影射的方法以更新实体状态
         this.update();
     }
 }
 ```
-We would normally declare the shadow method as `abstract` simply to avoid having to write a method body, however because it is not possible to declare something as both `private` and `abstract` for obvious reasons, we simply declare the shadow method with an empty body.
+我们通常将影子方法声明为`abstract`，只是为了避免编写方法体，但很显然，我们不可能将`private`与`abstract`同时声明，所以我们只是用空方法体声明影子方法。
 
-![Figure 14 - shadow all the things](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_13.png)
+![图14 - 影射万物](mixin_tut_13.png)
 
-**Figure 14 - shadow all the things**
+**图14 - 影射万物**
 
-### 6. Is it a bird? Is it a plane? No it's superclass!
-The final stop on our tour of the basic features of mixins is a brief look at how superclass accesses are handled within mixins. To begin with, we need to first understand why a mixin class is declared with the same superclass as the **target class**.
+### 6. 它是鸟吗？是飞机吗？不，它是~~DIO~~父类哒！
+旅途的最后一站是关于Mixin的基本特性，简要介绍如何在Mixin中处理父类的访问。首先，我们需要理解为什么一个Mixin类被声明为与**目标类**相同的超类。
 
-First let's take a quick look at our current class hierarchy:
+首先让我们快看看当前的类层次结构：
 
-![Figure 15 - state of play](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_14.png)
+![图15 - 游戏状态](mixin_tut_14.png)
 
-**Figure 15 - state of play**
+**图15 - 游戏状态**
 
-Remember from section 1 that invocations qualified with the `super` keyword are **statically bound**. In the context of our mixin class, if we call `super.onUpdate()` as shown in **figure 15** then the generated bytecode will reference the `onUpdate` method in the `Entity` class specifically.
+请记住，从第一节开始使用`super`关键字的调用都是**静态绑定**的。在我们的Mixin类上下文中，如果我们如**图15**所示调用`super.onUpdate()`，那么生成的字节码将具体地引用`Entity`类中的`onUpdate`方法。
 
-When the mixin has the same parent class as the **target class**, this is exactly what we want. However it is actually possible to have a mixin inherit from *any class in the __target class__'s hierarchy*, up to and including `Object`.
+当Mixin与**目标类**具有相同的父类时，这正是我们想要的。然而，实际上Mixin可以继承*目标类层次结构上的任何类*，直到并包括`Object`。
 
-Let's assume for a minute that `EntityPlayer` does not inherit directly from `Entity`, but instead an intermediate class `EntityMoving`, the mixin class will still extend directly from `Entity`:
+让我们假设一下，`EntityPlayer`不是直接从`Entity`继承的，而是从中间的一个类`EntityMoving`，而Mixin类仍然可以直接继承`Entity`：
 
-![Figure 16 - expanded hierarchy - this diagram is deliberately wrong!](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_15.png)
+![图16 - 继承层次结构 - 注意：此图是故意错误的！](mixin_tut_15.png)
 
-**Figure 16 - expanded hierarchy - note: this diagram is deliberately wrong!**
+**图16 - 继承层次结构 - 注意：此图是故意错误的！**
 
-Looking at this new hierarchy, it's now obvious why `super.onUpdate()` will *appear* to be calling the method in `Entity` from within the mixin class, but this is where it's important that you **ignore what your IDE (and common sense probably) is telling you, and remember that a mixin's point of view is ALWAYS that of the _target class_**!
+看看这个新的层次结构，现在很明显为什么`super.onUpdate()`将*出现*在Mixin类中调用`Entity`的方法，但这里很重要的一点是，**忽略IDE（可能还有常识）告诉你的，并记住Mixin的关注点永远在 _目标类_**！
 
-The problem here is that the intermediate class `EntityMoving` has overridden the `onUpdate` moving and the functional contract of the class is such that calling `onUpdate` in the superclass will actually lead to inconsistent behaviour. When we invoke `super.onUpdate()` from the mixin, it **must** have the **same** semantics as if the same Java statement were invoked **from the target class**, and **this is indeed the case**.
+这里的问题是，中间类`EntityMoving`已经重写了`onUpdate`，并且类的功能范围使得在超类中调用`onUpdate`实际上会导致不一样的行为。当我们在Mixin中调用`super.onUpdate()`时，它**必须**具有**相同**的语义，就像**从目标类**调用同一个Java语句一样，并且**确实如此**。
 
-* In order to preserve the semantic consistency of Java code you type into a mixin, the mixin transformer updates all **static bindings** in the mixin class as it is applied. This means that in the above example, the call to `super.onUpdate()` correctly invokes the method in `EntityMoving`
+* 为了保持你键入到Mixin中的Java代码的语义一致性，Mixin转换器在应用时更新Mixin类中所有的**静态绑定**。这意味着在上述例子中，调用`super.onUpdate()`将正确地调用`EntityMoving`中的方法。
 
-* This doesn't affect the semantics of the `this` keyword. Which for `protected` and `public` methods will always use **dynamic binding** and thus will always invoke the appropriate subclass method.
+* 这并不影响`this`关键词的语义。对于`protected`和`public`方法，它们总是使用**动态绑定**，因此总是调用适当的子类方法。
 
-> To get technical, the transformer will process all INVOKESPECIAL opcodes in the mixin and analyse the superclass hierarchy of the target class to find the most specialised version of that method. This process is expensive and is only carried out on "detached" mixins (those mixins whose superclass differs from the target class's superclass). To avoid this processing step, it is recommended that mixin classes have the same superclass as their target wherever possible.
+> 为了实现该技术，转换器将处理Mixin中所有的INVOKESPECIAL操作符，并分析目标类的父类层次结构，以找到该方法的最特化的版本。该过程开销很高，并且只在“分离的”Mixin（那些父类与目标类的父类不同的Mixin）上执行。为了避免这种处理步骤，建议尽可能地将Mixin类与它们的目标类具有相同的父类。
 
-![Figure 17 - final hierarchy](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_16.png)
+![图17 - 最终层次结构](mixin_tut_16.png)
 
-**Figure 17 - final hierarchy (mixin applied)**
+**图17 - 最终层次结构（Mixin应用后）**
 
-As you can see, after the mixin is applied to the target class, the semantics of the `super.onUpdate()` call are updated to be consistent with the **target class** and all is once again well.
+如你所见，将Mixin应用到目标类之后，将`super.onUpdate()`调用的语言更新为与**目标类**一致，并且一切都再次工作良好。
 
-### 7. Wrapping up
+### 7. 圆满完成
 
-While this introduction covers the basics of mixins, there are many more aspects of mixin functionality to explore, especially when working in an environment where the **target classes** will be obfuscated before being used in a production environment.
+虽然本介绍涵盖了Mixin的基本知识，但是还有很多方面需要探讨，尤其是在**目标类**在使用之前会被混淆的生产环境中工作时。
 
-#### More mixin topics (coming soon)
+#### 更多Mixin文章（即将到来）
 
 * [Introduction to Mixins - The Mixin Environment](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment)
 * [Introduction to Mixins - Overwriting Methods](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods)
