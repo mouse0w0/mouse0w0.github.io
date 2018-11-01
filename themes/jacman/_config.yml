@@ -12,6 +12,7 @@ menu:
 #### Widgets
 widgets: 
 - github-card
+- afdian-card
 - category
 - tag
 - links
@@ -23,7 +24,7 @@ widgets:
 
 
 #### RSS 
-rss: /atom.xml ## RSS address.
+rss: ## RSS address.
 
 #### Image
 imglogo:
@@ -65,6 +66,7 @@ author:
   email:      ## e.g. imjark@gmail.com
   twitter:    ## e.g. jarkwu for https://twitter.com/jarkwu
   github: Mouse0w0 ## e.g. wuchong for https://github.com/wuchong
+  afdian: mouse
   facebook:   ## e.g. imjark for https://facebook.com/imjark
   linkedin:   ## e.g. wuchong1014 for https://www.linkedin.com/in/wuchong1014
   google_plus:    ## e.g. "111190881341800841449" for https://plus.google.com/u/0/111190881341800841449, the "" is needed!
