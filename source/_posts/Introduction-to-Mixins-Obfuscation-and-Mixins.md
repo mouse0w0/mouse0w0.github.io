@@ -131,7 +131,7 @@ Mixin通过在编译时解析`@Shadow`注解，并将影子成员的适当混淆
 
 ![](mixin_transformer_chain_obf.png)
 
-#### 5.3  Unpredictable Member Names - The Curse of Synthetic Shenanigans
+#### 5.3  不可预测的成员名称 - 合成把戏的困扰
 
 OBF -> SRG -> MCP的确定性规则的例外是目标类中的合成成员（Synthetic Member）[<sup>3</sup>](#note3)造成的。虽然混淆代码库中的合成成员也像它们的外部类一样具有混淆名称，但是在开发中会出现问题，因为重新建立的内部类关系导致这些合成成员被剥离，然后被编译器重新创建。
 
