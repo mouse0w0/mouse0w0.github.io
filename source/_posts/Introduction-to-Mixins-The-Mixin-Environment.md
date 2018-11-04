@@ -2,6 +2,7 @@
 title: 介绍Mixin——Mixin环境
 date: 2018-11-01 17:18:21
 tags: [Java, Bytecode, Mixin]
+categories: Mixin
 ---
 > 本文翻译自：[Introduction to Mixins The Mixin Environment](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment)
 

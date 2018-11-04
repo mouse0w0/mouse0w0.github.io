@@ -2,6 +2,7 @@
 title: 介绍Mixin——混淆与Mixin
 date: 2018-11-02 12:39:35
 tags: [Java, Bytecode, Mixin]
+categories: Mixin
 ---
 > 本文翻译自：[Introduction to Mixins Obfuscation and Mixins](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Obfuscation-and-Mixins)
 

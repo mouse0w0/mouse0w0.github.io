@@ -2,6 +2,7 @@
 title: 介绍Mixin——理解Mixin的结构
 date: 2018-11-01 08:09:56
 tags: [Java, Bytecode, Mixin]
+categories: Mixin
 ---
 
 > 本文翻译自：[Introduction to Mixins Understanding Mixin Architecture](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture)
