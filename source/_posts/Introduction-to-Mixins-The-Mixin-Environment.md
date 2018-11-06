@@ -1,5 +1,5 @@
 ---
-title: 介绍Mixin——Mixin环境
+title: Mixin介绍——Mixin环境
 date: 2018-11-01 17:18:21
 tags: [Java, Bytecode, Mixin]
 categories: Mixin

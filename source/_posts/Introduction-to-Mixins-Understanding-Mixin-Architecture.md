@@ -1,5 +1,5 @@
 ---
-title: 介绍Mixin——理解Mixin的结构
+title: Mixin介绍——理解Mixin的结构
 date: 2018-11-01 08:09:56
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
