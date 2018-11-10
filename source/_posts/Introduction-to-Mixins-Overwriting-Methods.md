@@ -14,7 +14,7 @@ Introduction to Mixins Overwriting Methods](https://github.com/SpongePowered/Mix
 
 这两种情况都想要我们可能**重写**目标类的某些部分。
 
-### 1. The Proverbial Bull in the Proverbial Shop - Overwrites
+### 1. 房间里的大象 - 重写
 
 *重写（Overwrite）*是Mixin中最微妙的功能，通常应尽量使用[回调注入器（Callback Injectors）](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Rerouters)、[重路由器（Rerouters）](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Callback-Injectors)或其他Mixin代码注入功能。
 
@@ -137,7 +137,7 @@ public abstract class MixinEntityPlayer
 
 虽然常规重写的行为易于理解和相当可预测，但是它们缺乏灵活性，给Mixin设计来带了一些挑战，而这些挑战不容易克服。好消息是Mixin提供了内置功能来应对这些问题，坏消息是这个功能最初看起来会相当复杂。为了更清楚地理解这些功能，我们将逐步解释这个问题。
 
-#### 2.1 内部的嘎嘎叫和搜索混淆的鸭子
+#### 2.1 内部的嘎嘎叫和寻找混淆的鸭子
 
 正如我们所见的，Mixin的关键任务之一是通过使用Mixin将自己的接口应用到现有对象，在Java应用程序中提供伪鸭子类型功能。正如我们所见的，有时现有类中的方法*已经*实现了接口方法，我们称这种类型的方法为*内部（Intrinsic）*方法，因为它是现有类的一部分：实际上我们的类以及——从本质上——就知道如何嘎嘎叫。
 
