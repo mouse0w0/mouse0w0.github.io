@@ -17,15 +17,13 @@ widgets:
 - category
 - tag
 - links
+- rss
 ##- douban
-##- rss
 ##- weibo
-  ## provide eight widgets:github-card,category,tag,rss,archive,tagcloud,links,weibo
-
-
+## provide eight widgets:github-card,category,tag,rss,archive,tagcloud,links,weibo
 
 #### RSS 
-rss: ## RSS address.
+rss: ./atom.xml ## RSS address.
 
 #### Image
 imglogo:

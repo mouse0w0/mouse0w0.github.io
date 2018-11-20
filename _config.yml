@@ -81,3 +81,12 @@ deploy:
   type: git
   repo: https://github.com/Mouse0w0/mouse0w0.github.io.git
   branch: master
+
+plugin:
+  - hexo-generator-feed
+
+#Feed Atom
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
