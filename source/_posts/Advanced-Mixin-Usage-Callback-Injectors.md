@@ -257,27 +257,27 @@ protected void onResetPos(int x, int y, CallbackInfo ci) {
 
 #### 4.2 注入点的性质
 
-Before we go any further, there are some key things which should be understood about Injection Points:
+在进一步讨论之前，需要了解一些关于注入点的关键内容：
 
-* With very few exceptions, an Injector will place its injected code **before the opcode identified by the Injection Point**. This should be intuitive, some examples:
- * `RETURN` identifies the `RETURN` opcodes in a method, the injection happens immediately before the method returns
- * `HEAD` identifies the *first* opcode in a method, the injection happens at the very start of a method
- * `INVOKE` (see below) identifies a method call, the injection happens immediately before the method is called
+* 除少数情况外，注入器将把其注入的代码置于**注入点标识的操作符之前**。这应该是很直观的，一些例子如下：
+ * `RETURN`标识方法中的`RETURN`操作符，注入发生在方法返回之前。
+ * `HEAD`标识方法中的*第一个*操作符，注入发生在方法的开始处。
+ * `INVOKE`（参见下文）标识方法调用，注入发生在方法调用之前。
 
-* Since they are effectively queries, Injection Points **may return no results**. For example, imagine that in the example above we had specified `RETURN` as our query with an `ordinal` value of `2`. Since there are only two RETURN opcodes in the method, the Injection Point will match no opcodes. You can specify acceptable upper and lower limits for injections using constraints.
+* 由于它们是高效的查询，注入点**可能不会返回结果**。例如，假设在上述的示例中，我们指定`RETURN`作为查询，其`ordinal`值为`2`。由于在该方法中只有两个返回操作符，所以注入点将不匹配操作符。你可以使用约束指定可接受的上限和下限。
 
-* Whilst Injection Points are **deterministic for a given method**, this does not remove the maintenance burden when injecting into **a changing codebase**. With the exception of `HEAD` (which always matches the same point), all injection points - especially those using `ordinal` offsets or with other parameterised settings - should be checked when the target codebase changes in order to ensure that they remain correct.
+* 虽然对于一个**给定的方法**注入点是**确定的**，但是当注入**一个变化的代码库**时，这并不能消除维护负担。除了`HEAD`（它总是匹配相同的点），当目标代码库改变时，应该检查所有的注入点，尤其是那些使用`ordinal`偏移量或具有其他参数化设置的注入点，以确保它们始终正确。
 
-* Defining more complex injection points (more on this below) is one of the few places in Mixin where you will have to *get your hands dirty* and take a look at the bytecode of a **target method** itself. This is often necessary so you can pick the most suitable opcode for your injection, a good disassembler will help you immensely here.
+* 定义更复杂的注入点（下面将详细介绍）是Mixin中少数几个必须*弄脏你的手*并查看**目标方法**的字节码的地方之一。这通常是必要的，所以你可以选择最适合你的注入操作符，一个好的反汇编器将在此为你提供巨大的帮助。
 
-#### 4.3 Other Types of Injection Point
+#### 4.3 其他类型的注入点
 
-As well as the trusty `HEAD` and `RETURN` which are the hammer and screwdriver in your Injection Point toolbox, there are a selection of other pre-defined injection points you can use:
+你可用的注入点中，除了`HEAD`和`RETURN`以外，还可以选择使用其他预定义的注入点：
 
 <table width="100%">
     <tr>
-        <th>Injection Point</th>
-        <th>Code Identified</th>
+        <th>注入点</th>
+        <th>标识的代码</th>
     </tr>
     <tr>
         <td><tt>INVOKE</tt></td>
