@@ -277,37 +277,37 @@ protected void onResetPos(int x, int y, CallbackInfo ci) {
 <table width="100%">
     <tr>
         <th>注入点</th>
-        <th>标识的代码</th>
+        <th>代码识别方式</th>
     </tr>
     <tr>
         <td><tt>INVOKE</tt></td>
-        <td>Finds a method call and injects before it</td>
+        <td>查找方法调用并在其之前注入</td>
     </tr>
     <tr>
         <td><tt>FIELD</tt></td>
-        <td>Finds a field read or write and injects before it</td>
+        <td>查找字段读写并在其之前注入</td>
     </tr>
     <tr>
         <td><tt>NEW</tt></td>
-        <td>Finds a <tt>NEW</tt> opcode (object creation) and injects before it</td>
+        <td>查找<tt>NEW</tt>操作符（对象创建）并在其之前注入</td>
     </tr>
     <tr>
         <td><tt>JUMP</tt></td>
-        <td>Finds a jump opcode (of any type) and injects before it</td>
+        <td>查找跳转操作符（任何类型）并在其之前注入</td>
     </tr>
     <tr>
         <td><tt>INVOKE_STRING</tt></td>
-        <td>Finds a call to a method which takes a single <tt>String</tt> and returns <tt>void</tt> which accepts a constant string as an argument. This can be used primarily to find calls to <tt>Profiler.startSection( nameOfSection )</tt></td>
+        <td>查找方法调用，该方法接受单个<tt>String</tt>并返回<tt>void</tt>，或者说该方法接受常量字符串作为参数。这可以主要用于查找对<tt>Profiler.startSection(nameOfSection)</tt>的调用。</td>
     </tr>
     <tr>
         <td><tt>INVOKE_ASSIGN</tt></td>
-        <td>Finds a method call which returns a value and injects immediately after the value is assigned to a local variable. <b>Note this is the only Injection Point which injects <em>after</em> its target</b></td>
+        <td>查找方法调用，该方法调用后返回一个值，并在该值被分配给本地变量之后立刻注入。<b>注：这是唯一一个在注入点<em>之后</em>的注入</b></td>
     </tr>
 </table>
 
-For more details see the [Injection Point Reference](https://github.com/SpongePowered/Mixin/wiki/Injection-Point-Reference)
+更多细节请看[注入点参考](https://github.com/SpongePowered/Mixin/wiki/Injection-Point-Reference)
 
-### 5. Targets with non-Void Return Types
+### 5. 具有非Void返回类型的目标方法
 
 So far, we have only considered injecting into a target method which returns `void`. When injecting into a method with a non-`void` return type, injector **handler methods** will instead need to receive a `CallbackInfoReturnable`. The `CallbackInfoReturnable` differs from its parent `CallbackInfo` in that:
 
