@@ -171,92 +171,91 @@ protected void onSetPos(int x, int y, CallbackInfo ci) {
 
 ### 3. 可取消注入
 
-So far, our injections haven't altered the structure of the target method at all, they simply call our handler function allowing it to perform whatever tasks we require, leaving the target method unchanged. **Cancellable Injections** allow us to create injections which can prematurely *return* from the target method.
+到目前为止，我们的注入根本没有改变目标方法的结构，它只是调用我们的处理函数，使它执行我们需要的任何操作，而不改变目标方法。**可取消注入**允许我们创建可以提前从目标方法*return*的注入。
 
-Looking at the code which would be injected by our `setPos` example from above, we can see that the injected code consists of the creation of a new `CallbackInfo` instance, followed by a call to our **handler method**. However now let's alter our injector declaration in the `@Inject` annotation to include the `cancellable` flag. We will also add some logic to our handler body:
+从上面的`setPos`示例将注入的代码可以看出，注入的代码包括创建一个新的`CallbackInfo`实例，然后调用**处理方法**。但是，现在我们将向`@Inject`注解中的注入器声明添加`cancellable`标识。我们还将为处理方法体添加一些逻辑：
 
 ```java
 /**
- * Cancellable injection, note that we set the "cancellable"
- * flag to "true" in the injector annotation
+ * 可取消注入，注意我们在注入器注解中将"cancellable"标识设置为"true"
  */
 @Inject(method = "setPos", at = @At("HEAD"), cancellable = true)
 protected void onSetPos(int x, int y, CallbackInfo ci) {
-    // Check whether setting position to origin and do some custom logic
+    // 检查位置是否设置到原点，并执行自定义逻辑
     if (x == 0 && y == 0) {
-        // Some custom logic
+        // 一些自定义逻辑
         this.position = Point.ORIGIN;
         this.handleOriginPosition();
         
-        // Call update() just like the original method would have
+        // 就像原方法一样调用update()
         this.update();
         
-        // Mark the callback as cancelled
+        // 将回调标记为已取消
         ci.cancel();
     }
     
-    // Execution proceeds as normal at this point, no custom handling
+    // 此时正常执行，不执行自定义处理
 }
 ```
 
-In the above code, the **handler** checks whether the position is being set to `(0, 0)` and performs some custom logic instead, marking the callback as **cancelled** to cause the target method (`setPos`) to **return immediately after the injection**. We can see how his works by looking at the code injected into `setPos`, which looks like this:
+在上述代码中，**处理方法**检查位置是否设置为`(0, 0)`，并执行一些自定义逻辑，将回调标记为**已取消**，以使目标方法（`setPos`）在**注入之后立刻返回**。我们可以看到目标方法是如何处理注入到`setPos`的代码，看起来就像这样：
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_07.png)
+![](flard_07.png)
 
-As you can see, marking the injection as cancellable causes the mixin processor to inject code which checks whether the `CallbackInfo` was marked as cancelled, and return immediately if so.
+如你所见，将注入标记为可取消的，会导致Mixin处理器注入代码时会检查`CallbackInfo`是否被标记为已取消，如果是，则立刻返回。
 
-> Note: calling `cancel()` on a *non-cancellable* `CallbackInfo` will raise an exception!
+> 注意：在*不可取消*的`CallbackInfo`上调用`cancel()`将引发异常！
 
-This type of injection where we **inject at the method `HEAD` and conditionally return** is known as a **Short Circuit Injection** and is a very good replacement for things which would otherwise need to be `@Overwrite`. It is also possible to write a **Short Circuit** Injection which **always cancels**, this type of injector is know as a **Permanent Short Circuit** Injection or **RoadBlock Injection**.
+对于我们**在方法`HEAD`处，并且有条件地返回的注入**，被称为**短路注入（Short Circuit Injection）**，这对于那些本来是需要`@Overwrite`的东西是非常好的替代方案。也可以写一个总是取消的短路注入，这种类型的注入器被称为**永久短路注入（Permanent Short Circuit）**或**阻断注入（RoadBlock Injection）**。
 
-> Note that in most cases, RoadBlocks are preferable to `Overwrites`. This is partly because they allow other transformers to act on the original method without raising errors; but also because keeping our injected code in a separate method makes stack traces much more meaningful when exceptions occur in injected code.
+> 注意，大多数情况下，阻断注入最好是重写。其原因是因为它允许其他转换器对原始方法进行操作，而不会引起错误；还因为将注入的代码保持在单独的方法中，这使得在注入的代码中发生异常时，堆栈追踪更有用。
 
-### 4. Taking Aim - Injection Points
+### 4. 瞄准——注入点
 
-So far, we have encountered two different **Injection Points**: `HEAD` and `RETURN`, and seen examples of the first. Understanding Injection Points is vital when defining all types of Injectors, since the type of Injection Point you choose will depend on what you want the injection to achieve.
+此前，我们已经遇到了两个不同的**注入点**：`HEAD`和`RETURN`，并且看到了第一个示例。在定义所有类型的注入器时，理解注入点是至关重要的，因为你选择的注入点类型将取决于你希望注入达成什么目的。
 
-The `HEAD` and `RETURN` injection points are special because they are the only injection points which are *guaranteed to succeed*, this is because there will *always* be at least one RETURN opcode in a method, and naturally there will always be a method "head".
+`HEAD`和`RETURN`注入点是特殊的，因为它们是*保证成功的*唯一注入点，这是因为在一个方法中*总是*至少有一个RETURN操作符，并且总会自然有一个方法“头”。
 
-#### 4.1 Finding an Opcode in a Haystack
+#### 4.1 在草垛中寻找操作符
 
-The first thing it's important to know about Injection Points is that they are essentially *queries* which are run against the method bytecode which will return one *or more* opcodes which match their criteria. That's right: a single injection point can match more than once.
+关于注入点，首先需要明白的是，它们本质上是*查询*目标方法运行字节码中一个*或更多*个与其标准匹配的操作符。没错：一个注入点可以匹配不止一次。
 
-For an example of this, let's consider the semantics of the `RETURN` injection point. The `RETURN` injection point is defined as follows:
+举一个例子，让我们思考一下`RETURN`注入点的含义。`RETURN`注入点的定义如下：
 
-* `RETURN` matches *all RETURN opcodes* in the target method.
+* `RETURN`匹配目标方法中的*所有RETURN操作符*。
 
-The mixin processor will always inject the callback *immediately prior to* the matched opcode, and thus using `RETURN` will always inject a callback immediately prior to the method returning.
+Mixin处理器将始终在匹配的操作符*之前立刻*注入回调，因此使用`RETURN`将始终在方法返回之前立刻注入回调。
 
-Let's take a look at an example:
+让我们看一个例子：
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_08.png)
+![](flard_08.png)
 
-In this example we have modified the `setPos` method and added some extra logic with an explicit return in the middle of the method. In addition to the *implicit* return at the end of the method this means there are now *two* RETURN opcodes in the method body. When we tag the injection points in the method we see that this is reflected in the injection points identified by `RETURN`:
+在本例中，我们修改了`setPos`方法，并在方法中添加了一些带有显式返回值的额外逻辑。除了方法结尾的*隐式*返回以外，这还意味着现在方法体中含有*两个*RETURN操作符。当我们标记方法中的注入点时，我们可以看到这映射在`RETURN`所标识的注入点中：
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_09.png)
+![](flard_09.png)
 
-In order to differentiate the identified opcodes, each opcode identified by the injection point is tagged with a number starting at zero, this opcode index is known as the **ordinal** and is a zero-based index.
+为了区分所标记的操作符，由注入点标识的每个操作符都以从零开始的数字标记，该操作符索引被称为**序号（Ordinal）**，并且是从零开始的索引。
 
-Let's assume we want to write an injector which only places a callback at the first RETURN opcode:
+假设我们想要编写一个只在第一个RETURN操作符上放置的回调注入器：
 
 ```java
 @Inject(method = "setPos", at = @At(value = "RETURN", ordinal = 0))
 protected void onResetPos(int x, int y, CallbackInfo ci) {
-    // handler logic
+    // 处理方法的逻辑
 }
 ```
 
-Specifying the `ordinal` value inside the `@At` means we only inject before the *first* RETURN opcode.
+在`@At`中指定`ordinal`值意味着我们只在*第一个*RETURN操作符之前进行注入。
 
-> **NOTE:** You might be asking yourself: *What's the difference between this example injection, and for example just injecting into the `reset()` method? It would be called at the same point, right?*
+> **注意:**你可能会问自己：*这个示例注入与仅注入`reset()`方法有什么区别？它会在同一个点被调用，对吧？*
 > 
-> Choosing the right injector target can be pretty subjective, and many times will depend both on what you're trying to achieve with a specific injection, and other factors such as subclassing of the object in question, and what variables are available in scope.
+> 选择正确的注入器目标可能是极其主观的，并且很多时候将取决于你试图通过特定注入实现什么，以及其他因素，例如所讨论的对象的子类，以及范围中可用的变量。
 > 
-> For example, in the method above, injecting into `reset()` would raise the callback at the same point, but what if `reset()` is over-ridden by a subclass? The `reset()` method also doesn't receive a copy of the arguments `x` and `y`, which we may need. Also, what if the `reset()` method is called from some other point in the code? All of these things should be considered.
+> 例如，在上述发方法中，注入`reset()`会在同一点引发回调，但是如果`reset()`被子类重载了怎么办？`reset()`方法也不接收参数`x`和`y`的副本，这是我们可能需要的。另外，如果从代码中的其他点调用`reset()`方法会怎么样呢？所有这些事情都应该考虑。
 > 
-> Choosing the appropriate place to inject will depend heavily on the structure (and hierarchy) of the class in question and precisely what your injection is intended to do. You should consider all aspects of the usage and nature of your injection targets when identifying your injection points.
+> 选择合适的注入点在很大程度上取决于所讨论的类的结构（和层次结构）以及注入后打算做什么。在确定注入点是，应该考虑注入目标的使用及其性质的所有方面。
 
-#### 4.2 The Nature of Injection Points
+#### 4.2 注入点的性质
 
 Before we go any further, there are some key things which should be understood about Injection Points:
 
