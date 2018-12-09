@@ -395,64 +395,64 @@ private void onConstructed(CallbackInfo ci) {
 }
 ```
 
-这个注入器向类中的所有构造函数注入回调。如果目标类具有多个重载的构造函数，并且你仅希望将其注入到所有构造函数中，那么这非常有用。
+这个注入器向类中的所有构造方法注入回调。如果目标类具有多个重载的构造方法，并且你仅希望将其注入到所有构造方法中，那么这非常有用。
 
 目标通配符可以与任何方法名一起使用，但是，如果通配符匹配具有`void`返回类型和非`void`返回类型的方法，则注入将失败并出错，因为对于非`void`的目标需要使用`CallbackInfoReturnable`。
 
 ### 7. 回调注入器的思考与局限性
 
-#### 7.1 注入构造函数
+#### 7.1 注入构造方法
 
-现在Java代码中的构造函数相当简单，并限定了三个简单的约束：
+现在Java代码中的构造方法相当简单，并限定了三个简单的约束：
 
 1. 在任何其他代码之前都必须调用`super`。
 2. 必须初始化任何`final`字段。
 3. 作为第1点造成的结果，你不能在`super`调用中内联调用实例方法，这里进行的任何调用都必须是静态的。
 
-但在*字节码*层面，构造函数更加精致。由于编译后的`<init>`方法混杂着原先构造函数的代码，任何类的字段初始化器（复制到所有构造函数），以及在某些情况下合成的（编译器生成的）代码（例如`Enum`的构造函数）。由于它们的性质，它们就是字节码层面变换的雷区。
+但在*字节码*层面，构造方法更加精致。由于编译后的`<init>`方法混杂着原先构造方法的代码，任何类的字段初始化器（复制到所有构造方法），以及在某些情况下合成的（编译器生成的）代码（例如`Enum`的构造方法）。由于它们的性质，它们就是字节码层面变换的雷区。
 
 因此，Mixin对注入器施加以下限制：
 
-* **为构造函数支持的唯一注入点是`RETURN`注入器**。之所以强加此限制，是因为在调用处理方法代码之前，没有其他明智的方法可以确保类已经完全初始化。
+* **为构造方法支持的唯一注入点是`RETURN`注入点**。之所以强加此限制，是因为在调用处理方法代码之前，没有其他明智的方法可以确保类已经完全初始化。
 
-如果要注入构造函数，**必须**指定`RETURN`为注入点。
+如果要注入构造方法，**必须**指定`RETURN`为注入点。
 
-#### 7.2 失败状态
+#### 7.2 故障状态
 
-Like other Mixin capabilities, Callback Injectors are designed to be *fail-fast* and *fail-safe*. This generally means that if an injector fails it will generally do one of two things:
+像其他Mixin功能一样，回调注入器被设计为*快速失效*和*故障安全*的。这通常意味着如果注入器发生故障，它通常会做两件事之一：
 
-1. Fail "silently" (unless mixin debugging is enabled) and leave the **target** method untouched (however the **handler** method will still be merged into the target class)
-2. Fail with a deterministic error message: for example when an injector finds its target opcode but the **handler** method has an incorrect signature.
+1. “静默”故障（除非启用了Mixin调试）并保持**目标方法**不变（但**处理**方法仍将合并到目标类中）。
+2. 使用确定性的错误消息故障：例如，当注入器找到其目标操作符，但**处理**方法有着不正确的签名时。
 
-Injectors are designed so that any failure will **not** corrupt the method bytecode, it will either succeed or deterministically fail.
+注入器的设计使得任何故障都**不会**破坏方法字节码，它要么成功，要么绝对失败。
 
-Silent failure is usually reserved for Injectors whose Injection Points match no opcodes. This can happen when the target method is altered or replaced and can be extremely useful since "overloaded" injectors can be created to cater for different situations.
+静默故障通常发生在注入点不匹配操作符的注入器上。当目标方法被更改或替换时可能会发生这种情况，并且可能非常有用，因为可以创建“重载”注入器来适应不同的情况。
 
-However sometimes it may be important that a certain injector succeeds. Perhaps the stability of your application depends on it, or failure is not an anticipated state and the application should be shut down. Either way, it is sometimes necessary to be able to *insist* that an injector succeeds (and raise a failure state if it does not). This is possible using the `expect` and `require` arguments.
+然而，有时候注入器的成功是很重要的。也许应用程序的稳定取决于它，或者失败不是预期的状态，应用程序应该被关闭。无论那种方式，有时必须能够*确保*注入器成功（如果不成功，则引发故障状态）。使用`expect`和`require`参数是可能做到这一点的。
 
 ##### 7.2.1 Require
 
-The `require` argument is simple, specifying a value for `require` declares that the injector must succeed *at least this many times*.
+`require`参数很简单，为`require`指定特定值要求注入器必须成功*至少几次*。
 
 ```java
 @Inject(method = "foo", at = @At(value = "INVOKE", target = "someMethod"), require = 2)
 private void onInvokeSomeMethodInFoo(CallbackInfo ci) {
-    ...
+    // ...
 ```
 
-In this example, we expect our Injection Point to match 2 invocations in the **target** method. Specifying `require` means that if fewer than 2 injections result, then an error will be raised.
+在本例中，我们希望我们的注入点匹配**目标**方法中的2个调用.指定`require`意味着如果少于2次注入结果，就会发生错误。
 
-It is also possible to specify a config-wide value for `require` in your mixin config file.
+还可以在Mixin配置文件中为`require`指定一个配置域的值。
 
 ##### 7.2.2 Expect
 
-Sometimes failing at runtime is okay, but when developing your mixins you want to be able to use the `require` functionality (error when an injection fails) without having to sprinkle `require` everywhere and then remember to remove it before your code goes into production!
+有时在运行时故障是容许的，但是当开发Mixin时，你希望能够使用`require`功能（当注入失败时出错）而不必到处撒`require`，并且不需要记住在代码投入生产之前删除他！
 
-The `expect` argument allows you to do exactly that. `expect` works exactly like `require`, apart from the fact that it is only processed whenever the `mixin.debug.countInjections` system property is set to `true`. This allows you to check your injectors are working at dev time, but allow them to fail-fast in production.
+`expect`参数允许你精确地执行。`expect`的工作方式与`require`完全一样，除了它仅在将`mixin.debug.countInjections`系统属性设置为`true`是才对其进行处理。这允许你在开发检查注入器是否工作，并使它们在生产中快速失效。
 
-##### 7.2.3 Global Injector Settings
+##### 7.2.3 全局注入器设置
 
-You can specify a configuration-wide default value for `require` in your mixin config file, by including an `injectors` block, you can override the default value for `require` for all mixins in your config:
+你可以在你的Mixin配置文件中为`require`指定一个配置域的默认值，其包含在一个`injectors`块中，你可以覆盖配置中的所有Mixin的`require`默认值：
 
 ```json
 {
@@ -462,63 +462,63 @@ You can specify a configuration-wide default value for `require` in your mixin c
 }
 ```
 
-##### 7.2.4 Injector Groups
+##### 7.2.4 注入器组
 
-Whilst the semantics of `require` allow you to stipulate behaviour for a single injector, you may encounter a situation where you wish to provide multiple, alternative injectors for a single case. This is useful if your Mixin targets multiple environments, or if another transformer is known to alter a particular target method in a well-defined way.
+虽然`require`语句运行你规定单个注入器的行为额，但你可能会遇到希望为单个情境提供多个替代注入器的情况。如果Mixin面向多个环境，或者已知其他转换器已定义良好的方式修改特定目标方法，则这非常有用。
 
-In these circumstances you may provide two or more injectors in which only one is expected to succeed for a given environment. This of course presents a problem with how you might leverage the `require` value for those injectors, since if at least one is *expected* to fail in a given scenario this makes the use of `require` impossible.
+在这些情况下，你可以提供两个或多个注入器，其中对于给定的环境，只有一个预期成功。这当然提出了一个问题，即如何利用这些注入器的`require`值，因为如果在给定情景中预计至少有一个注入器会故障，那么这就不可能使用`require`。
 
-To tackle this situation, declaration of injector *groups* is supported. Using injector groups allows a `min` and `max` number of injections to be specified *for the group*, thus ensuring that the injections can still be verified as working but only the specified number of injections should occur.
+为了解决这一问题，注入器支持*组*的声明。使用注入器组允许*为组*指定`min`和`max`注入次数，聪哥确保注入仍然可以验证为有效，但是应该只发生指定的注入次数。
 
-To leverage injector groups, simply decorate each injector **handler method** with an `@Group` annotation. The first annotation should also specify `min` and (optionally) `max`. If multiple injector groups are used in a single mixin, then a unique `name` for the group should be specified on all of the `@Group` annotations in the mixin.
+为了使用注入器组，只需让每个注入器**处理方法**声明`@Group`注解。第一个注解应该指定`min`和（可选地）`max`。如果在单个Mixin中使用多个注入器组，那么应该在Mixin中的所有`@Group`注解上指定该组的唯一`name`。
 
-#### 7.3 Override Behaviour for Handler Methods
+#### 7.3 重写处理方法的行为
 
-When you define a Callback Injector **handler** method, your method is merged into the **target class** using normal mixin behaviour. However this has implications for sub-classing, in particular injectors defined in derived types.
+当定义回调注入器**处理**方法时，将使用正常的Mixin行为将方法合并到**目标类**中。然而，这对子类，特别是派生类型中定义的注入器有影响。
 
-* **Handler methods are renamed before merging** - all **handler** methods are *decorated* before being merged into the target class. This ensures that if another mixin to the *same* class defines an *identical* injector, the two handler methods will not conflict.
+* **处理方法在合并前重命名**——所有**处理**方法再被合并到目标类之前被*修饰*。这确保了如果*相同*类的另一个Mixin定义了*相同的*注入器，那么这两个处理方法将不会冲突。
 
-* **Handler methods are called using the opcode matching their access level** - if your **handler** method is `private` then it will be called using `INVOKESPECIAL` (static binding), if your **handler** method is non-private it will be called using `INVOKEVIRTUAL`, this will allow you to `@Override` the handler in a derived mixin.
+* **处理方法使用适合其访问级别的操作符来调用**——如果你的处理方法是`private`，那么将使用`INVOKESPECIAL`（静态绑定）调用它，如果**处理**方法是非私有的，则将使用`INVOKEVIRTUAL`调用它，这将允许你在派生的Mixin中`@Override`处理方法。
 
-* **If you `@Override` a handler method in a derived mixin, it will be renamed to match the decoration of its supermixin counterpart** - this is done so that a method in a derived class can never "accidentally" override your **handler** method.
+* **如果在派生的Mixin中`@Override`一个处理方法，它将被重命名以匹配其超Mixin对应方法的修饰**——这样做是为了使得派生类中的方法永远不能“意外”覆盖你的**处理**方法。
 
-In general, unless explicitly planning to use override semantics for a particular handler, it is recommended that **handler** methods be `private`.
+通常，除非明确计划为特定处理方法使用重写语句，否则建议**处理**方法是`private`的。
 
-### 8. Summary
+### 8. 总结
 
-This might seem like a lot to take in, Callback Injectors are powerful and quite nuanced, and as such that's not an unreasonable way to feel! Let's recap the key points to put this all in perspective:
+这似乎要思考很多，回调注入器功能强大，非常精细，因此这不是一种合理的思考方式！让我们回顾一下要点，把一切都理清楚：
 
-* Callback Injectors are just regular mixin methods which have the special behaviour of *injecting* a callback to themselves somewhere else in the target class
+* 回调注入器只是常规的Mixin方法，具有*注入*回调到目标类中一些位置的特殊行为。
 
-* They always consist of a **handler method**, a **target method** and some *Injection Points* inside the target
+* 它们总是由目标内部的**处理方法**、**目标方法**和一些*注入点*组成。
 
-* Callback Injector methods always take a `CallbackInfo`, and can take other arguments, such as the arguments of the **target** method, as well
+* 回调注入器方法总是接收一个`CallbackInfo`，并且可以接收其他参数，例如**目标**方法的参数。
 
-* Callbacks can be *cancellable*, allowing a premature return from the target method
+* 回调可以是*可取消的*，允许从目标方法提前返回。
 
-* Different ways of handling failure exist for injectors, `require` is the most useful setting and you should use it often
+* 对于注入器存在不同的故障处理方法，`require`是最有效的设置，你应该经常使用它。
 
-It's also worth mentioning things that callback injectors cannot, or do not, do:
+值得一提的是，回调注入器不能或不应该这样做：
 
-* Callback Injectors **do not inject the handler code into the target**, they only ever inject a *callback*. If you want to *return*, use a *cancellable injection*.
+* 回调注入器**不将处理方法代码注入目标**，它们只注入*回调*。如果你想*返回*，请使用*可取消的注入*。
 
-* Callback Injectors **cannot inject arbitrarily into constructors**, only `RETURN` is valid for constructor injectors
+* 回调注入器**不能随意注入构造方法**，只有`RETURN`对构造方法注入器有效。
 
-### 9. What Comes Next?
+### 9. 接下来做什么？
 
-Callback Injectors are the most basic form of injector provided by Mixin. In the following tutorial articles, we will introduce the other, more specialised, injectors:
+回调注入器仅是Mixin提供的最基本的注入器形式。在下列的教程文章中，我们将介绍其他更专业的注入器：
 
-* __[Capturing local variables with Callback Injectors](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Capture-Locals)__<br />
+* __[用回调注入器捕获局部变量](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Capture-Locals)__<br />
 A secondary feature of regular Callback Injectors, not covered in this introduction, is the ability to capture the local variables at the target location. In this article I introduce the concept of local capture, and the use of surrogates and argument coercion.
 
-* __[Introduction to Redirect Injectors](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Redirect-Injectors)__<br />
+* __[介绍重定向注入器](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Redirect-Injectors)__<br />
 Probably the most powerful injector type. Redirect injectors allow a target method call or field access to be "redirected" to a custom callback. This type of injector can be leveraged extremely effectively to "wrap around" a method call, change the return value of a method call, or inhibit a method call altogether.
 
-* __[Using ModifyArg Injectors to modify method invocation arguments](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyArg-Injectors)__<br />
+* __[使用ModifyArg注入器修改方法调用参数](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyArg-Injectors)__<br />
 **Redirect**'s baby brother, this type of injector allows a single argument to a method to be altered on-the-fly using a callback method.
 
-* __[Tweaking local variables in a method using ModifyVariable Injectors](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyVariable-Injectors)__<br />
+* __[使用ModifyVariable注入器修改方法中的局部变量](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyVariable-Injectors)__<br />
 Whilst delicate and one of the more tricky injectors to use, **ModifyVariable** injectors are the only injector type which can directly edit the value of a local variable within a method.
 
-* __[Hooking and modifying literal values using ModifyConstant Injectors](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyConstant-Injectors)__<br />
+* __[使用ModifyConstant注入器挂钩和修改文本值](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyConstant-Injectors)__<br />
 This type of injector can be used to turn a constant value used in a method into a method call to a callback. Extremely useful for hooking into loop logic, conditionals, or other "hard coded" parts of a target method that you wish to alter.
