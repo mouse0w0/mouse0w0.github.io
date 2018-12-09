@@ -309,118 +309,115 @@ protected void onResetPos(int x, int y, CallbackInfo ci) {
 
 ### 5. 具有非Void返回类型的目标方法
 
-So far, we have only considered injecting into a target method which returns `void`. When injecting into a method with a non-`void` return type, injector **handler methods** will instead need to receive a `CallbackInfoReturnable`. The `CallbackInfoReturnable` differs from its parent `CallbackInfo` in that:
+到目前为止，我们仅考虑注入一个返回`void`的目标方法。当注入具有非`void`返回类型的防辐射，注入器**处理方法**将替代性地接收一个`CallbackInfoReturnable`。`CallbackInfoReturnable`不同于它的父类`CallbackInfo`：
 
-* `CallbackInfoReturnable` is generic, with the return type of the method as its type argument
-* When *cancelling* a `cancellable` callback with a return type, the value to return from the method can be specified by calling `setReturnValue` instead of `cancel`
+* `CallbackInfoReturnable`是泛型的，方法的返回类型是它的类型参数。
+* 当取消一个具有返回类型的`cancellable`回调时，可以通过调用`setReturnValue`而不是`cancel`来指定从该方法返回的值。
 
-As you can imagine, this is incredibly useful when injecting into getters or when **Short Circuiting** a method with an inject at `HEAD`. Let's take a look at an example method which returns a value:
+正如你所想的，当注入Getter，或当在`HEAD`注入使一个方法**短路**时，这是非常有用的。让我们来看一个返回值的示例方法：
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_10.png)
+![](flard_10.png)
 
-The `getPos` method is a typical *getter* method in that its method body simply returns the value of a protected field. Let's add a mixin which injects at `HEAD` and returns a defaulted value if the field is `null`:
+`getPos`方法是一个典型的*Getter*方法，因为它的方法体仅返回受保护的字段的值。让我们添加一个注入`HEAD`的Mixin，如果字段为`null`，则返回默认值：
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_11.png)
+![](flard_11.png)
 
-The injector first merges our **handler method** into the target class, next it injects code into the **target method** to handle the cancellation.
+注入器首先将我们的**处理方法**合并到目标类中，然后将代码注入到**目标方法**中以处理取消。
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_12.png)
+![](flard_12.png)
 
-Note how the injected code differs from the `void`-type short-circuit code shown above. This time the injector returns the value we set in the `CallbackInfoReturnable` if the callback is cancelled. Our mixin code looks like this
+注意注入的代码与此前展示的`void`类型的短路代码的区别。这次如果取消回调，注入器返回我们在`CallbackInfoReturnable`中设置的值。我们的Mixin代码如下所示：
 
 ```java
 @Inject(method = "getPos", at = @At("HEAD"), cancellable = true)
 protected void onGetPos(CallbackInfoReturnable<Point> cir) {
     if (this.position == null) {
-        // setReturnValue implicitly cancel()s the callback
+        // setReturnValue 隐式 cancel() 回调
         cir.setReturnValue(Point.ORIGIN);
     }
     
-    // Note that if the handler returns normally then the method
-    // continues as normal, just like a normal cancellable
-    //  injection does if cancel() is not called.
+    // 注意，如果处理方法正常返回，则方法继续正常运行，就像可取消注入不调用cancel()的正常情况一样。
 }
 ```
 
-As you can imagine, this type of injector is extremely powerful, and is not restricted to `HEAD` injections, you can use any Injection Point that you wish. Something special happens when using cancellable returnable injections on `RETURN` however:
+可以想象，这种注入器非常强大，并且不限于注入`HEAD`，你可以使用任何你希望的注入点。然而，带使用可取消可返回注入时，会发生一些特殊情况：
 
-You may be thinking *"but surely in this very simple method, the `HEAD` and `RETURN` basically mean the same thing, right?"*
+你可能会想 *“但在这个非常简单的方法中，`HEAD`和`RETURN`的基本上意思是一样的，对吧？”*
 
-You would be forgiven for thinking that, since it seems like the logical deduction, however in practice the single statement `return this.position` actually consists of two operations:
+可以原谅你这样想，因为这似乎是逻辑推断的结果，然而在实际中，单个语句`return this.position`实际上包含两个操作：
 
-1. Fetch the value of the field `position`
-2. Return the value
+1. 获取字段`position`的值。
+2. 返回这个值。
 
-The value is temporarily stored in the method's *argument stack*, you can think of these as temporary, invisible variables which store values as the JVM manipulates them. What this means from a practical perspective is that `HEAD` and `RETURN` are actually separate places in the method!
+这个值临时储存在方法的*参数堆栈*中，你可以将这些视为临时的、不可见的变量，这些变量在JVM操作值时储存这些值。从实际的角度来看，这意味着`HEAD`和`RETURN`在方法中实际上是位置分开的！
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_13.png)
+![](flard_13.png)
 
-Since we know that a `RETURN` opcode must return a value, we know that the value is available for us to access whenever we inject at `RETURN`. The injection processor handles this situation and "captures" the return value into the CallbackInfo passed to our handler:
+由于我们知道，`RETURN`操作符必须返回一个值，因此我们知道，无论何时在`RETURN`注入，该值都可用于访问。注入处理器处理这种情况，并将返回值“捕获”并传递给处理方法的CallbackInfo中：
 
-![](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/flard_14.png)
+![](flard_14.png)
 
-This approach has a number of benefits:
+这种方法有很多好处：
 
-* The contract of our injector can now be more loosely coupled to the implementation of the **target** method. In other words, if the **target** method changes, our handler doesn't need to know about the change, since it only cares about the value being returned.
-* If a **target** method has multiple `RETURN` opcodes, the value returned can still be processed without needing additional context
-* It allows us to make "observer" injections which only *inspect* the value being returned without actually altering it or needing to worry about the method's implementation.
+* 现在我们的注入器Key更松散地耦合到**目标方法**的实现中。换句话说，如果**目标**方法更改，我们的处理方法不需要知道更改，因为它只关心返回的值。
+* 如果**目标**反复有多个`RETURN`操作符，则返回的值仍可被处理，而不需要额外的上下文。
+* 它运行我们进行“观察者”注入，该注入仅*检查*返回的值，而不实际更改它或担心方法的实现。
 
-For example, let's say we alter our example injector above to use `RETURN` instead of `HEAD`. All we care about is having the method not return `null`, so our code becomes:
+例如，让我们更改上述例子，用`RETURN`代替`HEAD`。我们关系的是让这个方法不返回`null`，所以我们的代码变成：
 
 ```java
 @Inject(method = "getPos", at = @At("RETURN"), cancellable = true)
 protected void onGetPos(CallbackInfoReturnable<Point> cir) {
-    // Check the captured return value
+    // 检查捕获的返回值
     if (cir.getReturnValue() == null) {
-        // if it's null, set our fallback value as the return
+        // 如果为空，设置默认值为返回值
         cir.setReturnValue(Point.ORIGIN);
     }
 }
 ```
 
-### 6. Callback Injector features
+### 6. 回调注入器特性
 
-#### 6.1 Multiple Injection Points
+#### 6.1 多注入点
 
-It should be noted that the `at` parameter of an `@Inject` annotation is actually an array type. This means that it is quite possible to specify multiple Injection Points for a single injector **handler** method.
+应该注意的是，`@Inject`注解的`at`参数实际上是数组类型。这意味着可为单个注入器处理方法指定多个注入点。
 
-#### 6.2 Wildcard Targets
+#### 6.2 目标通配符
 
-When specifying the target `method` for an injector, appending an asterisk (`*`) the method name directs the mixin processor to match all methods with the specified name, regardless of their signature. This allows a single injector to target multiple methods.
+当为注入器指定目标`method`时，添加星号（`*`）的方法名称可指定Mixin处理器匹配所有具有指定名称的方法，不管它们的签名如何。这允许单个注入器以多个方法为目标。
 
-Using this syntax makes it impossible to capture method arguments, since the method arguments will vary from method to method. However it makes observer-type injections trivial. For example, consider the following injection:
+使用这种语法会使捕获方法参数变得不可能，因为方法参数会因方法而异。然而，它使观察类型的注入变得简单。例如，思考下面的注入：
 
 ```java
 @Inject(method = "<init>*", at = @At("RETURN"))
 private void onConstructed(CallbackInfo ci) {
-    // do initialisation stuff
+    // 初始化资源
 }
 ```
 
-This injector injects a callback into all constructors in the class. This is useful if a target class has multiple overloaded constructors and you simply wish to inject into all of them.
+这个注入器向类中的所有构造函数注入回调。如果目标类具有多个重载的构造函数，并且你仅希望将其注入到所有构造函数中，那么这非常有用。
 
-Wildcard targets can be used with any method name, however if a wildcard matches methods with both `void` return types and non-`void` return types, then the injection will fail with an error because a `CallbackInfoReturnable` is required for the non-void targets.
+目标通配符可以与任何方法名一起使用，但是，如果通配符匹配具有`void`返回类型和非`void`返回类型的方法，则注入将失败并出错，因为对于非`void`的目标需要使用`CallbackInfoReturnable`。
 
-### 7. Considerations and Limitations for Callback Injectors
+### 7. 回调注入器的思考与局限性
 
-#### 7.1 Injecting into constructors
+#### 7.1 注入构造函数
 
-Now constructors in java code are fairly straightforward and impose three simple restrictions:
+现在Java代码中的构造函数相当简单，并限定了三个简单的约束：
 
-1. you must call `super` before any other code
-2. you must initialise any `final` fields.
-3. as a corollary to point 1, you cannot invoke an instance method inline in the `super` call, any calls made here must be static
+1. 在任何其他代码之前都必须调用`super`。
+2. 必须初始化任何`final`字段。
+3. 作为第1点造成的结果，你不能在`super`调用中内联调用实例方法，这里进行的任何调用都必须是静态的。
 
-However at the *bytecode* level constructors are much more delicate. Since a compiled `<init>` method represents a mish-mash of the original constructor code, any field initialisers for the class (duplicated in all constructors), and in some cases synthetic (compiler-generated) code as well (for example in `Enum` constructors). Because of their nature, they represent a minefield for bytecode-level transformations.
+但在*字节码*层面，构造函数更加精致。由于编译后的`<init>`方法混杂着原先构造函数的代码，任何类的字段初始化器（复制到所有构造函数），以及在某些情况下合成的（编译器生成的）代码（例如`Enum`的构造函数）。由于它们的性质，它们就是字节码层面变换的雷区。
 
-Mixin thus imposes the following restriction on injecting into constructors:
+因此，Mixin对注入器施加以下限制：
 
-* **The only Injection Point supported for constructors is the `RETURN` injector**
- This restriction is imposed because there is no other sensible way to be sure that the class is fully initialised before calling your handler code.
+* **为构造函数支持的唯一注入点是`RETURN`注入器**。之所以强加此限制，是因为在调用处理方法代码之前，没有其他明智的方法可以确保类已经完全初始化。
 
-If you want to inject into a constructor, you **must** specify `RETURN` as your injection point.
+如果要注入构造函数，**必须**指定`RETURN`为注入点。
 
-#### 7.2 Failure States
+#### 7.2 失败状态
 
 Like other Mixin capabilities, Callback Injectors are designed to be *fail-fast* and *fail-safe*. This generally means that if an injector fails it will generally do one of two things:
 
