@@ -18,9 +18,9 @@ tags: Programming
 * [YAGNI](#YAGNI)
 * [做最简单的事情](#做最简单的事情)
 * [关注点分离](#关注点分离)
-* [Keep Things DRY](#keep-things-dry)
-* [Code For The Maintainer](#code-for-the-maintainer)
-* [Avoid Premature Optimization](#avoid-premature-optimization)
+* [保持事情不再重复](#保持事情不再重复)
+* [为维护者写代码](#为维护者写代码)
+* [避免过早优化](#避免过早优化)
 * [Boy-Scout Rule](#boy-scout-rule)
 
 ### Inter-Module/Class
@@ -98,9 +98,9 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 关注点分离是一种将计算机程序分离成不同部分的设计原则，以便每个部分专注于单个关注点。例如，应用程序的业务逻辑是一个关注点而用户界面是另一个关注点。更改用户界面不应要求更改业务逻辑，反之亦然。
 
-引用 [Edsger W. Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra) (1974):
+引用[Edsger W. Dijkstra](https://en.wikipedia.org/wiki/Edsger_W._Dijkstra) (1974)所说：
 
-> It is what I sometimes have called "the separation of concerns", which, even if not perfectly possible, is yet the only available technique for effective ordering of one's thoughts, that I know of. This is what I mean by "focusing one's attention upon some aspect": it does not mean ignoring the other aspects, it is just doing justice to the fact that from this aspect's point of view, the other is irrelevant.
+> 我有时将其称为“关注点分离”，即使这完全不可能做到，但它也是我所知道的唯一有效的思维整理技巧。这就是我所说的“将注意力集中在某个方面”的意思：这并不意味着忽略其他方面，只是对于从某一方面的视角公正地来看，另一方面是不相关的事情。
 
 为什么？
 
@@ -115,76 +115,76 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 * [Separation of Concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
 
-## Keep things DRY
+## 保持事情不再重复
 
-Every piece of knowledge must have a single, unambiguous, authoritative representation within a system.
+在一个系统内，每一项认识都必须有一个单一的、明确的、权威的表示。
 
-Each significant piece of functionality in a program should be implemented in just one place in the source code. Where similar functions are carried out by distinct pieces of code, it is generally beneficial to combine them into one by abstracting out the varying parts.
+程序中的每一项重要功能都应该只在源代码中的一个地方实现。相似的函数由不同的代码块执行的情况下，抽象出不同的部分，将它们组合为一个函数通常是有益的。
 
-Why
+为什么
 
-* Duplication (inadvertent or purposeful duplication) can lead to maintenance nightmares, poor factoring, and logical contradictions.
-* A modification of any single element of a system does not require a change in other logically unrelated elements.
-* Additionally, elements that are logically related all change predictably and uniformly, and are thus kept in sync.
+* 重复（无意或有意的重复）会造成噩梦般的维护，保养不良和逻辑矛盾。
+* 对系统中任意单个元素的修改不需要改变其他逻辑上无关的元素。
+* 此外，相关逻辑的元素的变化都是可预测的和均匀的，因此是保持同步的。
 
-How
+怎么做
 
-* Put business rules, long expressions, if statements, math formulas, metadata, etc. in only one place.
+* 只在一个处编写业务规则、长表达式、if语句、数学公式、元数据等。
+* 确定系统中使用的每一项认识的唯一来源，然后使用该源来生成该认识的适用实例（代码、文档、测试等）。
 * Identify the single, definitive source of every piece of knowledge used in your system, and then use that source to generate applicable instances of that knowledge (code, documentation, tests, etc).
-* Apply the [Rule of three](http://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)).
+* 使用[三法则（Rule of three）](http://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)).
 
-Resources
+相关资源
 
 * [Dont Repeat Yourself](http://c2.com/cgi/wiki?DontRepeatYourself)
 * [Don't repeat yourself](http://en.wikipedia.org/wiki/Don't_repeat_yourself)
 * [Don't Repeat Yourself](http://programmer.97things.oreilly.com/wiki/index.php/Don't_Repeat_Yourself)
 
-Related
+相似资料
 
 * [Abstraction principle](http://en.wikipedia.org/wiki/Abstraction_principle_(computer_programming))
 * [Once And Only Once](http://c2.com/cgi/wiki?OnceAndOnlyOnce) is a subset of DRY (also referred to as the goal of refactoring).
 * [Single Source of Truth](http://en.wikipedia.org/wiki/Single_Source_of_Truth)
 * A violation of DRY is [WET](http://thedailywtf.com/articles/The-WET-Cart) (Write Everything Twice)
 
-## Code For The Maintainer
+## 为维护者写代码
 
-Why
+为什么
 
-* Maintenance is by far the most expensive phase of any project.
+* 到目前为止，维护是任何项目中最昂贵的阶段。
 
-How
+怎么做
 
-* *Be* the maintainer.
-* Always code as if the person who ends up maintaining your code is a violent psychopath who knows where you live.
-* Always code and comment in such a way that if someone a few notches junior picks up the code, they will take pleasure in reading and learning from it.
-* [Don't make me think](http://www.sensible.com/dmmt.html).
-* Use the [Principle of Least Astonishment](http://en.wikipedia.org/wiki/Principle_of_least_astonishment).
+* *成为*维护者。
+* 不论何时编写代码，要想着最后维护代码的人是一个知道自己住在哪里的暴力精神病人。
+* 如果某个入门的人掌握了代码，他们就会从阅读和学习代码中获得乐趣，以这样的想法去编写代码和注释。
+* [别让我想（Don't make me think）](http://www.sensible.com/dmmt.html).
+* 使用[最少惊讶原则（Principle of Least Astonishment）](http://en.wikipedia.org/wiki/Principle_of_least_astonishment).
 
-Resources
+相关资料
 
 * [Code For The Maintainer](http://c2.com/cgi/wiki?CodeForTheMaintainer)
 * [The Noble Art of Maintenance Programming](http://blog.codinghorror.com/the-noble-art-of-maintenance-programming/)
 
-## Avoid Premature Optimization
+## 避免过早优化
 
-Quoting [Donald Knuth](http://en.wikiquote.org/wiki/Donald_Knuth):
+引用[Donald Knuth](http://en.wikiquote.org/wiki/Donald_Knuth)所说：
 
-> Programmers waste enormous amounts of time thinking about, or worrying about, the speed of noncritical parts of their programs, and these attempts at efficiency actually have a strong negative impact when debugging and maintenance are considered. We should forget about small efficiencies, say about 97% of the time: premature optimization is the root of all evil. Yet we should not pass up our opportunities in that critical 3%.
+> 程序员浪费大量的时间来思考或担心程序的非关键部分的速度，而考研尝试这些优化实际上在调试和维护时有很强的负面影响。比如说在97%的开发时间，我们应该忽略低效率：过早的优化是万恶之源。然而，我们不应该在关键的3%中放弃我们的机会。
 
+当然，需要理解什么是“过早”什么不是“过早”。
 
-Understanding what is and isn’t "premature" is critical of course.
+为什么
 
-Why
+* 瓶颈在哪是未知的。
+* 优化后，阅读和维护可能会更困难。
 
-* It is unknown upfront where the bottlenecks will be.
-* After optimization, it might be harder to read and thus maintain.
+怎么做
 
-How
+* [使它运作，使它正确，使它更快（Make It Work Make It Right Make It Fast）](http://c2.com/cgi/wiki?MakeItWorkMakeItRightMakeItFast)
+* 不要在你不需要的时候优化，只有在你发现一个瓶颈之后才能优化它。
 
-* [Make It Work Make It Right Make It Fast](http://c2.com/cgi/wiki?MakeItWorkMakeItRightMakeItFast)
-* Don't optimize until you need to, and only after profiling you discover a bottleneck optimise that.
-
-Resources
+相关资源
 
 * [Program optimization](http://en.wikipedia.org/wiki/Program_optimization)
 * [Premature Optimization](http://c2.com/cgi/wiki?PrematureOptimization)
