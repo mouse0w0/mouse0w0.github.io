@@ -131,7 +131,6 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 * 只在一个处编写业务规则、长表达式、if语句、数学公式、元数据等。
 * 确定系统中使用的每一项认识的唯一来源，然后使用该源来生成该认识的适用实例（代码、文档、测试等）。
-* Identify the single, definitive source of every piece of knowledge used in your system, and then use that source to generate applicable instances of that knowledge (code, documentation, tests, etc).
 * 使用[三法则（Rule of three）](http://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)).
 
 相关资源
