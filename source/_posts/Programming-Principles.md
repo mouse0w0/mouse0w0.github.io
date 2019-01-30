@@ -34,15 +34,15 @@ tags: Programming
 
 ### 模块/类
 
-* [Maximise Cohesion](#maximise-cohesion)
-* [Liskov Substitution Principle](#liskov-substitution-principle)
-* [Open/Closed Principle](#openclosed-principle)
-* [Single Responsibility Principle](#single-responsibility-principle)
-* [Hide Implementation Details](#hide-implementation-details)
-* [Curly's Law](#curlys-law)
-* [Encapsulate What Changes](#encapsulate-what-changes)
-* [Interface Segregation Principle](#interface-segregation-principle)
-* [Command Query Separation](#command-query-separation)
+* [最大化聚合](#最大化聚合)
+* [里氏代换原则](#里氏代换原则)
+* [开放/封闭原则](#开放/封闭原则)
+* [单一职责原则](#单一职责原则)
+* [隐藏实现细节](#隐藏实现细节)
+* [科里定律](#科里定律)
+* [封装经常修改的代码](#封装经常修改的代码)
+* [接口隔离原则](#接口隔离原则)
+* [命令查询分离](#命令查询分离)
 
 ## KISS
 
@@ -53,8 +53,6 @@ tags: Programming
 * 更少的代码可以花更少的时间去写，Bug更少，并且更容易修改。
 * 简单是复杂的最高境界。
 * 完美境地，非冗杂，而不遗。
-
-> 译注：第二句话来自达·芬奇，原文为“Simplicity is the ultimate sophistication.”；第三句话来自安东尼·德·圣-埃克苏佩里，原文为“It seems that perfection is reached not when there is nothing left to add, but when there is nothing left to take away.”。
 
 相关资料
 
@@ -257,7 +255,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 > 它越简单，设计越正交，异常就越少。这使得用编程语言学习、读写程序变得更容易。正交特征的含义是独立于环境；关键参数是对称性与一致性。
 
-来源：[Orthogonality](http://en.wikipedia.org/wiki/Orthogonality_(programming))
+来源：<a herf="http://en.wikipedia.org/wiki/Orthogonality_(programming)">Orthogonality</a>
 
 ## 稳健性原则
 
@@ -304,130 +302,130 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 * [Inversion of Control in Wikipedia](https://en.wikipedia.org/wiki/Inversion_of_control)
 * [Inversion of Control Containers and the Dependency Injection pattern](https://www.martinfowler.com/articles/injection.html)
 
-## Maximise Cohesion
+## 最大化聚合
 
-Cohesion of a single module/component is the degree to which its responsibilities form a meaningful unit; higher cohesion is better.
+单个模块/组件的聚合性是其职责形成有意义的单元的程度，越高的聚合性越好。
 
-Why
+为什么
 
-* Increased difficulty in understanding modules.
-* Increased difficulty in maintaining a system, because logical changes in the domain affect multiple modules, and because changes in one module require changes in related modules.
-* Increased difficulty in reusing a module because most applications won’t need the random set of operations provided by a module.
+* 增加了理解模块的难度。
+* 增加了维护系统的难度，因为域中逻辑的更改会影响多个模块，并且一个模块的更改需要相关模块的更改。
+* 由于大多数应用程序不需要模块提供的随机操作集，因此重用模块的难度增加。
 
-How
+怎么做
 
-* Group related functionalities sharing a single responsibility (e.g. in a class).
+* 与组相关的功能共享一项职责（例如在一个类中）。
 
-Resources
+相关资料
 
-* [Cohesion](http://en.wikipedia.org/wiki/Cohesion_(computer_science))
+* <a herf="http://en.wikipedia.org/wiki/Cohesion_(computer_science)">Cohesion</a>
 * [Coupling And Cohesion](http://c2.com/cgi/wiki?CouplingAndCohesion)
 
-## Liskov Substitution Principle
+## 里氏代换原则
 
-The LSP is all about expected behavior of objects:
+里氏代换原则（LSP）完全是关于对象的预期行为：
 
-> Objects in a program should be replaceable with instances of their subtypes without altering the correctness of that program.
+> 程序中的对象应该可以替换为其子类型的实例，而不会改变该程序的正确性。
 
-Resources
+相关资源
 
 * [Liskov substitution principle](http://en.wikipedia.org/wiki/Liskov_substitution_principle)
 * [Liskov Substitution Principle](http://www.blackwasp.co.uk/lsp.aspx)
 
-## Open/Closed Principle
+## 开放/封闭原则
 
-Software entities (e.g. classes) should be open for extension, but closed for modification. I.e. such an entity can allow its behavior to be modified without altering its source code.
+软件实体（例如类）应对扩展是开放的，但对修改是封闭的。也就是说，这样的实体可以允许在不改变其源代码的情况下修改其行为。
 
-Why
+为什么
 
-* Improve maintainability and stability by minimizing changes to existing code.
+* 通过最小化对现有代码的修改来提高可维护性和稳定性
 
-How
+怎么做
 
-* Write classes that can be extended (as opposed to classes that can be modified).
-* Expose only the moving parts that need to change, hide everything else.
+* 编写可以扩展的类（而不是可以修改的类）
+* 只暴露需要更换的活动部分，隐藏其他所有部分。
 
-Resources
+相关资源
 
 * [Open Closed Principle](http://en.wikipedia.org/wiki/Open/closed_principle)
 * [The Open Closed Principle](https://8thlight.com/blog/uncle-bob/2014/05/12/TheOpenClosedPrinciple.html)
 
-## Single Responsibility Principle
+## 单一职责原则
 
-A class should never have more than one reason to change.
+一个类不应该有多个修改的原因。
 
-Long version: Every class should have a single responsibility, and that responsibility should be entirely encapsulated by the class. Responsibility can be defined as a reason to change, so a class or module should have one, and only one, reason to change.
+长话版：每个类都应该有一个单独的职责，并且该职责应该完全由该类封装。职责可以定义为修改的原因，一次类或模块应该有且仅有一个修改的原因。
 
-Why
+为什么
 
-* Maintainability: changes should be necessary only in one module or class.
+* 可维护性：仅有一个模块或类中需要修改。
 
-How
+怎么做
 
-* Apply [Curly's Law](#Curly-s-Law).
+* 使用 [科里定律](#科里定律).
 
-Resources
+相关资料
 
 * [Single responsibility principle](http://en.wikipedia.org/wiki/Single_responsibility_principle)
 
-## Hide Implementation Details
+## 隐藏实现细节
 
-A software module hides information (i.e. implementation details) by providing an interface, and not leak any unnecessary information.
+软件模块通过提供接口来隐藏信息（即实现细节），而不泄露任何不必要的信息。
 
-Why
+为什么
 
-* When the implementation changes, the interface clients are using does not have to change.
+* 当实现更改时，客户端使用的接口不必更改。
 
-How
+怎么做
 
-* Minimize accessibility of classes and members.
-* Don’t expose member data in public.
-* Avoid putting private implementation details into a class’s interface.
-* Decrease coupling to hide more implementation details.
+* 最小化类和成员的可访问性。
+* 不要公开成员数据。
+* 避免将私有实现细节放入类的接口中。
+* 减少耦合以隐藏更多实现细节。
 
-Resources
+相关资料
 
 * [Information hiding](http://en.wikipedia.org/wiki/Information_hiding)
 
-## Curly's Law
+## 科里定律
 
-Curly's Law is about choosing a single, clearly defined goal for any particular bit of code: Do One Thing.
+科里定律是关于为任何特定代码选择一个明确定义的目标：仅做一件事。
 
 * [Curly's Law: Do One Thing](http://blog.codinghorror.com/curlys-law-do-one-thing/)
 * [The Rule of One or Curly’s Law](http://fortyplustwo.com/2008/09/06/the-rule-of-one-or-curlys-law/)
 
-## Encapsulate What Changes
+## 封装经常修改的代码
 
-A good design identifies the hotspots that are most likely to change and encapsulates them behind an API. When an anticipated change then occurs, the modifications are kept local.
+一个好的设计可以辨别出最有可能改变的热点，并将它们封装在API之后。当预期的修改发生时，修改会保持在局部。
 
-Why
+为什么
 
-* To minimize required modifications when a change occurs
+* 在发生更改时，最小化所需的修改。
 
-How
+怎么做
 
-* Encapsulate the concept that varies behind an API
-* Possibly separate the varying concept into its own module
+* 封装API背后不同的概念。
+* 将可能不同的概念分到各自的模块。
 
-Resources
+相关资料
 
 * [Encapsulate the Concept that Varies](http://principles-wiki.net/principles:encapsulate_the_concept_that_varies)
 * [Encapsulate What Varies](http://blogs.msdn.com/b/steverowe/archive/2007/12/26/encapsulate-what-varies.aspx)
 * [Information Hiding](https://en.wikipedia.org/wiki/Information_hiding)
 
-## Interface Segregation Principle
+## 接口隔离原则
 
-Reduce fat interfaces into multiple smaller and more specific client specific interfaces. An interface should be more dependent on the code that calls it than the code that implements it.
+将臃肿的接口减少到多个更小更具体的客户端特定接口中。接口应该比实现它的代码更依赖于调用它的代码。
 
-Why
+为什么
 
-* If a class implements methods that are not needed the caller needs to know about the method implementation of that class. For example if a class implements a method but simply throws then the caller will need to know that this method shouldn't actually be called.
+* 如果类实现了不需要的方法，则调用方需要了解该类的方法实现。例如，如果一个类实现了一个方法，但只是简单的抛出异常，那么调用方将需要知道实际上不应该调用这个方法。
 
-How
+怎么做
 
-* Avoid fat interfaces. Classes should never have to implement methods that violate the [Single responsibility principle](#single-responsibility-principle).
+* 避免臃肿的接口。类不应该实现任何违反[单一职责原则](#单一职责原则)的方法。
 
-Resources
+相关资料
 
 * [Interface segregation principle](https://en.wikipedia.org/wiki/Interface_segregation_principle)
 
@@ -447,22 +445,22 @@ Resources
 相关资料
 * [Opportunistic Refactoring](http://martinfowler.com/bliki/OpportunisticRefactoring.html)
 
-## Command Query Separation
+## 命令查询分离
 
-The Command Query Separation principle states that each method should be either a command that performs an action or a query that returns data to the caller but not both. Asking a question should not modify the answer.
+命令查询分离原则规定，每个方法都应该是执行操作的命令，或者是向调用者返回数据但不能同时做两件事的查询。提问不应该改变答案。  
 
-With this principle applied the programmer can code with much more confidence. The query methods can be used anywhere and in any order since they do not mutate the state. With commands one has to be more careful.
+利用这个原则，程序员可以更加自信地进行编码。查询方法可以在任何地方以任何顺序使用，因为它们不会改变状态。而使用命令，你必须更加小心。
 
-Why
+为什么
 
-* By clearly separating methods into queries and commands the programmer can code with additional confidence without knowing each method's implementation details.
+* 通过将方法清晰地分为查询和命令，程序员可以在不了解每个方法的实现细节的情况下，更加自信地编码。
 
-How
+怎么做
 
-* Implement each method as either a query or a command
-* Apply naming convention to method names that implies whether the method is a query or a command
+* 将每个方法实现为查询或命令。
+* 对方法名使用命名约定，该方法名表示该方法是查询还是命令。
 
-Resources
+相关资料
 
 * [Command Query Separation in Wikipedia](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation)
 * [Command Query Separation by Martin Fowler](http://martinfowler.com/bliki/CommandQuerySeparation.html)
