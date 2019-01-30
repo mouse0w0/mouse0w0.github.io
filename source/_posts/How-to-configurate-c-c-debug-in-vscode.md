@@ -1,7 +1,7 @@
 ---
 title: 如何在VSCode中配置C/C++ Debug
 date: 2018-11-03 20:34:10
-tags: [VSCode, C, C++]
+tags: [VSCode, C/C++]
 ---
 
 ## 下载并安装MinGW

@@ -21,18 +21,18 @@ tags: Programming
 * [保持事情不再重复](#保持事情不再重复)
 * [为维护者写代码](#为维护者写代码)
 * [避免过早优化](#避免过早优化)
-* [Boy-Scout Rule](#boy-scout-rule)
+* [童子军军规](#童子军军规)
 
-### Inter-Module/Class
+### 模块间/类
 
-* [Minimise Coupling](#minimise-coupling)
-* [Law of Demeter](#law-of-demeter)
-* [Composition Over Inheritance](#composition-over-inheritance)
-* [Orthogonality](#orthogonality)
-* [Robustness Principle](#robustness-principle)
-* [Inversion of Control](#inversion-of-control)
+* [最小化耦合](#最小化耦合)
+* [迪米特法则](#迪米特法则)
+* [组合优于继承](#组合优于继承)
+* [正交性](#正交性)
+* [稳健性原则](#稳健性原则)
+* [控制反转](#控制反转)
 
-### Module/Class
+### 模块/类
 
 * [Maximise Cohesion](#maximise-cohesion)
 * [Liskov Substitution Principle](#liskov-substitution-principle)
@@ -48,7 +48,7 @@ tags: Programming
 
 大多数系统如果保持简单而不是复杂，效果最好。
 
-为什么？
+为什么
 
 * 更少的代码可以花更少的时间去写，Bug更少，并且更容易修改。
 * 简单是复杂的最高境界。
@@ -65,12 +65,12 @@ tags: Programming
 
 YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情。
 
-为什么？
+为什么
 
 * 去做任何仅在未来需要的特性，意味着从当前迭代需要完成的功能中分出精力。
 * 它使代码膨胀；软件变得更大和更复杂。
 
-怎么做？
+怎么做
 
 * 在当你真正需要它们的时候，才实现它们，而不是在你预见到你需要它们的时候。
 
@@ -82,11 +82,11 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 ## 做最简单的事情
 
-为什么？
+为什么
 
 * 仅有当我们只解决问题本身时，才能最大化地解决实际问题。
 
-怎么做？
+怎么做
 
 * 扪心自问：“最简单的事情是什么？”。
 
@@ -102,12 +102,12 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 > 我有时将其称为“关注点分离”，即使这不可能完全做到，但它也是我所知道的唯一有效的思维整理技巧。这就是我所说的“将注意力集中在某个方面”的意思：这并不意味着忽略其他方面，只是对于从某一方面的视角公正地来看，另一方面是不相关的事情。
 
-为什么？
+为什么
 
 * 简化软件应用程序的开发与维护。
 * 当关注点很好地分开时，各个部分可以被重用，并且可以独立开发和更新。
 
-怎么做？
+怎么做
 
 * 将程序功能分成联系部分尽可能少的模块。
 
@@ -133,7 +133,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 * 确定系统中使用的每一项认识的唯一来源，然后使用该源来生成该认识的适用实例（代码、文档、测试等）。
 * 使用[三法则（Rule of three）](http://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)).
 
-相关资源
+相关资料
 
 * [Dont Repeat Yourself](http://c2.com/cgi/wiki?DontRepeatYourself)
 * [Don't repeat yourself](http://en.wikipedia.org/wiki/Don't_repeat_yourself)
@@ -183,123 +183,123 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 * [使它运作，使它正确，使它更快（Make It Work Make It Right Make It Fast）](http://c2.com/cgi/wiki?MakeItWorkMakeItRightMakeItFast)
 * 不要在你不需要的时候优化，只有在你发现一个瓶颈之后才能优化它。
 
-相关资源
+相关资料
 
 * [Program optimization](http://en.wikipedia.org/wiki/Program_optimization)
 * [Premature Optimization](http://c2.com/cgi/wiki?PrematureOptimization)
 
-## Minimise Coupling
+## 最小化耦合
 
-Coupling between modules/components is their degree of mutual interdependence; lower coupling is better. In other words, coupling is the probability that code unit "B" will "break" after an unknown change to code unit "A".
+模块/组件之间的耦合是它们互相依赖的程度，较低的耦合更好。换句话说，耦合是代码单元“B”在未知的代码单元“A”更改后“被破坏”的几率。
 
-Why
+为什么
 
-* A change in one module usually forces a ripple effect of changes in other modules.
-* Assembly of modules might require more effort and/or time due to the increased inter-module dependency.
-* A particular module might be harder to reuse and/or test because dependent modules must be included.
-* Developers might be afraid to change code because they aren't sure what might be affected.
+* 一个模块的更改通常会导致其他模块的更改，产生涟漪效益。
+* 由于模块间的依赖性增加，模块装配可能需要更多的工作和/或时间。
+* 特定的模块可能难以重用和/或测试，因为必须包含相关模块。
+* 开发人员可能害怕更改代码，因为他们不确定什么会收到影响。
 
-How
+怎么做
 
-* Eliminate, minimise, and reduce complexity of necessary relationships.
-* By hiding implementation details, coupling is reduced.
-* Apply the [Law of Demeter](#law-of-demeter).
+* 消除，最小化和降低必要关联的复杂性。
+* 通过隐藏实现细节，减少耦合。
+* 使用[迪米特法则](#迪米特法则)。
 
-Resources
+相关资料
 
 * [Coupling](http://en.wikipedia.org/wiki/Coupling_(computer_programming))
 * [Coupling And Cohesion](http://c2.com/cgi/wiki?CouplingAndCohesion)
 
-## Law of Demeter
+## 迪米特法则
 
-Don't talk to strangers.
+不要和陌生人说话。
 
-Why
+为什么
 
-* It usually tightens coupling
-* It might reveal too much implementation details
+* 这通常会导致更紧密的耦合。
+* 可能会暴露过多的实现细节。
 
-How
+怎么做
 
-A method of an object may only call methods of:
+对象的方法只能调用以下方法：
 
-  1. The object itself.
-  1. An argument of the method.
-  1. Any object created within the method.
-  1. Any direct properties/fields of the object.
+1. 对象自身的方法。
+2. 方法参数中的方法。
+3. 方法中创建的任何对象的方法。
+4. 对象的任何直接属性或字段的方法。
 
-Resources
+相关资料
 
 * [Law of Demeter](http://en.wikipedia.org/wiki/Law_of_Demeter)
 * [The Law of Demeter Is Not A Dot Counting Exercise](http://haacked.com/archive/2009/07/14/law-of-demeter-dot-counting.aspx/)
 
-## Composition Over Inheritance
+## 组合优于继承
 
-Why
+为什么
 
-* Less coupling between classes.
-* Using inheritance, subclasses easily make assumptions, and break LSP.
+* 类之间的耦合减少。
+* 使用继承，子类很容易做出假设，并破坏里氏代换原则（LSP）。
 
-How
+怎么做
 
-* Test for LSP (substitutability) to decide when to inherit.
-* Compose when there is a "has a" (or "uses a") relationship, inherit when "is a".
+* 测试LSP（可替换性）以决定何时继承。
+* 当存在“有”（或“使用”）的关系时使用组合，当存在“是”的关系时使用继承。
 
-Resources
+相关资料
 
 * [Favor Composition Over Inheritance](http://blogs.msdn.com/b/thalesc/archive/2012/09/05/favor-composition-over-inheritance.aspx)
 
-## Orthogonality
+## 正交性
 
-> The basic idea of orthogonality is that things that are not related conceptually should not be related in the system.
+> 正交性的基本概念是，概念上不相关的东西在系统中不应该相关。
 
-Source: [Be Orthogonal](http://www.artima.com/intv/dry3.html)
+来源：[Be Orthogonal](http://www.artima.com/intv/dry3.html)
 
-> It is associated with simplicity; the more orthogonal the design, the fewer exceptions. This makes it easier to learn, read and write programs in a programming language. The meaning of an orthogonal feature is independent of context; the key parameters are symmetry and consistency.
+> 它越简单，设计越正交，异常就越少。这使得用编程语言学习、读写程序变得更容易。正交特征的含义是独立于环境；关键参数是对称性与一致性。
 
-Source: [Orthogonality](http://en.wikipedia.org/wiki/Orthogonality_(programming))
+来源：[Orthogonality](http://en.wikipedia.org/wiki/Orthogonality_(programming))
 
-## Robustness Principle
+## 稳健性原则
 
-> Be conservative in what you do, be liberal in what you accept from others
+> 坚持保守自己的作为，自由接受他人的作为。
 
-Collaborating services depend on each others interfaces. Often the interfaces need to evolve causing the other end to receive unspecified data. A naive implementation refuses to collaborate if the received data does not strictly follow the specification. A more sophisticated implementation will still work ignoring the data it does not recognize.
+合作的服务依赖于彼此的接口。通常，接口需要提升，导致另一端接收未指定的数据。如果接收到的数据没有严格遵守规范，那么简单的实现将仅拒绝合作。更复杂的实现却可以忽略它无法识别的数据。
 
-Why
+为什么
 
-* In order to be able to evolve services you need to ensure that a provider can make changes to support new demands while causing minimal breakage to their existing clients.
+* 为了能够提高服务，你需要确保提供者可以进行更改以支持新的需求，同时对现有客户端造成最小的破坏。
 
-How
+怎么做
 
-* Code that sends commands or data to other machines (or to other programs on the same machine) should conform completely to the specifications, but code that receives input should accept non-conformant input as long as the meaning is clear.
+* 向其他机器（或同一机器上的其他程序）发送指令或数据的代码应该完全符合规范，但接受输入的代码应接受不一致的输入，只要其意义明确。
 
-Resources
+相关资料
 
 * [Robustness Principle in Wikipedia](https://en.wikipedia.org/wiki/Robustness_principle)
 * [Tolerant Reader](http://martinfowler.com/bliki/TolerantReader.html)
 
-## Inversion of Control
+## 控制反转
 
-Inversion of Control is also known as the Hollywood Principle, "Don't call us, we'll call you". It is a design principle in which custom-written portions of a computer program receive the flow of control from a generic framework. Inversion of control carries the strong connotation that the reusable code and the problem-specific code are developed independently even though they operate together in an application. 
+控制反转又被称为好莱坞原则，“不要打电话给我们，我们会打电话给你”。它是一种设计原则，计算机程序的自定义编写部分从通用框架接收控制流。控制反转具有强烈的含义，即可重用代码和特定于问题的代码是独立开发的，即使它们在应用程序中一同工作。
 
-Why
+为什么
 
-* Inversion of control is used to increase modularity of the program and make it extensible.
-* To decouple the execution of a task from implementation.
-* To focus a module on the task it is designed for.
-* To free modules from assumptions about how other systems do what they do and instead rely on contracts.
-* To prevent side effects when replacing a module.
+* 控制反转用于提高程序的模块性，使其具有可扩展性。
+* 将任务的执行与实现分离。
+* 将模块集中在其设计任务上。
+* 使模块不受关于其他系统如何执行其任务的假设约束，而是依赖于约定。
+* 以防止模块更换时出现副作用。
 
-How
+怎么做
 
-* Using Factory pattern
-* Using Service Locator pattern
-* Using Dependency Injection
-* Using contextualized lookup
-* Using Template Method pattern
-* Using Strategy pattern
+* 使用工厂模式
+* 使用服务定位器模式
+* 使用依赖注入
+* 使用依赖查找
+* 使用模板方法模式
+* 使用策略模式
 
-Resources
+相关资料
 
 * [Inversion of Control in Wikipedia](https://en.wikipedia.org/wiki/Inversion_of_control)
 * [Inversion of Control Containers and the Dependency Injection pattern](https://www.martinfowler.com/articles/injection.html)
@@ -431,21 +431,20 @@ Resources
 
 * [Interface segregation principle](https://en.wikipedia.org/wiki/Interface_segregation_principle)
 
-## Boy-Scout Rule
+## 童子军军规
 
-The Boy Scouts of America have a simple rule that we can apply to our profession: "Leave the campground cleaner than you found it". The boy-scout rule states that we should always leave the code cleaner than we found it.
+美国童子军有一条简单的军规，我们可以使用到我们的职业中：“离开营地时比你到达时更干净”。根据童子军军规，我们应该至终保持代码比我们看到时更干净。
 
-Why
+为什么
 
-* When making changes to an existing codebase the code quality tends to degrade, accumulating technical debt. Following the boyscout rule, we should mind the quality with each commit. Technical debt is resisted by continuous refactoring, no matter how small.
+* 当对现有代码库进行更改时，代码质量往往会降低，从而积累技术债务。根据童子军军规，我们应该注意每一个提交（Commit）的质量。无论规模有多小，技术债务都会受到不断重构的抵制。
 
-How
+怎么做
 
-* With each commit make sure it does not degrade the codebase quality.
-* Any time someone sees some code that isn't as clear as it should be, they should take the opportunity to fix it right there and then.
+* 每次提交都要确保它不会降低代码库的质量。
+* 任何时候，如果有人看到一些代码不够清楚，他们就应该抓住机会在那里修复它。
 
-Resources
-
+相关资料
 * [Opportunistic Refactoring](http://martinfowler.com/bliki/OpportunisticRefactoring.html)
 
 ## Command Query Separation
