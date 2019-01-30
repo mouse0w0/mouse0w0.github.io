@@ -21,4 +21,11 @@
 	</article>
 	<%- partial('pagination') %>
 	<%- partial('comment') %>
+	<% if (theme.gitalk.enable){ %>
+  <%- partial('gitalk', {
+      key: item.slug,
+      title: item.title,
+      url: config.url + url_for(item.path)
+    }) %>
+  <% } %>
 </div>  

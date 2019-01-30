@@ -9,7 +9,6 @@ tags: [Java, JNI, C/C++]
 >
 > [Java Native Interface Specification (Java 11)](https://docs.oracle.com/en/java/javase/11/docs/specs/jni/index.html)
 >
-> [Java Programming Tutorial
-Java Native Interface (JNI)](https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html)
+> [Java Programming Tutorial Java Native Interface (JNI)](https://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html)
 >
 > [JNI 学习笔记](https://www.jianshu.com/p/f6e3dd8edb13)

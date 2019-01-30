@@ -135,3 +135,11 @@ baidu_search:     ## http://zn.baidu.com/
 tinysou_search:     ## http://tinysou.com/
   enable: false
   id:  ## e.g. "4ac092ad8d749fdc6293" for your tiny search id
+
+# Gitalk
+gitalk:
+  enable: true
+  github_user: Mouse0w0
+  github_repo: mouse0w0.github.io
+  client_id: 7aa03b00f01b00627546
+  client_secret: 3b6ba50fa682ea7b0acced5106630a95921bfd92
