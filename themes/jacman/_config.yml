@@ -56,7 +56,7 @@ creative_commons: by-nc-sa
 #### Author information
 author:
   intro_line1:  "这是耗子的博客。"    ## your introduction on the bottom of the page
-  intro_line2:  "喜欢Java，MineCraft和二次元。"  ## the 2nd line
+  intro_line2:  "想要变强。"  ## the 2nd line
   weibo: ##2176287895     ## e.g. wuchong1014 or 2176287895 for http://weibo.com/2176287895
   weibo_verifier: ##b3593ceb    ## e.g. b3593ceb Your weibo-show widget verifier ,if you use weibo-show it is needed.
   tsina:      ## e.g. 2176287895  Your weibo ID,It will be used in share button.
@@ -82,6 +82,9 @@ toc:
 #### Links
 links:
   未知之域: http://www.mcbbs.net/group-1181-1.html,一个综合性开发团队
+  《用LWJGL3开发3D游戏》中文翻译: https://mouse0w0.github.io/lwjglbook-CN-Translation/,《用LWJGL3开发3D游戏》中文翻译
+  BungeeCord插件开发中文教程: https://github.com/Mouse0w0/BungeeCordChineseTutorial,BungeeCord插件开发中文教程
+  Minecraft开发者中文指南: https://github.com/Mouse0w0/MinecraftDeveloperGuide,Minecraft开发者中文指南
 
 #### Comment
 duoshuo_shortname:    ## e.g. wuchong   your duoshuo short name.
