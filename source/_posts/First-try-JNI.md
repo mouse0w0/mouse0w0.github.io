@@ -25,6 +25,11 @@ public class LearnJNI {
 
 在Java的编译输出目录下执行如下指令：
 ```
+javac -h . com.github.mouse0w0.learnjni.LearnJNI
+```
+
+> 在Java 10之前，生成头文件主要通过`javah`:
+> ```
 javah -classpath . -jni com.github.mouse0w0.learnjni.LearnJNI
 ```
 
