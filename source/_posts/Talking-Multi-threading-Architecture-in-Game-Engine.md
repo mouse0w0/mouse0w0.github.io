@@ -1,5 +1,5 @@
 ---
-title: 游戏引擎多线程架构研究
+title: 泛谈游戏引擎中的多线程架构
 date: 2019-11-18 21:20:38
 tags: [GameEngine, Architecture]
 ---
