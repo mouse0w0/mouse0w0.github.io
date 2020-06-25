@@ -1,7 +1,7 @@
 ---
 title: 如何使用Java本地接口（JNI）
 date: 2019-01-30 17:04:21
-tags: [Java, C/C++, Native]
+tags: [Java, C/C++]
 ---
 
 
