@@ -1,7 +1,7 @@
 ---
 title: 介绍 Nashorn —— Java 8 JavaScript 引擎
 date: 2018-12-02 19:07:03
-tags: [Java, Nashorn]
+tags: [Java]
 ---
 本文我们来介绍一下Java 8的Nashorn JavaScript引擎。Nashorn是于Java 8中用于取代Rhino（Java 6，Java 7）的JavaScript引擎。Nashorn完全支持ECMAScript 5.1规范以及一些扩展。与先前的Rhino引擎相比，它有二到十倍的性能提升。本文中将使用各种各样的例子来说明Nashorn的强大功能。
 

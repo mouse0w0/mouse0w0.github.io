@@ -1,7 +1,7 @@
 ---
 title: 编程原则（Programming Principles）
 date: 2018-10-04 14:26:25
-tags: Programming
+tags: [Design Pattern]
 ---
 
 > **本文翻译自[Programming Principles](http://java-design-patterns.com/principles/)。**
