@@ -51,6 +51,6 @@ Bob->Alice : hello
 
 ![Monochrome 反转主题](reverse_monochrome.png)
 
-以上就是PlantUML提供的一些主题，如有需要可以自己阅读PlantUML的官方文档，通过`skinparam`修改样式。
+以上就是PlantUML提供的一些主题，如有需要可以自行阅读PlantUML的[用户指南](http://plantuml.com/zh/guide)，通过`skinparam`修改样式。
 
 再推荐一个非官方主题，有需要的可自行取用：[https://github.com/xuanye/plantuml-style-c4](https://github.com/xuanye/plantuml-style-c4)。
