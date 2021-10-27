@@ -103,7 +103,7 @@ Mixin通过在编译时解析`@Shadow`注解，并将影子成员的适当混淆
 
 ##### 5.1.1 Mixin引用映射
 
-为了允许混淆“软”引用，注解处理器(https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor)处理映射文件，该映射文件被包含在生产用Jar中，并在[配置文件](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment#mixin-configuration-files)中指定。这个*引用图（Reference Map，或简称“refmap”）*包含Mixin集合中所有到它们混淆的对象的软引用。
+为了允许混淆“软”引用，[注解处理器](https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor)处理映射文件，该映射文件被包含在生产用Jar中，并在[配置文件](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment#mixin-configuration-files)中指定。这个*引用表（Reference Map，或简称“refmap”）*包含Mixin集合中所有到它们混淆的对象的软引用。
 
 每个编译阶段都放出一个引用映射，因此在对应转换期间编译的每个Mixin集合都应该对该转换使用相同的引用映射。应该选择引用映射的唯一名称以避免冲突。
 
