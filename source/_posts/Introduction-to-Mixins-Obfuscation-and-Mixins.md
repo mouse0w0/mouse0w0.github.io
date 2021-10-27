@@ -21,7 +21,7 @@ categories: Mixin
 
 一旦我们编写了代码，我们需要**重**混淆我们的Mod代码，以便它可以与原始的（混淆的）代码库一起工作。因此，开发生命周期看起来如下图所示：
 
-![](obfuscation_lifecycle.png)
+![混淆生命周期](./Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_lifecycle.png)
 
 ### 2. 化解识别危机 - 定义“混淆边界”
 
@@ -39,7 +39,7 @@ categories: Mixin
 
 在每个阶段**所有**字段和方法被重命名，因此每组混淆形成不相关的混淆*环境*，所有字段和方法具有对应于该环境的名称：
   
-![混淆环境](obfuscation_environments.png)
+![混淆环境](./Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_environments.png)
 
 我们还将把这些假想环境之间的假想边界称为“*混淆边界（Obfuscation Boundary）* ”，因为显然*跨越*边界可能会造成问题。例如，方法`getHealth`（MCP名）总是希望`takeDamage`方法在任何特定执行周期都是它的MCP名称，如果同时存在来自不同环境的名称，那么很有可能发生问题。
 
@@ -126,11 +126,11 @@ Mixin通过在编译时解析`@Shadow`注解，并将影子成员的适当混淆
 
 显然，在应用运行时反混淆后，将Mixin字节码和目标类组合是非常重要的，因此环境中的混淆映射需与Mixin中的混淆映射相匹配。让我们重新看看前文中的图，转换器链中的Mixin概述：
 
-![](mixin_transformer_chain.png)
+![](./Introduction-to-Mixins-Obfuscation-and-Mixins/mixin_transformer_chain.png)
 
 当我们考虑在此图中（在上游转换器链中）在哪里应用运行时反混淆时，我们可以看到反混淆转换器本身如何表示混淆边界，以及为什么必须在该转换器的下游应用Mixin：
 
-![](mixin_transformer_chain_obf.png)
+![](./Introduction-to-Mixins-Obfuscation-and-Mixins/mixin_transformer_chain_obf.png)
 
 #### 5.3  不可预测的成员名称 - 合成把戏的困扰
 
