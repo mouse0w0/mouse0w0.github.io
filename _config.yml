@@ -80,7 +80,7 @@ theme: jacman
 deploy:
   type: git
   repo: https://github.com/Mouse0w0/mouse0w0.github.io.git
-  branch: master
+  branch: pages
 
 plugin:
   - hexo-generator-feed
