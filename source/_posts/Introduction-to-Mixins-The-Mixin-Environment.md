@@ -1,5 +1,5 @@
 ---
-title: Mixin介绍——Mixin环境
+title: 介绍Mixin——Mixin环境
 date: 2018-11-01 17:18:21
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
@@ -14,7 +14,7 @@ categories: Mixin
 
 Mixin本身是独立于常规类，通过转换器链（Transformer Chain）[<sup>2</sup>](#note2)传输的，这是为了允许重映射转换器（Remapping Transformer）[<sup>3</sup>](#note3)在Mixin与目标类组合之前完成它们的工作。因此，Mixin转换器在任何重映射转换器的*下游*是很重要的，这是通过在转换器链中插入代理转换器（Proxy Transformer）来内部处理的。
 
-![Mixin转换器链](mixin_transformer_chain.png)
+![Mixin转换器链](./Introduction-to-Mixins-The-Mixin-Environment/mixin_transformer_chain.png)
 
 Mixin需要在类开始载入之前进行处理，以便识别它们的**目标类**，进行[**层次结构验证**](https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins)，并为方法和字段解析任何需要更新的**静态绑定**。你希望使用的Mixin应该在配置文件中指定，你的CoreMod、Tweaker、Jar Metadata或litemod.json将指定模组Jar内的资源位置。
 
@@ -55,7 +55,7 @@ Mixin需要在类开始载入之前进行处理，以便识别它们的**目标�
 
 像FML和LiteLoader这样的*Tweaker*还能够加载和注入它们找到的其他*Tweaker*，因此`Launch`在循环中初始化*Tweaker*，直到不再继续注册更多的*Tweaker*。我们可以想到`Launch`中的执行流程如下：
 
-![启动生命周期](mixin_env_0.png)
+![启动生命周期](./Introduction-to-Mixins-The-Mixin-Environment/mixin_env_0.png)
 
 这个初始化阶段*必须*在游戏开始加载之前完成，这是绝对必要的，否则因为在*Tweak*初始化周期中晚点注册的*Transformer*可能没机会处理它需要的类，并且转换器链也可能不完整。
 
@@ -66,7 +66,7 @@ Mixin需要在类开始载入之前进行处理，以便识别它们的**目标�
 
 由于Mixin子系统必须在这个早期阶段（在游戏类加载之前）初始化，所以它必须作为CoreMod或Tweaker加载，具体参阅下面的引导部分。
 
-![启动生命周期](mixin_env_1.png)
+![启动生命周期](./Introduction-to-Mixins-The-Mixin-Environment/mixin_env_1.png)
 
 一旦*Tweaker*初始化完成，`Launch`将调用游戏的原始`main()`方法，该方法启动游戏加载过程。在此之前，转换器链已经完成，因此转换器链可以通过注册的转换器加载和处理游戏类。游戏进入其主循环，按需加载类，并由转换器链（包括Mixin）处理。
 
@@ -100,7 +100,7 @@ _那么为什么要考虑**预初始化**呢？_
 
 Mixin库内含一个第一类的Tweaker，它被设计为在尽可能早的时候注册并开始处理类，这在下图中标记为 **(1)** 。正常的CoreMod启动发生于 **(2)** 处的第一次循环，然后游戏加载开始于 **(3)**。
 
-![启动生命周期](mixin_env_2.png)
+![启动生命周期](./Introduction-to-Mixins-The-Mixin-Environment/mixin_env_2.png)
 
 如果需要在**预初始化**与类组合，则建议使用第一类Tweaker。
 

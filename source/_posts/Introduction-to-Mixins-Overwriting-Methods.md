@@ -1,5 +1,5 @@
 ---
-title: Mixin介绍——重写方法
+title: 介绍Mixin——重写方法
 date: 2018-11-07 11:47:18
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
@@ -20,11 +20,11 @@ Introduction to Mixins Overwriting Methods](https://github.com/SpongePowered/Mix
 
 让我们花一点时间来回顾我们在[本教程的第一部分](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture#6-is-it-a-bird-is-it-a-plane-no-its-superclass)中的例子，使用Mixin将`setLevel`方法添加到目标类中：
 
-![](mixin_tut_19.png)
+![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_19.png)
 
 Mixin中含有没有多余修饰的附加方法，并且该方法将被添加到目标类中。在Mixin应用之后，该方法将存在于目标类中，就好像它一直存在一样。我已经用![](mixin_tut_21.png)标记了Mixin方法，以便于合并时更容易找到它：
 
-![](mixin_tut_20.png)
+![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_20.png)
 
 因此，下一个问题是：*如果我们在Mixin中声明一个 __已经存在于目标类中的方法__，会发生什么？*
 
@@ -60,7 +60,7 @@ public abstract class MixinEntityPlayer
 ```
 现在，当应用Mixin时，在Mixin中定义的`getLevel()`方法将重写现有的对应部分：
 
-![](mixin_tut_22.png)
+![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_22.png)
 
 最后类的结构与之前没有什么不同，但包含了我们在`getLevel()`方法中定义的新逻辑。
 
@@ -145,11 +145,11 @@ Mixin的关键任务之一是通过使用Mixin将自己的接口应用到现有�
 
 让我们来看一个简单的例子。在本例中，我们将使用与前一篇文章中相同的类和接口，但我们将假设`Identifyable`接口不会与目标对象冲突：
 
-![](mixin_tut_24.png)
+![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_24.png)
 
 正如我们所见的，Mixin中不需要实现`getID`，因为类`Foo`本质上已经实现了接口。但是，混淆之后，类、字段和方法名称都发生了变化，我们遇到了一个问题：
 
-![](mixin_tut_25.png)
+![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_25.png)
 
 既然方法不再有实现，任何使用者如果试图调用该方法，都会引发`AbstractMethodError`。
 
@@ -158,11 +158,11 @@ Mixin的关键任务之一是通过使用Mixin将自己的接口应用到现有�
 * __用原始方法的副本重写该方法__
  这似乎是最直白的，当然也是最简单的方法。如我们所知，省略`@Overwrite`注解会导致重写*不*被混淆。这意味着，在我们的开发环境中（方法和字段名不被混淆），该方法将简单地重写目标中的现有方法：
 
- ![](mixin_tut_26.png)
+ ![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_26.png)
  
  在混淆之后，重写神奇地转换为*新*的访问器，因为方法合并的语义意味着该方法将简单地添加到目标类：
  
- ![](mixin_tut_27.png)
+ ![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_27.png)
  
 这种方法的两个主要缺点是，首先，它需要将原始方法复制到Mixin中，这对于简单的访问器来说是可以接受的，但对于更复杂的方法可能是有问题的，因为它再次使我们处于需要手动保持功能与目标方法等同的处境。如果目标方法改变，那么我们必须更新重写。其次，我们可能最终需要为那些我们并不真正感兴趣的字段创建影子，并且宁愿通过现有类的公共约定（例如，通过原始访问器）进行访问，而对于更复杂的方法，这可能有更多的影子字段。除了复制原始方法的功能之外，我们对这些字段并不真正感兴趣，因此添加它们只会造成代码混乱。
 
@@ -209,7 +209,7 @@ public abstract class MixinFoo {
 
 当然，在应用Mixin时，前缀将被删除，这意味着在Mixin合并之后，我们将以冲突结束。正如我们所知，Mixin会把这个冲突当作一个*重写*，让我们回到起点！
 
-![](mixin_tut_28.png)
+![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_28.png)
 
 然而，情况变得更糟，因为新方法中对`this.getID()`的调用**现在变成了自引用**，如果调用该方法，将导致堆栈溢出，因为它将递归地调用自己，直到JVM用完堆栈空间！
 
@@ -241,7 +241,7 @@ public abstract class MixinFoo {
 
 我们的新Mixin行为图是这样的：
 
-![](mixin_tut_29.png)
+![](./Introduction-to-Mixins-Overwriting-Methods/mixin_tut_29.png)
 
 ### 3. 约束
 

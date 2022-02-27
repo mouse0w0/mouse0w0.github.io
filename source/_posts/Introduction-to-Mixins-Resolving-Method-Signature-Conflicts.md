@@ -1,5 +1,5 @@
 ---
-title: Mixin介绍——解决方法签名冲突
+title: 介绍Mixin——解决方法签名冲突
 date: 2018-11-06 11:15:29
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
@@ -27,11 +27,11 @@ public interface Identifyable {
 
 但是，如果我们的一个目标类的父类已经定义了一个返回类型不同签名的方法，那么Java编译器就不会让我们编译我们的Mixin。为了知道原因，让我们来看看我们试图创建的代码结构。我已经用返回类型修饰了每个访问器来表明问题：
 
-![](mixin_conflict_0.png)
+![](./Introduction-to-Mixins-Resolving-Method-Signature-Conflicts/mixin_conflict_0.png)
 
 父类中的`getID()`方法和我们试图定义的`getID()`方法仅在返回类型上不同。这种类型的重载Java并不支持，编译器也会在编译Mixin时发生错误：
 
-![](mixin_conflict_1.png)
+![](./Introduction-to-Mixins-Resolving-Method-Signature-Conflicts/mixin_conflict_1.png)
 
 然而，运行Java的引擎Java虚拟机（Java Virtual Machine，JVM）隐藏着一丝希望：JVM本身**支持**这种重载，只是Java语言不支持而已。这意味着，如果能够让编译器编译我们的代码，那么实际的类就可以正常工作了。
 
@@ -39,7 +39,7 @@ public interface Identifyable {
 
 如果Java不允许我们访问JVM，那么如何利用隐藏的功能呢？简单：我们使用一个假的方法来编译Mixin，并在应用Mixin时用我们想要的实际方法来交换它。我们的解决方案的第一阶段看起来是这样的：
 
-![](mixin_conflict_2.png)
+![](./Introduction-to-Mixins-Resolving-Method-Signature-Conflicts/mixin_conflict_2.png)
 
 在本例中，我们将下划线（`_`）作为方法的前缀，并在应用Mixin时使用重命名操作来从方法名中除去下划线。我们还从Mixin中删除了接口声明，因为编译器仍足够聪明，即使在接口上定义方法也能够发现冲突。
 
@@ -57,7 +57,7 @@ public interface Identifyable {
 
 对于软实现，我们将定义用于接口中的方法的前缀，这解决了第一个问题，以及不实际使用`implements`关键字，声明接口实现的方法，这解决了第二个问题。
 
-![](mixin_conflict_3.png)
+![](./Introduction-to-Mixins-Resolving-Method-Signature-Conflicts/mixin_conflict_3.png)
 
 就最终效果来说，软实现提供了与让Mixin直接实现接口的完全相同的功能，换句话说：
 
@@ -101,7 +101,7 @@ public abstract class MixinBar extends Foo {
 
 让我们修改上述示例，删除`Bar`，假设我们直接混入`Foo`：
 
-![](mixin_conflict_4.png)
+![](./Introduction-to-Mixins-Resolving-Method-Signature-Conflicts/mixin_conflict_4.png)
 
 我们可以很快发现，由于签名冲突，我们不能在目标类中添加`getID()`的影射。
 

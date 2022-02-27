@@ -1,5 +1,5 @@
 ---
-title: Mixin介绍——理解Mixin的结构
+title: 介绍Mixin——理解Mixin的结构
 date: 2018-11-01 08:09:56
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
@@ -20,7 +20,7 @@ _**这不是一篇教程** 本介绍并非教程，有关Mixin实现的更多详
 
 在示例中，我们可以看到一个`EntityPlayer`类，它的直接（并且唯一）父类是`Entity`。我们可以用这样的UML风格来表示它：
 
-![图1 - 一个简单的类层次结构](mixin_tut_0.png)
+![图1 - 一个简单的类层次结构](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_0.png)
 
 **图1 - 一个简单的（虚构的）类层次结构**
 
@@ -28,7 +28,7 @@ _**这不是一篇教程** 本介绍并非教程，有关Mixin实现的更多详
 
 为了充实示例，让我们添加一些假想的字段和方法到想象的示例类中：
 
-![图二 - 一个有成员的简单的类层次结构](mixin_tut_1.png)
+![图二 - 一个有成员的简单的类层次结构](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_1.png)
 
 **图二 - 一个有假想字段和方法的简单的类层次结构**
 
@@ -40,7 +40,7 @@ _**这不是一篇教程** 本介绍并非教程，有关Mixin实现的更多详
 
 首先来看一下我们假想类中的一些可能的调用和访问：
 
-![图3 - 一些字段和方法的访问](mixin_tut_2.png)
+![图3 - 一些字段和方法的访问](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_2.png)
 
 **图3 - 一些字段和方法的访问**
 
@@ -77,7 +77,7 @@ _**这不是一篇教程** 本介绍并非教程，有关Mixin实现的更多详
 
 旁注：*是的，这完全偏离了UML的轨道，但UML对于表示此处的概念并不真的有用，这个框图的**底部**从其他任何对象来看都是“可视区域”，该接口实际上位于公共类“之前”，并给出它的一个子集。*
 
-![图4 - 一个让UML爱好者讨厌的图](mixin_tut_3.png)
+![图4 - 一个让UML爱好者讨厌的图](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_3.png)
 
 **图4 - 一个让UML爱好者讨厌的图**
 
@@ -106,7 +106,7 @@ _**这不是一篇教程** 本介绍并非教程，有关Mixin实现的更多详
 
 例如，假设我们为可以升级的对象创建一个新的接口，叫做`Leveller`，就像这样：
 
-![图5 - Leveller接口](mixin_tut_4.png)
+![图5 - Leveller接口](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_4.png)
 
 **图5 - _多么美好的一天啊，嘿嘿_**
 
@@ -147,7 +147,7 @@ public void method() {
 
 最后要考虑的是，当类*不*实现接口时会发生什么。让我们把另一个名为`setLevel()`的方法添加到我们的示例接口`Leveller`中：
 
-![图6 - 添加setLevel()](mixin_tut_5.png)
+![图6 - 添加setLevel()](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_5.png)
 
 **图6 - 添加setLevel()**
 
@@ -200,7 +200,7 @@ public abstract class MixinEntityPlayer
 ```
 就是这样！当Mixin被处理时，在Mixin上声明的任何接口都被应用到**目标类**。让我们看看当前的类层次结构：
 
-![图7 - Mixin层次结构（应用前）](mixin_tut_6.png)
+![图7 - Mixin层次结构（应用前）](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_6.png)
 
 **图7 - Mixin层次结构（应用前）**
 
@@ -208,7 +208,7 @@ public abstract class MixinEntityPlayer
 
 在Mixin应用之后，新的类层次看起来像这样：
 
-![图8 - 类层次结构（应用后）](https://raw.githubusercontent.com/SpongePowered/Mixin/master/docs/images/mixin_tut_7.png)
+![图8 - 类层次结构（应用后）](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_7.png)
 
 **图8 - 类层次结构（应用后）**
 
@@ -249,7 +249,7 @@ public abstract class MixinEntityPlayer
 ```
 生成以下类层次：
 
-![图9 - Mixin类层次（应用前）](mixin_tut_8.png)
+![图9 - Mixin类层次（应用前）](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_8.png)
 
 **图9 - Mixin类层次（应用前）**
 
@@ -266,13 +266,13 @@ public abstract class MixinEntityPlayer
     }
 }
 ```
-![图10 - 添加一个方法到Mixin](mixin_tut_9.png)
+![图10 - 添加一个方法到Mixin](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_9.png)
 
 **图10 - 添加一个方法到Mixin**
 
 现在，当应用Mixin时，新方法也将被添加到**目标类**：
 
-![图11 - 类层次结构（应用后）](mixin_tut_10.png)
+![图11 - 类层次结构（应用后）](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_10.png)
 
 **图11 - 类层次结构（应用后）**
 
@@ -281,7 +281,7 @@ public abstract class MixinEntityPlayer
 ### 5. 点燃蜡烛将投下Shadow
 因此，现在我们有办法将新方法注入**目标类**，但是在实现新注入的方法体时，我们就很快遇到一个问题：在理想情况下，我们希望新的`setLevel()`实现能够访问`EntityPlayer`中的`level`变量。但有一个问题是……它不能。
 
-![图12 - 不可能的访问](mixin_tut_11.png)
+![图12 - 不可能的访问](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_11.png)
 
 **图12 - 不可能的访问**
 
@@ -308,7 +308,7 @@ public abstract class MixinEntityPlayer
 ```
 `@Shadow`注释在Mixin中创建一个“虚拟字段”，它反映了**目标类**的对应部分：
 
-![图13 - 我和我的影子](mixin_tut_12.png)
+![图13 - 我和我的影子](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_12.png)
 
 **图13 - 我和我的影子**
 
@@ -338,7 +338,7 @@ public abstract class MixinEntityPlayer
 ```
 我们通常将影子方法声明为`abstract`，只是为了避免编写方法体，但很显然，我们不可能将`private`与`abstract`同时声明，所以我们只是用空方法体声明影子方法。
 
-![图14 - 影射万物](mixin_tut_13.png)
+![图14 - 影射万物](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_13.png)
 
 **图14 - 影射万物**
 
@@ -347,7 +347,7 @@ public abstract class MixinEntityPlayer
 
 首先让我们快看看当前的类层次结构：
 
-![图15 - 游戏状态](mixin_tut_14.png)
+![图15 - 游戏状态](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_14.png)
 
 **图15 - 游戏状态**
 
@@ -357,7 +357,7 @@ public abstract class MixinEntityPlayer
 
 让我们假设一下，`EntityPlayer`不是直接从`Entity`继承的，而是从中间的一个类`EntityMoving`，而Mixin类仍然可以直接继承`Entity`：
 
-![图16 - 继承层次结构 - 注意：此图是故意错误的！](mixin_tut_15.png)
+![图16 - 继承层次结构 - 注意：此图是故意错误的！](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_15.png)
 
 **图16 - 继承层次结构 - 注意：此图是故意错误的！**
 
@@ -371,7 +371,7 @@ public abstract class MixinEntityPlayer
 
 > 为了实现该技术，转换器将处理Mixin中所有的INVOKESPECIAL操作符，并分析目标类的父类层次结构，以找到该方法的最特化的版本。该过程开销很高，并且只在“分离的”Mixin（那些父类与目标类的父类不同的Mixin）上执行。为了避免这种处理步骤，建议尽可能地将Mixin类与它们的目标类具有相同的父类。
 
-![图17 - 最终层次结构](mixin_tut_16.png)
+![图17 - 最终层次结构](./Introduction-to-Mixins-Understanding-Mixin-Architecture/mixin_tut_16.png)
 
 **图17 - 最终层次结构（Mixin应用后）**
 

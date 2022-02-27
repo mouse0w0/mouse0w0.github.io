@@ -23,7 +23,7 @@ categories: Mixin
 
 在我们探讨更多细节之前，来介绍一下我们的学习样例。下图展示了一个非常简单的类`Flard`中的一些代码：
 
-![](flard_00.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_00.png)
 
 `Flard`类包含：
 
@@ -37,7 +37,7 @@ categories: Mixin
 
 让我们看看从一些外部代码调用`setPos`设置器的执行流程：
 
-![](flard_01.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_01.png)
 
 这里并没有发生什么特别的事情，箭头精确地指示了我们期望给定代码发生的事情。
 
@@ -49,7 +49,7 @@ categories: Mixin
 
 答案是：*告诉方法调用我们的自定义代码！*
 
-![](invoke.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/invoke.png)
 
 #### 1.2 你要调用谁？onUpdate！
 
@@ -61,7 +61,7 @@ categories: Mixin
 
 因此，假设我们的第一步是使用Mixin将新的**处理**方法`onUpdate`添加到目标类中。在本例中，**处理**方法简单地对某个假想名为`Observer`的单例观察者对象调用`foo`：
 
-![](flard_02.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_02.png)
 
 好，一切都很好，但是我们的新方法基本上只是呆在那里，除此之外什么都不做，所以让我们看看我们如何做注入器的实际*注入*部分：
 
@@ -69,7 +69,7 @@ categories: Mixin
 
 在开始之前，我们首先要做的是识别目标方法的各部分。让我们用记号标记`update()`方法，这些记号标明了我们能够容易识别的一些区域：
 
-![](flard_03.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_03.png)
 
 记号标明了该方法的各部分剖析：
 
@@ -82,7 +82,7 @@ categories: Mixin
 
 现在我们准备链接这些点。首先我们将用注入器声明来修饰我们的`onUpdate`处理方法：
 
-![](flard_04.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_04.png)
 
 如你所见，`@Inject`注解需要两条信息：要注入的**方法**和要注入的**点**。在代码中看起来是这样的：
 
@@ -96,7 +96,7 @@ protected void onUpdate() {
 
 当Mixin处理器应用Mixin方法时，它看到`@Inject`注解并在**目标**方法中生成调用**处理**方法的代码：
 
-![](flard_05.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_05.png)
 
 我们的**处理**函数的注入回调以紫色显示。与重写不同，**目标**方法的原始行为是不受影响的，我们的**处理**方法只是在方法开始时接收回调。
 
@@ -152,7 +152,7 @@ protected void onSetPos(int x, int y, CallbackInfo ci) {
 
 注意我们仍需包含`CallbackInfo`参数。注入`setPos`的代码先现在看起来是这样的，注意调用在调用**处理**方法`onSetPos`时传递了参数`x`和`y`：
 
-![](flard_06.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_06.png)
 
 方法参数和CallbackInfo一同为注入提供**环境（Context）**，并允许你相应地更改处理器的行为。例如：
 
@@ -200,7 +200,7 @@ protected void onSetPos(int x, int y, CallbackInfo ci) {
 
 在上述代码中，**处理方法**检查位置是否设置为`(0, 0)`，并执行一些自定义逻辑，将回调标记为**已取消**，以使目标方法（`setPos`）在**注入之后立刻返回**。我们可以看到目标方法是如何处理注入到`setPos`的代码，看起来就像这样：
 
-![](flard_07.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_07.png)
 
 如你所见，将注入标记为可取消的，会导致Mixin处理器注入代码时会检查`CallbackInfo`是否被标记为已取消，如果是，则立刻返回。
 
@@ -228,11 +228,11 @@ Mixin处理器将始终在匹配的操作符*之前立刻*注入回调，因此�
 
 让我们看一个例子：
 
-![](flard_08.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_08.png)
 
 在本例中，我们修改了`setPos`方法，并在方法中添加了一些带有显式返回值的额外逻辑。除了方法结尾的*隐式*返回以外，这还意味着现在方法体中含有*两个*RETURN操作符。当我们标记方法中的注入点时，我们可以看到这映射在`RETURN`所标识的注入点中：
 
-![](flard_09.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_09.png)
 
 为了区分所标记的操作符，由注入点标识的每个操作符都以从零开始的数字标记，该操作符索引被称为**序号（Ordinal）**，并且是从零开始的索引。
 
@@ -316,15 +316,15 @@ protected void onResetPos(int x, int y, CallbackInfo ci) {
 
 正如你所想的，当注入Getter，或当在`HEAD`注入使一个方法**短路**时，这是非常有用的。让我们来看一个返回值的示例方法：
 
-![](flard_10.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_10.png)
 
 `getPos`方法是一个典型的*Getter*方法，因为它的方法体仅返回受保护的字段的值。让我们添加一个注入`HEAD`的Mixin，如果字段为`null`，则返回默认值：
 
-![](flard_11.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_11.png)
 
 注入器首先将我们的**处理方法**合并到目标类中，然后将代码注入到**目标方法**中以处理取消。
 
-![](flard_12.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_12.png)
 
 注意注入的代码与此前展示的`void`类型的短路代码的区别。这次如果取消回调，注入器返回我们在`CallbackInfoReturnable`中设置的值。我们的Mixin代码如下所示：
 
@@ -351,11 +351,11 @@ protected void onGetPos(CallbackInfoReturnable<Point> cir) {
 
 这个值临时储存在方法的*参数堆栈*中，你可以将这些视为临时的、不可见的变量，这些变量在JVM操作值时储存这些值。从实际的角度来看，这意味着`HEAD`和`RETURN`在方法中实际上是位置分开的！
 
-![](flard_13.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_13.png)
 
 由于我们知道，`RETURN`操作符必须返回一个值，因此我们知道，无论何时在`RETURN`注入，该值都可用于访问。注入处理器处理这种情况，并将返回值“捕获”并传递给处理方法的CallbackInfo中：
 
-![](flard_14.png)
+![](./Advanced-Mixin-Usage-Callback-Injectors/flard_14.png)
 
 这种方法有很多好处：
 

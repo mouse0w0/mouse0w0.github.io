@@ -1,5 +1,5 @@
 ---
-title: Mixin介绍——混淆与Mixin
+title: 介绍Mixin——混淆与Mixin
 date: 2018-11-02 12:39:35
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
