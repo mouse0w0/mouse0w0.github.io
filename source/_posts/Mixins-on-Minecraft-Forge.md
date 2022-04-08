@@ -18,7 +18,7 @@ Mixin现在作为库与[Minecraft Forge](https://www.minecraftforge.net/)一同�
 2. 添加Mixin**注解处理器（Annotation Processor）**依赖。
 3. 通过`mixin`闭包（Closure）为**MixinGradle**配置选项。
 
-> 在本指南中，将假定你的Mixin配置名为`mixins.mymod.json`，而refmap并命名为`mixins.mymod.refmap.json`，并且你只使用了`main`源代码集（SourceSet）。
+> 在本指南中，将假定你的Mixin配置名为`mixins.mymod.json`，而refmap被命名为`mixins.mymod.refmap.json`，并且你只使用了`main`源代码集（SourceSet）。
 
 ## 步骤 1 - 添加MixinGradle插件
 
