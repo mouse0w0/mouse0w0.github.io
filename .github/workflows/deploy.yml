@@ -22,7 +22,7 @@ jobs:
         with:
           build_dir: ./public/
           target_branch: pages
-          keep_history: true
+          keep_history: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
