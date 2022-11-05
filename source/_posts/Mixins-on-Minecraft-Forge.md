@@ -120,8 +120,6 @@ mixin {
 ```
 
 ### 实用设置
-“mixin”闭包也可用于配置选项，如mixin系统属性（用于开发运行）和*Mixin注释处理器*的选项。例如，我建议设置“mixin”。调试。冗长的和混合的。调试。在开发过程中进行出口。为了方便起见，我们可以在“mixin”闭包中设置这些属性：
-
 `mixin`闭包也可用于配置选项，如Mixin[系统属性](https://github.com/SpongePowered/Mixin/wiki/Mixin-Java-System-Properties)（用于开发运行）和*Mixin注解处理器*的选项。例如，我建议在开发期间设置`mixin.debug.verbose`和`mixin.debug.export`。为了方便起见，我们可以在`mixin`闭包中设置这些属性：
 
 ```groovy
