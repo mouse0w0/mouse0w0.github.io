@@ -135,7 +135,7 @@ public void method() {
 
 换句话说，如果我们只关心一个对象有方法`quack()`和`walk()`，那么对我们而言，它是一个`Duck`，而不关心它是否只是一个非常聪明的`Pigeon`，只要它有这些方法，那它对我们来说就是`Duck`。
 
-如果还不清楚这里说了什么，那么我建议[阅读Wiki百科文章]((http://en.wikipedia.org/wiki/Duck_typing))，因为它详细地涵盖了超出本介绍范围的概念。
+如果还不清楚这里说了什么，那么我建议[阅读Wikipedia的条目](http://en.wikipedia.org/wiki/Duck_typing)，因为它详细地涵盖了超出本介绍范围的概念。
 
 那么到目前为止我们知道了什么？
 
