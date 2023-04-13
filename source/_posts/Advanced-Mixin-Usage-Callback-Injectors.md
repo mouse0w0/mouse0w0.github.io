@@ -309,7 +309,7 @@ protected void onResetPos(int x, int y, CallbackInfo ci) {
 
 ### 5. 具有非Void返回类型的目标方法
 
-到目前为止，我们仅考虑注入一个返回`void`的目标方法。当注入具有非`void`返回类型的防辐射，注入器**处理方法**将替代性地接收一个`CallbackInfoReturnable`。`CallbackInfoReturnable`不同于它的父类`CallbackInfo`：
+到目前为止，我们仅考虑注入一个返回`void`的目标方法。当注入具有非`void`返回类型的方法中时，注入器**处理方法**将替代性地接收一个`CallbackInfoReturnable`。`CallbackInfoReturnable`不同于它的父类`CallbackInfo`：
 
 * `CallbackInfoReturnable`是泛型的，方法的返回类型是它的类型参数。
 * 当取消一个具有返回类型的`cancellable`回调时，可以通过调用`setReturnValue`而不是`cancel`来指定从该方法返回的值。
