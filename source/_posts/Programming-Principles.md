@@ -8,7 +8,7 @@ tags: [Design Pattern]
 
 每个程序员都可以从理解编程原理和模式中受益。这篇概述用于我个人参考，同时我也把它放在这。也许这在设计、讨论或复查中对你有所帮助。但请注意，这还远远不够，你常常需要在相互矛盾的原则之间做出权衡。
 
-本文受[The Principles of Good Programming](http://www.artima.com/weblogs/viewpost.jsp?thread=331531)启发。我觉得这份列表已经足够了，但这并不完全符合我个人的想法。此外，我还需要更多的论证、细节以及其他资料的链接。如果您有任何反馈或者改进的建议，[请让我知道](https://github.com/webpro/programming-principles/issues)。
+本文受[The Principles of Good Programming](http://www.artima.com/weblogs/viewpost.jsp?thread=331531)启发。我觉得这份列表已经足够了，但其并不完全符合我个人的想法。此外，我还需要更多的论证、细节以及其他资料的链接。如果您有任何反馈或者改进的建议，[请让我知道](https://github.com/webpro/programming-principles/issues)。
 
 ## 目录
 
@@ -18,7 +18,7 @@ tags: [Design Pattern]
 * [YAGNI](#YAGNI)
 * [做最简单的事情](#做最简单的事情)
 * [关注点分离](#关注点分离)
-* [保持事情不再重复](#保持事情不再重复)
+* [避免重复](#避免重复)
 * [为维护者写代码](#为维护者写代码)
 * [避免过早优化](#避免过早优化)
 * [童子军军规](#童子军军规)
@@ -113,7 +113,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 * [Separation of Concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)
 
-## 保持事情不再重复
+## 避免重复
 
 在一个系统内，每一项认识都必须有一个单一的、明确的、权威的表示。
 
@@ -129,7 +129,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 * 只在一个处编写业务规则、长表达式、if语句、数学公式、元数据等。
 * 确定系统中使用的每一项认识的唯一来源，然后使用该源来生成该认识的适用实例（代码、文档、测试等）。
-* 使用[三法则（Rule of three）](http://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)).
+* 使用<a herf="http://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)">三法则（Rule of three）</a>。
 
 相关资料
 
@@ -156,7 +156,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 * 不论何时编写代码，要想着最后维护代码的人是一个知道自己住在哪里的暴力精神病人。
 * 如果某个入门的人掌握了代码，他们就会从阅读和学习代码中获得乐趣，以这样的想法去编写代码和注释。
 * [别让我想（Don't make me think）](http://www.sensible.com/dmmt.html).
-* 使用[最少惊讶原则（Principle of Least Astonishment）](http://en.wikipedia.org/wiki/Principle_of_least_astonishment).
+* 使用[最少惊讶原则（Principle of Least Astonishment）](http://en.wikipedia.org/wiki/Principle_of_least_astonishment)。
 
 相关资料
 
@@ -167,7 +167,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 引用[Donald Knuth](http://en.wikiquote.org/wiki/Donald_Knuth)所说：
 
-> 程序员浪费大量的时间来思考或担心程序的非关键部分的速度，而考研尝试这些优化实际上在调试和维护时有很强的负面影响。比如说在97%的开发时间，我们应该忽略低效率：过早的优化是万恶之源。然而，我们不应该在关键的3%中放弃我们的机会。
+> 程序员浪费大量的时间来思考或担心程序的非关键部分的速度，而考虑尝试这些优化实际上在调试和维护时有很强的负面影响。比如说在97%的开发时间，我们应该忽略低效率：过早的优化是万恶之源。然而，我们不应该在关键的3%中放弃我们的机会。
 
 当然，需要理解什么是“过早”什么不是“过早”。
 
@@ -362,7 +362,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 怎么做
 
-* 使用 [科里定律](#科里定律).
+* 使用[科里定律](#科里定律)。
 
 相关资料
 
