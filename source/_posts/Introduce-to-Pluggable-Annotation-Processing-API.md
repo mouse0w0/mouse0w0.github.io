@@ -5,7 +5,9 @@ tags: [Java]
 ---
 插入式注解处理API（[JSR269](https://www.jcp.org/en/jsr/detail?id=269)）是用于处理注解（元数据，[JSR175](https://www.jcp.org/en/jsr/detail?id=269)）的一套API。其API位于`javax.annotation.processing`和`javax.lang.model`包下。
 
-插入式注解处理API可以让你在编译期访问注解元数据，处理和自定义你的编译输出，像反射一样访问类、字段、方法和注解等元素，创建新的源文件等等。可用于减少编写配置文件的劳动量，提高代码可读性等等。本文中我们将尝试着创建一个注解处理器用于标识一个服务提供者（Service Provider），并同时讲解插入式注解处理API的相关内容。
+插入式注解处理API可以让你在编译期访问注解元数据，处理和自定义你的编译输出，像反射一样访问类、字段、方法和注解等元素，创建新的源文件等等。可用于减少编写配置文件的劳动量，提高代码可读性等等。本文中我们将尝试着创建一个用于标识服务提供者的注解处理器，并同时讲解插入式注解处理API的相关内容。
+
+> 关于服务提供者和`ServiceLoader`是什么及其更多信息请浏览Java文档[java.util.ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html)
 
 首先创建一个`@ServiceProvider`注解，该注解用于标识一个服务提供者类，其`value()`值为服务接口类的类对象。
 ```java
@@ -175,10 +177,17 @@ public interface ProcessingEnvironment {
     }
 ```
 
-现在，你可以将注解处理器打包为Jar类库，然后由你的其他项目引用并构建。就会自动的生成对应的Service文件了！
+现在，你可以将注解处理器打包为Jar类库，然后由你的其他项目引用并构建。就会自动地在`META-INF/services`下生成对应的服务提供者文件了！
 ```java
-@ServiceProvider(Processor.class)
-public class ExampleClass {
+@ServiceProvider(MyService.class)
+public class MyServiceImpl implements MyService {
+}
+```
+
+最后，使用`ServiceLoader.load(MyService.class)`加载对应服务类的所有服务提供者实例：
+```java
+for (MyService service : ServiceLoader.load(MyService.class)) {
+    System.out.println(service.getClass().getSimpleName()); // 输出为MyServiceImpl
 }
 ```
 
