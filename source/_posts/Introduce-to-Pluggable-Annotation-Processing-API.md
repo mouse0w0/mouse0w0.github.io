@@ -193,6 +193,8 @@ for (MyService service : ServiceLoader.load(MyService.class)) {
 
 更多关于插入式注解处理API的详细信息，请浏览Java文档[javax.annotation.processing](https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/package-summary.html)和[javax.lang.model](https://docs.oracle.com/javase/8/docs/api/javax/lang/model/package-summary.html)。
 
+本文的源代码：https://github.com/mouse0w0/jsr269-example
+
 > 强烈建议使用Maven或Gradle等自动构建工具进行构建，否则你可能需要配置你的IDE以使用注解处理器。
 
 > 后记：我实在是懒得写了......
