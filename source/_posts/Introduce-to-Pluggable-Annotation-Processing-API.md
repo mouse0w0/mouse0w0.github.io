@@ -7,7 +7,7 @@ tags: [Java]
 
 插入式注解处理API可以让你在编译期访问注解元数据，处理和自定义你的编译输出，像反射一样访问类、字段、方法和注解等元素，创建新的源文件等等。可用于减少编写配置文件的劳动量，提高代码可读性等等。本文中我们将尝试着创建一个用于标识服务提供者的注解处理器，并同时讲解插入式注解处理API的相关内容。
 
-> 关于服务提供者和`ServiceLoader`是什么及其更多信息请浏览Java文档[java.util.ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html)
+> 关于服务提供者和`ServiceLoader`是什么及其更多信息请浏览Java文档[java.util.ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html)。
 
 首先创建一个`@ServiceProvider`注解，该注解用于标识一个服务提供者类，其`value()`值为服务接口类的类对象。
 ```java
