@@ -28,7 +28,7 @@ public class ServiceProviderProcessor extends AbstractProcessor {
 }
 ```
 
-同时，我们要在我们的源文件路径下的`META-INF.services`文件夹下，创建一个名为`javax.annotation.processing.Processor`的文本文件，其中写入我们的注解处理器的全称，例如：
+同时，我们要在我们的源文件路径下的`META-INF/services`文件夹下，创建一个名为`javax.annotation.processing.Processor`的文本文件，其中写入我们的注解处理器的全称，例如：
 ```
 com.github.mouse0w0.jsr269.ServiceProviderProcessor
 ```
