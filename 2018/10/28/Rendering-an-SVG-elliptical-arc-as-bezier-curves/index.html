@@ -1,0 +1,639 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>以贝塞尔曲线渲染一个SVG椭圆弧 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：https:&#x2F;&#x2F;mortoray.com&#x2F;2017&#x2F;02&#x2F;16&#x2F;rendering-an-svg-elliptical-arc-as-bezier-curves&#x2F;  我需要绘制椭圆和圆弧，如果没有它们就不能完成一个向量API。但苹果的核心图形库除了轴对齐圆弧外没有其他的东西。安卓有椭圆，但似乎也限制它轴对齐。这意味着我要将椭圆转换成一组贝塞尔曲线，用于这些后端API。  在本文中，另">
+<meta property="og:type" content="article">
+<meta property="og:title" content="以贝塞尔曲线渲染一个SVG椭圆弧">
+<meta property="og:url" content="https://mouse0w0.github.io/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：https:&#x2F;&#x2F;mortoray.com&#x2F;2017&#x2F;02&#x2F;16&#x2F;rendering-an-svg-elliptical-arc-as-bezier-curves&#x2F;  我需要绘制椭圆和圆弧，如果没有它们就不能完成一个向量API。但苹果的核心图形库除了轴对齐圆弧外没有其他的东西。安卓有椭圆，但似乎也限制它轴对齐。这意味着我要将椭圆转换成一组贝塞尔曲线，用于这些后端API。  在本文中，另">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/svg_f-6-5-2.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/svg_f-6-5-4.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/maisonobe_3-4-1.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/arc_svg_example.png">
+<meta property="article:published_time" content="2018-10-28T15:09:46.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.964Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Graphics">
+<meta property="article:tag" content="Math">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/svg_f-6-5-2.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/" title="以贝塞尔曲线渲染一个SVG椭圆弧" itemprop="url">以贝塞尔曲线渲染一个SVG椭圆弧</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-28T15:09:46.000Z" itemprop="datePublished"> 发表于 2018-10-28</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SVG%E5%9C%86%E5%BC%A7%E8%A1%A8%E7%A4%BA%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">SVG圆弧表示法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%AF%E7%82%B9%E8%BD%AC%E6%8D%A2%E5%88%B0%E4%B8%AD%E5%BF%83%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">端点转换到中心点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B3%E6%96%B9%E6%A0%B9"><span class="toc-number">2.1.</span> <span class="toc-text">平方根</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E4%BD%99%E5%BC%A6"><span class="toc-number">2.2.</span> <span class="toc-text">反余弦</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E5%BC%A7%E5%88%B0%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF"><span class="toc-number">3.</span> <span class="toc-text">从弧到贝塞尔曲线</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0"><span class="toc-number">3.1.</span> <span class="toc-text">参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E6%A4%AD%E5%9C%86"><span class="toc-number">4.</span> <span class="toc-text">一个椭圆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E7%AB%AF%E7%82%B9%E5%88%B0%E4%B8%AD%E5%BF%83%E5%BC%A7%E8%BD%AC%E6%8D%A2"><span class="toc-number">5.</span> <span class="toc-text">附录：端点到中心弧转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95%EF%BC%9AJavaScript%E5%AE%8C%E6%95%B4%E5%AE%9E%E7%8E%B0"><span class="toc-number">6.</span> <span class="toc-text">附录：JavaScript完整实现</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://mortoray.com/2017/02/16/rendering-an-svg-elliptical-arc-as-bezier-curves/">https://mortoray.com/2017/02/16/rendering-an-svg-elliptical-arc-as-bezier-curves/</a></p>
+</blockquote>
+<p>我需要绘制椭圆和圆弧，如果没有它们就不能完成一个向量API。但苹果的核心图形库除了轴对齐圆弧外没有其他的东西。安卓有椭圆，但似乎也限制它轴对齐。这意味着我要将椭圆转换成一组贝塞尔曲线，用于这些后端API。</p>
+<blockquote>
+<p>在本文中，另请参阅<a target="_blank" rel="noopener" href="https://mortoray.com/2017/02/02/the-smooth-sexy-curves-of-a-bezier-spline/">The smooth sexy curves of a bezier spline (平滑性感的贝塞尔曲线)</a>和<a target="_blank" rel="noopener" href="https://mortoray.com/2017/02/23/stuffing-curves-into-boxes-calculating-the-bounds/">Stuffing curves into boxes: calculating the bounds (让方框囊括曲线：计算边界)</a>。</p>
+</blockquote>
+<h2 id="SVG圆弧表示法"><a href="#SVG圆弧表示法" class="headerlink" title="SVG圆弧表示法"></a>SVG圆弧表示法</h2><p>SVG的圆弧指令允许绘制任何一种想要的弧形。由于<a target="_blank" rel="noopener" href="https://www.fusetools.com/">Fuse</a>的旧<code>Path</code>已经允许SVG路径数据，所以使用这个弧线的定义似乎是合理的。</p>
+<p>SVG通过通过它们的端点定义弧：在哪里开始和结束。这些再与椭圆的半径和旋转组合。基于以上参数，就有四个可能的弧。然后还要囊括两个奇怪的标志来选择对应弧。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a radius-x radius-y x-axis-rotation large-arc-flag sweep-flag x y</span><br></pre></td></tr></table></figure>
+<p>这是从绘图角度指定弧的一种好方法。你知道两点相连，你也知道你想要哪个扫掠角。但问题是，这不是一个实际绘制弧线的好办法。它需要转换为一个中心点和要绘制的角度范围。</p>
+<h2 id="端点转换到中心点"><a href="#端点转换到中心点" class="headerlink" title="端点转换到中心点"></a>端点转换到中心点</h2><p>SVG附录“椭圆弧实现注释”中有一个“从端点到中心点的参数化转换”算法。这很有帮助，因为该圆弧标记法有些不常见，很难在别处找到这个算法。</p>
+<p>然而，它也有一些问题。标准中的示例弧实际上错了！它需要修复一下。</p>
+<h3 id="平方根"><a href="#平方根" class="headerlink" title="平方根"></a>平方根</h3><p>首个问题就是F6.5.2(下图公式)中的平方根：</p>
+<p><img src="/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/svg_f-6-5-2.png" alt="svg_f-6-5-2"></p>
+<p>当试图开方一个负数时，会产生一个虚数，它会变成$NaN$。每当输入的半径不够大，两个端点与椭圆链接时，就会出现这种问题。即使原数是一致的，浮点精度误差也会导致这个值略负。这对开方来说是不可忽略的：<code>sqrt(0)</code>是$0$，但<code>sqrt(-0.000001)</code>是$NaN$。</p>
+<p>我对它的修复如下。从规范中我们分离出$\sqrt{pq}$如下所示：</p>
+<script type="math/tex; mode=display">\begin{array}{rll} dq &= r_x^2 y_1'^2 + r_y^2 x_1'^2 \\ \\ pq &= \frac{r_x^2 r_y^2 - dq}{dq} \\ \end{array}</script><p>问题是当所给的$cr &gt; 1$时，$pq &lt; 0$：</p>
+<script type="math/tex; mode=display">\begin{array}{rll} cr &= dq : (r_x^2 r_y^2) \\ \\ cr &= \frac{x_1'^2}{r_x^2} + \frac{y_1'^2}{r_y^2} \end{array}</script><p>考虑到这个系数，很容易地扩大半径。我们将半径乘以$\sqrt{cr}$。这将准确地将$cr$值减少到1（尽管如此，仍需要注意浮点精度问题），导致$pq == 0$。</p>
+<blockquote>
+<p>完全方程在本文的末尾。我将执行<code>sqrt(max(0, pq))</code>；由于精确性，在放大r之后，pq值仍可能为负（实际上在使用中，出现了轻微的负值）。</p>
+</blockquote>
+<h3 id="反余弦"><a href="#反余弦" class="headerlink" title="反余弦"></a>反余弦</h3><p>该算法还包括计算两个矢量之间的夹角。虽然已经有了计算的函数，但我还是决定使用他们的方程来确保$±$部分能够按预期工作。</p>
+<p><img src="/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/svg_f-6-5-4.png" alt="svg_f-6-5-4"></p>
+<p>通常情况下，我们需要担心这里的除法，但这个算法中的预过滤确保我们有非零的长度。</p>
+<p>但它不能保证<code>arccos</code>的参数是有效的。由于浮点精度（又是它），该值可能略大于1，或略小于1。这对于<code>arccos</code>是不可忽视的，这在那些情况下仅返回一个<code>NaN</code>（准确地说结果是一个虚数）。在我的代码中，我添加了一个<code>clamp</code>方法来防止它。</p>
+<p><code>clamp</code>是有效的，因为理论上，方程不能产生范围在-1~1之外的值。这是一个测定过的角度，它有固定的数值范围。我得到的超出范围的值也只是略微超出范围而已。</p>
+<h2 id="从弧到贝塞尔曲线"><a href="#从弧到贝塞尔曲线" class="headerlink" title="从弧到贝塞尔曲线"></a>从弧到贝塞尔曲线</h2><p>我们可以使用这个中心点表示法把圆弧转换为一组贝塞尔曲线。这涉及到很多东西：椭圆的参数方程，它的倒数，以及一些我没有导出的复杂公式。</p>
+<p>值得庆幸的是，L. Maisonobe发表了一篇<a target="_blank" rel="noopener" href="http://www.spaceroots.org/documents/ellipse/elliptical-arc.pdf">Drawing an elliptical arc using polylines, quadratic or cubic Bézier curves（使用折线、二次或三次贝塞尔曲线绘制椭圆弧）</a>的论文。我所要做的就是读它并翻译成代码。</p>
+<h3 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h3><p>首先是获得椭圆的参数方程。椭圆的标准方程如下：</p>
+<script type="math/tex; mode=display">\left(\frac{x}{a}\right)^2 + \left(\frac{y}{b}\right)^2 = 1</script><p>这告诉我们，给定的<code>x, y</code>点是否位于椭圆上。但这对绘制椭圆不是很有用。取而代之的是，我们想要得到一个参数化的形式。下面是一个函数，传递一个值<code>t</code>，这表示椭圆上的一个伪角度，然后返回<code>x, y</code>坐标。这其中包括椭圆半径与X轴的转角（SVG弧必须的）。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">public</span> float2 <span class="title">EllipticArcPoint</span>(<span class="params"> float2 c, float2 r, <span class="built_in">float</span> xAngle, <span class="built_in">float</span> t </span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> float2(</span><br><span class="line">        c.X + r.X * Math.Cos(xAngle) * Math.Cos(t) - r.Y * Math.Sin(xAngle) * Math.Sin(t),</span><br><span class="line">        c.Y + r.X * Math.Sin(xAngle) * Math.Cos(t) + r.Y * Math.Cos(xAngle) * Math.Sin(t));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我提到<code>t</code>是一个伪夹角，它不是一个真正的“角度”。它的角度是基于“如果一个人认为椭圆是一个被拉伸然后旋转的圆”（这是SVG规范中的用词）。</p>
+<p>这个方程式的目的是，我们可以在圆弧定义的起始角和终止角之间迭代，以找到椭圆上的点。第二个函数叫做椭圆弧导数。这两个函数让我们计算一个近似于任何弧线的贝塞尔曲线。下表是我们所需的。</p>
+<p><img src="/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/maisonobe_3-4-1.png" alt="maisonobe_3-4-1"></p>
+<p>其中$\mathit{E}$是椭圆弧点函数，$\mathit{E}’$是椭圆弧导数函数，$\eta_1$和$\eta_2$是我们正在近似计算的弧的起始角和结束角。</p>
+<p>我所要做的就是把角度范围细分成小节以获得良好的近似值。我不太理解这篇论文的误差计算，但是我发现<a target="_blank" rel="noopener" href="https://www.joecridge.me/content/pdf/bezier-arcs.pdf">Joe Cridge的另一篇论文</a>指出$\pi/2$的分割方式在相当高分辨率的设备上有潜在的一个像素误差。因此，我选择了$\pi/4$来保证平滑，即使是在高像素密度的移动设备上。</p>
+<h2 id="一个椭圆"><a href="#一个椭圆" class="headerlink" title="一个椭圆"></a>一个椭圆</h2><p><img src="/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/arc_svg_example.png" alt="arc_svg_example"></p>
+<p>把之前的一切组合在一起，我们就能够从SVG渲染示例了。这是建立在向量API上的，我从上一篇文章开始，对<a target="_blank" rel="noopener" href="https://mortoray.com/2017/02/02/the-smooth-sexy-curves-of-a-bezier-spline/">平滑性感的贝塞尔曲线</a>进行了研究。我的工作后端是苹果核心图形，但这个代码也将运行在安卓Canvas和Windows的System.Drawing上。通过自己计算贝塞尔曲线，我们不需要限制后端绘制弧的能力了。</p>
+<p>本系列还有一篇文章即将面世。我们仍然需要计算这些图形的边界。这是衍生的另一件奇遇。</p>
+<blockquote>
+<p>我在<a target="_blank" rel="noopener" href="https://www.fusetools.com/">Fuse</a>上的作品充满了有趣的代码。关注我的<a target="_blank" rel="noopener" href="http://twitter.com/edaqa">Twitter</a>或者<a target="_blank" rel="noopener" href="https://www.facebook.com/mortoray/">Facebook</a>以获得更多的见解和轶事。如果有什么特别的跨平台工具激起你的好奇心，<a target="_blank" rel="noopener" href="https://mortoray.com/about/?src=fuse">请让我知道</a>。</p>
+</blockquote>
+<h2 id="附录：端点到中心弧转换"><a href="#附录：端点到中心弧转换" class="headerlink" title="附录：端点到中心弧转换"></a>附录：端点到中心弧转换</h2><p>这是Uno代码（和本文发布时间一样）用于从SVG弧转换为中心点表示法。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    执行SVG 1.1 规范中详细说明的点到弧中心点参数的转换。</span></span><br><span class="line"><span class="comment">    F.6.5 从端点到中心点参数化转换</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    @param r 必须是一个ref，以防它需要按SVG规范放大。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">internal</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">EndpointToCenterArcParams</span>(<span class="params"> float2 p1, float2 p2, <span class="keyword">ref</span> float2 r_, <span class="built_in">float</span> xAngle, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="built_in">bool</span> flagA, <span class="built_in">bool</span> flagS, <span class="keyword">out</span> float2 c, <span class="keyword">out</span> float2 angles </span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">double</span> rX = Math.Abs(r_.X);</span><br><span class="line">    <span class="built_in">double</span> rY = Math.Abs(r_.Y);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//(F.6.5.1)</span></span><br><span class="line">    <span class="built_in">double</span> dx2 = (p1.X - p2.X) / <span class="number">2.0</span>;</span><br><span class="line">    <span class="built_in">double</span> dy2 = (p1.Y - p2.Y) / <span class="number">2.0</span>;</span><br><span class="line">    <span class="built_in">double</span> x1p = Math.Cos(xAngle)*dx2 + Math.Sin(xAngle)*dy2;</span><br><span class="line">    <span class="built_in">double</span> y1p = -Math.Sin(xAngle)*dx2 + Math.Cos(xAngle)*dy2;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//(F.6.5.2)</span></span><br><span class="line">    <span class="built_in">double</span> rxs = rX * rX;</span><br><span class="line">    <span class="built_in">double</span> rys = rY * rY;</span><br><span class="line">    <span class="built_in">double</span> x1ps = x1p * x1p;</span><br><span class="line">    <span class="built_in">double</span> y1ps = y1p * y1p;</span><br><span class="line">    <span class="comment">// 当 `dq &gt; rxs * rys` (见下文)，检查半径是否太小 `pq &lt; 0`</span></span><br><span class="line">    <span class="comment">// cr 是比率 (dq : rxs * rys) </span></span><br><span class="line">    <span class="built_in">double</span> cr = x1ps/rxs + y1ps/rys;</span><br><span class="line">    <span class="keyword">if</span> (cr &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">//缩放 rX,rY 同时 cr == 1</span></span><br><span class="line">        <span class="keyword">var</span> s = Math.Sqrt(cr);</span><br><span class="line">        rX = s * rX;</span><br><span class="line">        rY = s * rY;</span><br><span class="line">        rxs = rX * rX;</span><br><span class="line">        rys = rY * rY;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">double</span> dq = (rxs * y1ps + rys * x1ps);</span><br><span class="line">    <span class="built_in">double</span> pq = (rxs*rys - dq) / dq;</span><br><span class="line">    <span class="built_in">double</span> q = Math.Sqrt( Math.Max(<span class="number">0</span>,pq) ); <span class="comment">//使用Max防止浮点精度问题</span></span><br><span class="line">    <span class="keyword">if</span> (flagA == flagS)</span><br><span class="line">        q = -q;</span><br><span class="line">    <span class="built_in">double</span> cxp = q * rX * y1p / rY;</span><br><span class="line">    <span class="built_in">double</span> cyp = - q * rY * x1p / rX;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//(F.6.5.3)</span></span><br><span class="line">    <span class="built_in">double</span> cx = Math.Cos(xAngle)*cxp - Math.Sin(xAngle)*cyp + (p1.X + p2.X)/<span class="number">2</span>;</span><br><span class="line">    <span class="built_in">double</span> cy = Math.Sin(xAngle)*cxp + Math.Cos(xAngle)*cyp + (p1.Y + p2.Y)/<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//(F.6.5.5)</span></span><br><span class="line">    <span class="built_in">double</span> theta = svgAngle( <span class="number">1</span>,<span class="number">0</span>, (x1p-cxp) / rX, (y1p - cyp)/rY );</span><br><span class="line">    <span class="comment">//(F.6.5.6)</span></span><br><span class="line">    <span class="built_in">double</span> delta = svgAngle(</span><br><span class="line">        (x1p - cxp)/rX, (y1p - cyp)/rY,</span><br><span class="line">        (-x1p - cxp)/rX, (-y1p-cyp)/rY);</span><br><span class="line">    delta = Math.Mod(delta, Math.PIf * <span class="number">2</span> );</span><br><span class="line">    <span class="keyword">if</span> (!flagS)</span><br><span class="line">        delta -= <span class="number">2</span> * Math.PIf;</span><br><span class="line"></span><br><span class="line">    r_ = float2((<span class="built_in">float</span>)rX,(<span class="built_in">float</span>)rY);</span><br><span class="line">    c = float2((<span class="built_in">float</span>)cx,(<span class="built_in">float</span>)cy);</span><br><span class="line">    angles = float2((<span class="built_in">float</span>)theta, (<span class="built_in">float</span>)delta);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="built_in">float</span> <span class="title">svgAngle</span>(<span class="params"> <span class="built_in">double</span> ux, <span class="built_in">double</span> uy, <span class="built_in">double</span> vx, <span class="built_in">double</span> vy </span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">var</span> u = float2((<span class="built_in">float</span>)ux, (<span class="built_in">float</span>)uy);</span><br><span class="line">    <span class="keyword">var</span> v = float2((<span class="built_in">float</span>)vx, (<span class="built_in">float</span>)vy);</span><br><span class="line">    <span class="comment">//(F.6.5.4)</span></span><br><span class="line">    <span class="keyword">var</span> dot = Vector.Dot(u,v);</span><br><span class="line">    <span class="keyword">var</span> len = Vector.Length(u) * Vector.Length(v);</span><br><span class="line">    <span class="keyword">var</span> ang = Math.Acos( Math.Clamp(dot / len,<span class="number">-1</span>,<span class="number">1</span>) ); <span class="comment">//浮点精度误差，略微超过值</span></span><br><span class="line">    <span class="keyword">if</span> ( (u.X*v.Y - u.Y*v.X) &lt; <span class="number">0</span>)</span><br><span class="line">        ang = -ang;</span><br><span class="line">    <span class="keyword">return</span> ang;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="附录：JavaScript完整实现"><a href="#附录：JavaScript完整实现" class="headerlink" title="附录：JavaScript完整实现"></a>附录：JavaScript完整实现</h2><blockquote>
+<p>本代码来自：<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/43946153/approximating-svg-elliptical-arc-in-canvas-with-javascript/43952974#43952974">StackOverflow</a></p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> canvas = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;canvas&quot;</span>);</span><br><span class="line"><span class="keyword">var</span> ctx = canvas.<span class="title function_">getContext</span>(<span class="string">&quot;2d&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// M100,350</span></span><br><span class="line"><span class="comment">// a45,35 -30 0,1 50,-25</span></span><br><span class="line"></span><br><span class="line">canvas.<span class="property">width</span> = <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">clientWidth</span>;</span><br><span class="line">canvas.<span class="property">height</span> = <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">clientHeight</span>;</span><br><span class="line">ctx.<span class="property">strokeWidth</span> = <span class="number">2</span>;</span><br><span class="line">ctx.<span class="property">strokeStyle</span> = <span class="string">&quot;#000000&quot;</span>;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">clamp</span>(<span class="params">value, min, max</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title class_">Math</span>.<span class="title function_">min</span>(<span class="title class_">Math</span>.<span class="title function_">max</span>(value, min), max)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">svgAngle</span>(<span class="params">ux, uy, vx, vy </span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> dot = ux*vx + uy*vy;</span><br><span class="line">  <span class="keyword">var</span> len = <span class="title class_">Math</span>.<span class="title function_">sqrt</span>(ux*ux + uy*uy) * <span class="title class_">Math</span>.<span class="title function_">sqrt</span>(vx*vx + vy*vy);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> ang = <span class="title class_">Math</span>.<span class="title function_">acos</span>( <span class="title function_">clamp</span>(dot / len,-<span class="number">1</span>,<span class="number">1</span>) );</span><br><span class="line">  <span class="keyword">if</span> ( (ux*vy - uy*vx) &lt; <span class="number">0</span>)</span><br><span class="line">    ang = -ang;</span><br><span class="line">  <span class="keyword">return</span> ang;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">generateBezierPoints</span>(<span class="params">rx, ry, phi, flagA, flagS, x1, y1, x2, y2</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> rX = <span class="title class_">Math</span>.<span class="title function_">abs</span>(rx);</span><br><span class="line">  <span class="keyword">var</span> rY = <span class="title class_">Math</span>.<span class="title function_">abs</span>(ry);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> dx2 = (x1 - x2)/<span class="number">2</span>;</span><br><span class="line">  <span class="keyword">var</span> dy2 = (y1 - y2)/<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> x1p =  <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi)*dx2 + <span class="title class_">Math</span>.<span class="title function_">sin</span>(phi)*dy2;</span><br><span class="line">  <span class="keyword">var</span> y1p = -<span class="title class_">Math</span>.<span class="title function_">sin</span>(phi)*dx2 + <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi)*dy2;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> rxs = rX * rX;</span><br><span class="line">  <span class="keyword">var</span> rys = rY * rY;</span><br><span class="line">  <span class="keyword">var</span> x1ps = x1p * x1p;</span><br><span class="line">  <span class="keyword">var</span> y1ps = y1p * y1p;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> cr = x1ps/rxs + y1ps/rys;</span><br><span class="line">  <span class="keyword">if</span> (cr &gt; <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> s = <span class="title class_">Math</span>.<span class="title function_">sqrt</span>(cr);</span><br><span class="line">    rX = s * rX;</span><br><span class="line">    rY = s * rY;</span><br><span class="line">    rxs = rX * rX;</span><br><span class="line">    rys = rY * rY;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> dq = (rxs * y1ps + rys * x1ps);</span><br><span class="line">  <span class="keyword">var</span> pq = (rxs*rys - dq) / dq;</span><br><span class="line">  <span class="keyword">var</span> q = <span class="title class_">Math</span>.<span class="title function_">sqrt</span>( <span class="title class_">Math</span>.<span class="title function_">max</span>(<span class="number">0</span>,pq) );</span><br><span class="line">  <span class="keyword">if</span> (flagA === flagS)</span><br><span class="line">    q = -q;</span><br><span class="line">  <span class="keyword">var</span> cxp = q * rX * y1p / rY;</span><br><span class="line">  <span class="keyword">var</span> cyp = - q * rY * x1p / rX;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> cx = <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi)*cxp - <span class="title class_">Math</span>.<span class="title function_">sin</span>(phi)*cyp + (x1 + x2)/<span class="number">2</span>;</span><br><span class="line">  <span class="keyword">var</span> cy = <span class="title class_">Math</span>.<span class="title function_">sin</span>(phi)*cxp + <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi)*cyp + (y1 + y2)/<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> theta = <span class="title function_">svgAngle</span>( <span class="number">1</span>,<span class="number">0</span>, (x1p-cxp) / rX, (y1p - cyp)/rY );</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> delta = <span class="title function_">svgAngle</span>(</span><br><span class="line">    (x1p - cxp)/rX, (y1p - cyp)/rY,</span><br><span class="line">    (-x1p - cxp)/rX, (-y1p-cyp)/rY);</span><br><span class="line"></span><br><span class="line">  delta = delta - <span class="title class_">Math</span>.<span class="property">PI</span> * <span class="number">2</span> * <span class="title class_">Math</span>.<span class="title function_">floor</span>(delta / (<span class="title class_">Math</span>.<span class="property">PI</span> * <span class="number">2</span>));</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!flagS)</span><br><span class="line">    delta -= <span class="number">2</span> * <span class="title class_">Math</span>.<span class="property">PI</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> n1 = theta, n2 = delta;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">// E(n)</span></span><br><span class="line">  <span class="comment">// cx +acosθcosη−bsinθsinη</span></span><br><span class="line">  <span class="comment">// cy +asinθcosη+bcosθsinη</span></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">E</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> enx = cx + rx * <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">cos</span>(n) - ry * <span class="title class_">Math</span>.<span class="title function_">sin</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">sin</span>(n);</span><br><span class="line">    <span class="keyword">var</span> eny = cy + rx * <span class="title class_">Math</span>.<span class="title function_">sin</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">cos</span>(n) + ry * <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">sin</span>(n);</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="attr">x</span>: enx,<span class="attr">y</span>: eny&#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// E&#x27;(n)</span></span><br><span class="line">  <span class="comment">// −acosθsinη−bsinθcosη</span></span><br><span class="line">  <span class="comment">// −asinθsinη+bcosθcosη</span></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">Ed</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> ednx = -<span class="number">1</span> * rx * <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">sin</span>(n) - ry * <span class="title class_">Math</span>.<span class="title function_">sin</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">cos</span>(n);</span><br><span class="line">    <span class="keyword">var</span> edny = -<span class="number">1</span> * rx * <span class="title class_">Math</span>.<span class="title function_">sin</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">sin</span>(n) + ry * <span class="title class_">Math</span>.<span class="title function_">cos</span>(phi) * <span class="title class_">Math</span>.<span class="title function_">cos</span>(n);</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="attr">x</span>: ednx, <span class="attr">y</span>: edny&#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> n = [];</span><br><span class="line">  n.<span class="title function_">push</span>(n1);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> interval = <span class="title class_">Math</span>.<span class="property">PI</span>/<span class="number">4</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(n[n.<span class="property">length</span> - <span class="number">1</span>] + interval &lt; n2)</span><br><span class="line">    n.<span class="title function_">push</span>(n[n.<span class="property">length</span> - <span class="number">1</span>] + interval)</span><br><span class="line"></span><br><span class="line">  n.<span class="title function_">push</span>(n2);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">getCP</span>(<span class="params">n1, n2</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> en1 = <span class="title function_">E</span>(n1);</span><br><span class="line">    <span class="keyword">var</span> en2 = <span class="title function_">E</span>(n2);</span><br><span class="line">    <span class="keyword">var</span> edn1 = <span class="title class_">Ed</span>(n1);</span><br><span class="line">    <span class="keyword">var</span> edn2 = <span class="title class_">Ed</span>(n2);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> alpha = <span class="title class_">Math</span>.<span class="title function_">sin</span>(n2 - n1) * (<span class="title class_">Math</span>.<span class="title function_">sqrt</span>(<span class="number">4</span> + <span class="number">3</span> * <span class="title class_">Math</span>.<span class="title function_">pow</span>(<span class="title class_">Math</span>.<span class="title function_">tan</span>((n2 - n1)/<span class="number">2</span>), <span class="number">2</span>)) - <span class="number">1</span>)/<span class="number">3</span>;</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(en1, en2);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="attr">cpx1</span>: en1.<span class="property">x</span> + alpha*edn1.<span class="property">x</span>,</span><br><span class="line">      <span class="attr">cpy1</span>: en1.<span class="property">y</span> + alpha*edn1.<span class="property">y</span>,</span><br><span class="line">      <span class="attr">cpx2</span>: en2.<span class="property">x</span> - alpha*edn2.<span class="property">x</span>,</span><br><span class="line">      <span class="attr">cpy2</span>: en2.<span class="property">y</span> - alpha*edn2.<span class="property">y</span>,</span><br><span class="line">      <span class="attr">en1</span>: en1,</span><br><span class="line">      <span class="attr">en2</span>: en2</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> cps = []</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; n.<span class="property">length</span> - <span class="number">1</span>; i++) &#123;</span><br><span class="line">    cps.<span class="title function_">push</span>(<span class="title function_">getCP</span>(n[i],n[i+<span class="number">1</span>]));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> cps;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// M100,100</span></span><br><span class="line">ctx.<span class="title function_">moveTo</span>(<span class="number">100</span>,<span class="number">100</span>)</span><br><span class="line"><span class="comment">// a45,35 -30 0,1 50,-25</span></span><br><span class="line"><span class="keyword">var</span> rx = <span class="number">45</span>, ry=<span class="number">35</span>,phi =  -<span class="number">30</span> * <span class="title class_">Math</span>.<span class="property">PI</span> / <span class="number">180</span>, fa = <span class="number">0</span>, fs = <span class="number">1</span>, x = <span class="number">100</span>, y = <span class="number">100</span>, x1 = x + <span class="number">50</span>, y1 = y - <span class="number">25</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> cps = <span class="title function_">generateBezierPoints</span>(rx, ry, phi, fa, fs, x, y, x1, y1);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> limit = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; limit &amp;&amp; i &lt; cps.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    ctx.<span class="title function_">bezierCurveTo</span>(cps[i].<span class="property">cpx1</span>, cps[i].<span class="property">cpy1</span>,</span><br><span class="line">                      cps[i].<span class="property">cpx2</span>, cps[i].<span class="property">cpy2</span>,</span><br><span class="line">                      i &lt; limit - <span class="number">1</span> ? cps[i].<span class="property">en2</span>.<span class="property">x</span> : x1, i &lt; limit - <span class="number">1</span> ? cps[i].<span class="property">en2</span>.<span class="property">y</span> : y1);</span><br><span class="line">  &#125;</span><br><span class="line">ctx.<span class="title function_">stroke</span>()</span><br></pre></td></tr></table></figure>  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Graphics/">Graphics</a><a href="/tags/Math/">Math</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2018/10/28/Rendering-an-SVG-elliptical-arc-as-bezier-curves/" data-title="以贝塞尔曲线渲染一个SVG椭圆弧 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/11/01/Introduction-to-Mixins-Understanding-Mixin-Architecture/" title="介绍Mixin——理解Mixin的结构">
+  <strong>上一篇：</strong><br/>
+  <span>
+  介绍Mixin——理解Mixin的结构</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/13/Introduce-AutoHotkey/"  title="介绍 AutoHotkey">
+ <strong>下一篇：</strong><br/> 
+ <span>介绍 AutoHotkey
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '以贝塞尔曲线渲染一个SVG椭圆弧',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SVG%E5%9C%86%E5%BC%A7%E8%A1%A8%E7%A4%BA%E6%B3%95"><span class="toc-number">1.</span> <span class="toc-text">SVG圆弧表示法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%AF%E7%82%B9%E8%BD%AC%E6%8D%A2%E5%88%B0%E4%B8%AD%E5%BF%83%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">端点转换到中心点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B3%E6%96%B9%E6%A0%B9"><span class="toc-number">2.1.</span> <span class="toc-text">平方根</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E4%BD%99%E5%BC%A6"><span class="toc-number">2.2.</span> <span class="toc-text">反余弦</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E%E5%BC%A7%E5%88%B0%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF"><span class="toc-number">3.</span> <span class="toc-text">从弧到贝塞尔曲线</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0"><span class="toc-number">3.1.</span> <span class="toc-text">参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E6%A4%AD%E5%9C%86"><span class="toc-number">4.</span> <span class="toc-text">一个椭圆</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E7%AB%AF%E7%82%B9%E5%88%B0%E4%B8%AD%E5%BF%83%E5%BC%A7%E8%BD%AC%E6%8D%A2"><span class="toc-number">5.</span> <span class="toc-text">附录：端点到中心弧转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95%EF%BC%9AJavaScript%E5%AE%8C%E6%95%B4%E5%AE%9E%E7%8E%B0"><span class="toc-number">6.</span> <span class="toc-text">附录：JavaScript完整实现</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

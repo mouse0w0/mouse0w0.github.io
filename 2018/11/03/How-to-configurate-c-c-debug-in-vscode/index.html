@@ -1,0 +1,661 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>如何在VSCode中配置C/C++ Debug | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="下载并安装MinGW首先进入MinGW官网，点击Download按钮。  进入下载页面后，点击MinGW Installation Manager (mingw-get)。  进入mingw-get的下载页面后，点击Show按钮，然后分别下载mingw-get-0.6.3-mingw32-pre-20170905-1-bin.tar.xz和mingw-get-0.6.3-mingw32-pre-2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何在VSCode中配置C&#x2F;C++ Debug">
+<meta property="og:url" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="下载并安装MinGW首先进入MinGW官网，点击Download按钮。  进入下载页面后，点击MinGW Installation Manager (mingw-get)。  进入mingw-get的下载页面后，点击Show按钮，然后分别下载mingw-get-0.6.3-mingw32-pre-20170905-1-bin.tar.xz和mingw-get-0.6.3-mingw32-pre-2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Download_1.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Download_2.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Download_3.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Unzip.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_GUI.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Loading.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Loaded.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Mark.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Mark_2.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Installation.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Installation_2.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Installing.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Env_Var.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Cmd.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Install_C.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_1.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_2.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_3.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_4.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_5.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_6.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_HelloWorld.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Run.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Successful.png">
+<meta property="article:published_time" content="2018-11-03T12:34:10.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.940Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="C&#x2F;C++">
+<meta property="article:tag" content="VSCode">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Download_1.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/" title="如何在VSCode中配置C/C++ Debug" itemprop="url">如何在VSCode中配置C/C++ Debug</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2018-11-03T12:34:10.000Z" itemprop="datePublished"> 发表于 2018-11-03</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%B9%B6%E5%AE%89%E8%A3%85MinGW"><span class="toc-number">1.</span> <span class="toc-text">下载并安装MinGW</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEVSCode"><span class="toc-number">2.</span> <span class="toc-text">配置VSCode</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="下载并安装MinGW"><a href="#下载并安装MinGW" class="headerlink" title="下载并安装MinGW"></a>下载并安装MinGW</h2><p>首先进入<a target="_blank" rel="noopener" href="http://www.mingw.org/">MinGW官网</a>，点击Download按钮。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Download_1.png" alt="MinGW Download"></p>
+<p>进入下载页面后，点击<strong>MinGW Installation Manager (mingw-get)</strong>。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Download_2.png" alt="MinGW Download"></p>
+<p>进入mingw-get的下载页面后，点击<strong>Show</strong>按钮，然后分别下载<strong>mingw-get-0.6.3-mingw32-pre-20170905-1-bin.tar.xz</strong>和<strong>mingw-get-0.6.3-mingw32-pre-20170905-1-gui.tar.xz</strong>文件（此过程可能需要挂VPN）。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Download_3.png" alt="MinGW Download"></p>
+<blockquote>
+<p>注意：其实直接用<code>mingw-get-setup.exe</code>安装MinGW也可以，略去了解压步骤。</p>
+</blockquote>
+<p>两个文件下载完成后，将其解压至同一文件夹中。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Unzip.png" alt="MinGW Unzip"></p>
+<p>进入MinGW目录下的<code>libexec\mingw-get</code>文件夹，点击<code>guimain.exe</code>运行。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_GUI.png" alt="MinGW GUI"></p>
+<p>等待MinGW载入完成，这个过程可能很长。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Loading.png" alt="MinGW Loading"></p>
+<p>加载完成后看起来如图所示，其中<strong>Basic Setup</strong>是基本要安装的，<strong>All Packages</strong>则包含了所有可以安装的包，具体各包的作用我们在此不做深入探讨了。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Loaded.png" alt="MinGW Loaded"></p>
+<p><strong>右键单击</strong>想要安装的项目，选择<strong>Mark for Installation</strong>对想要安装的项目进行标记，同时该项目的依赖项也会被标记为需要安装。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Mark.png" alt="MinGW Mark for Installation"></p>
+<p>在<strong>All Packages</strong>中找到<code>mingw32-gcc-g++-bin</code>和<code>mingw32-gdb-bin</code>，标记它们为需要安装的项目，此时它们的依赖项也会被同时标记。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Mark_2.png" alt="MinGW Mark for Installation"></p>
+<p>点击左上角菜单栏的<strong>Installation</strong>，选择<strong>Apply Changes</strong>，在弹出的界面中再点击<strong>Apply</strong>开始安装所选的项目。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Installation.png" alt="MinGW Installation"></p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Installation_2.png" alt="MinGW Installation"></p>
+<p>等待它安装完成，这个过程可能会很长。安装完成后点击<strong>Close</strong>按钮即可。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Installing.png" alt="MinGW Installing"></p>
+<p>在<strong>计算机-系统属性-高级系统设置-环境变量</strong>将<code>MinGW\bin</code>添加到<code>Path</code>中。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Env_Var.png" alt="MinGW Environment Variable"></p>
+<p>打开<code>cmd</code>，输入<code>gcc -v</code>，输出如下信息即表示安装成功。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/MinGW_Cmd.png" alt="MinGW Command Line"></p>
+<h2 id="配置VSCode"><a href="#配置VSCode" class="headerlink" title="配置VSCode"></a>配置VSCode</h2><p>在扩展中搜索C，然后选择<code>C/C++</code>插件进行安装。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Install_C.png" alt="VSCode Install C"></p>
+<p>安装完成后重启，并打开一个文件夹作为C/C++开发的工作空间。</p>
+<p>点击上方菜单栏中的<strong>调试-打开配置</strong>。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_1.png" alt="VSCode Configurate"></p>
+<p>在打开的<code>launch.json</code>文件里面，添加如下内容：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;(gdb) Launch&quot;</span><span class="punctuation">,</span> <span class="comment">// 配置名称，将会在启动配置的下拉菜单中显示</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cppdbg&quot;</span><span class="punctuation">,</span> <span class="comment">// 配置类型，这里只能为cppdbg</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span> <span class="comment">// 请求配置类型，可以为launch（启动）或attach（附加）</span></span><br><span class="line">            <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceRoot&#125;/$&#123;fileBasenameNoExtension&#125;.exe&quot;</span><span class="punctuation">,</span> <span class="comment">// 将要进行调试的程序的路径</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="comment">// 程序调试时传递给程序的命令行参数，一般设为空即可</span></span><br><span class="line">            <span class="attr">&quot;stopAtEntry&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span> <span class="comment">// 设为true时程序将暂停在程序入口处，一般设置为false</span></span><br><span class="line">            <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceRoot&#125;&quot;</span><span class="punctuation">,</span> <span class="comment">// 调试程序时的工作目录，一般为$&#123;workspaceRoot&#125;即代码所在目录</span></span><br><span class="line">            <span class="attr">&quot;environment&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;externalConsole&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span> <span class="comment">// 调试时是否显示外部控制台窗口</span></span><br><span class="line">            <span class="attr">&quot;MIMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;miDebuggerPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;D:\\MinGW\\gdb.exe&quot;</span><span class="punctuation">,</span> <span class="comment">// miDebugger的路径，注意这里要与MinGw的路径对应</span></span><br><span class="line">            <span class="attr">&quot;preLaunchTask&quot;</span><span class="punctuation">:</span> <span class="string">&quot;g++&quot;</span><span class="punctuation">,</span> <span class="comment">// 调试会话开始前执行的任务，一般为编译程序，c++为g++, c为gcc</span></span><br><span class="line">            <span class="attr">&quot;setupCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="punctuation">&#123;</span></span><br><span class="line">                    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Enable pretty-printing for gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-enable-pretty-printing&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="attr">&quot;ignoreFailures&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">                <span class="punctuation">&#125;</span></span><br><span class="line">            <span class="punctuation">]</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure><br>结果如下所示：</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_2.png" alt="VSCode Configurate"></p>
+<p>然后保存<code>launch.json</code>文件。</p>
+<p>然后点击上方菜单栏中的<strong>终端-配置任务…</strong>。然后选择<strong>使用模板创建 tasks.json 文件</strong>，再选择<strong>Others 运行任意外部命令的示例</strong>，这将打开一个<code>tasks.json</code>文件。</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_3.png" alt="VSCode Configurate"></p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_4.png" alt="VSCode Configurate"></p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_5.png" alt="VSCode Configurate"></p>
+<p>在打开的<code>tasks.json</code>文件中写入以下内容：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2.0.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;g++&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;-g&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;$&#123;file&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;-o&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;$&#123;fileBasenameNoExtension&#125;.exe&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;-fexec-charset=GBK&quot;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span> <span class="comment">// 编译命令参数</span></span><br><span class="line">    <span class="attr">&quot;problemMatcher&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;owner&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cpp&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;fileLocation&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="string">&quot;relative&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;$&#123;workspaceRoot&#125;&quot;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;pattern&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;regexp&quot;</span><span class="punctuation">:</span> <span class="string">&quot;^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;file&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;line&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;column&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;severity&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="number">5</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure><br>结果如下所示：</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Configurate_6.png" alt="VSCode Configurate"></p>
+<p>接下来，我们编写一个HelloWorld程序，然后测试它：</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_HelloWorld.png" alt="Hello World"></p>
+<p>点击上方菜单栏的<strong>调试-非调试启动</strong>以开始运行：</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Run.png" alt="VSCode Run"></p>
+<p>最终结果如下所示：</p>
+<p><img src="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/VSCode_Successful.png" alt="VSCode Successful"></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/C-C/">C/C++</a><a href="/tags/VSCode/">VSCode</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2018/11/03/How-to-configurate-c-c-debug-in-vscode/" data-title="如何在VSCode中配置C/C++ Debug | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/11/06/Introduction-to-Mixins-Resolving-Method-Signature-Conflicts/" title="介绍Mixin——解决方法签名冲突">
+  <strong>上一篇：</strong><br/>
+  <span>
+  介绍Mixin——解决方法签名冲突</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/"  title="介绍Mixin——混淆与Mixin">
+ <strong>下一篇：</strong><br/> 
+ <span>介绍Mixin——混淆与Mixin
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '如何在VSCode中配置C/C++ Debug',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E5%B9%B6%E5%AE%89%E8%A3%85MinGW"><span class="toc-number">1.</span> <span class="toc-text">下载并安装MinGW</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEVSCode"><span class="toc-number">2.</span> <span class="toc-text">配置VSCode</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

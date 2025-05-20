@@ -1,0 +1,975 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>编程原则（Programming Principles） | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自Programming Principles。  每个程序员都可以从理解编程原理和模式中受益。这篇概述用于我个人参考，同时我也把它放在这。也许这在设计、讨论或复查中对你有所帮助。但请注意，这还远远不够，你常常需要在相互矛盾的原则之间做出权衡。 本文受The Principles of Good Programming启发。我觉得这份列表已经足够了，但其并不完全符合我个人的想法。此外，我">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编程原则（Programming Principles）">
+<meta property="og:url" content="https://mouse0w0.github.io/2018/10/04/Programming-Principles/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自Programming Principles。  每个程序员都可以从理解编程原理和模式中受益。这篇概述用于我个人参考，同时我也把它放在这。也许这在设计、讨论或复查中对你有所帮助。但请注意，这还远远不够，你常常需要在相互矛盾的原则之间做出权衡。 本文受The Principles of Good Programming启发。我觉得这份列表已经足够了，但其并不完全符合我个人的想法。此外，我">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-10-04T06:26:25.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.964Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Design Pattern">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/10/04/Programming-Principles/" title="编程原则（Programming Principles）" itemprop="url">编程原则（Programming Principles）</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2018-10-04T06:26:25.000Z" itemprop="datePublished"> 发表于 2018-10-04</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">目录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E7%94%A8"><span class="toc-number">1.1.</span> <span class="toc-text">通用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E9%97%B4-%E7%B1%BB"><span class="toc-number">1.2.</span> <span class="toc-text">模块间&#x2F;类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97-%E7%B1%BB"><span class="toc-number">1.3.</span> <span class="toc-text">模块&#x2F;类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KISS"><span class="toc-number">2.</span> <span class="toc-text">KISS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#YAGNI"><span class="toc-number">3.</span> <span class="toc-text">YAGNI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%81%9A%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E4%BA%8B%E6%83%85"><span class="toc-number">4.</span> <span class="toc-text">做最简单的事情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E6%B3%A8%E7%82%B9%E5%88%86%E7%A6%BB"><span class="toc-number">5.</span> <span class="toc-text">关注点分离</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E9%87%8D%E5%A4%8D"><span class="toc-number">6.</span> <span class="toc-text">避免重复</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E7%BB%B4%E6%8A%A4%E8%80%85%E5%86%99%E4%BB%A3%E7%A0%81"><span class="toc-number">7.</span> <span class="toc-text">为维护者写代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E8%BF%87%E6%97%A9%E4%BC%98%E5%8C%96"><span class="toc-number">8.</span> <span class="toc-text">避免过早优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E5%8C%96%E8%80%A6%E5%90%88"><span class="toc-number">9.</span> <span class="toc-text">最小化耦合</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%AA%E7%B1%B3%E7%89%B9%E6%B3%95%E5%88%99"><span class="toc-number">10.</span> <span class="toc-text">迪米特法则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF"><span class="toc-number">11.</span> <span class="toc-text">组合优于继承</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E4%BA%A4%E6%80%A7"><span class="toc-number">12.</span> <span class="toc-text">正交性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A8%B3%E5%81%A5%E6%80%A7%E5%8E%9F%E5%88%99"><span class="toc-number">13.</span> <span class="toc-text">稳健性原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%8F%8D%E8%BD%AC"><span class="toc-number">14.</span> <span class="toc-text">控制反转</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%A4%A7%E5%8C%96%E8%81%9A%E5%90%88"><span class="toc-number">15.</span> <span class="toc-text">最大化聚合</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8C%E6%B0%8F%E4%BB%A3%E6%8D%A2%E5%8E%9F%E5%88%99"><span class="toc-number">16.</span> <span class="toc-text">里氏代换原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E6%94%BE-%E5%B0%81%E9%97%AD%E5%8E%9F%E5%88%99"><span class="toc-number">17.</span> <span class="toc-text">开放&#x2F;封闭原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%8E%9F%E5%88%99"><span class="toc-number">18.</span> <span class="toc-text">单一职责原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E8%97%8F%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">19.</span> <span class="toc-text">隐藏实现细节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A7%91%E9%87%8C%E5%AE%9A%E5%BE%8B"><span class="toc-number">20.</span> <span class="toc-text">科里定律</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%81%E8%A3%85%E7%BB%8F%E5%B8%B8%E4%BF%AE%E6%94%B9%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="toc-number">21.</span> <span class="toc-text">封装经常修改的代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99"><span class="toc-number">22.</span> <span class="toc-text">接口隔离原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%A5%E5%AD%90%E5%86%9B%E5%86%9B%E8%A7%84"><span class="toc-number">23.</span> <span class="toc-text">童子军军规</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E6%9F%A5%E8%AF%A2%E5%88%86%E7%A6%BB"><span class="toc-number">24.</span> <span class="toc-text">命令查询分离</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p><strong>本文翻译自<a target="_blank" rel="noopener" href="http://java-design-patterns.com/principles/">Programming Principles</a>。</strong></p>
+</blockquote>
+<p>每个程序员都可以从理解编程原理和模式中受益。这篇概述用于我个人参考，同时我也把它放在这。也许这在设计、讨论或复查中对你有所帮助。但请注意，这还远远不够，你常常需要在相互矛盾的原则之间做出权衡。</p>
+<p>本文受<a target="_blank" rel="noopener" href="http://www.artima.com/weblogs/viewpost.jsp?thread=331531">The Principles of Good Programming</a>启发。我觉得这份列表已经足够了，但其并不完全符合我个人的想法。此外，我还需要更多的论证、细节以及其他资料的链接。如果您有任何反馈或者改进的建议，<a target="_blank" rel="noopener" href="https://github.com/webpro/programming-principles/issues">请让我知道</a>。</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><h3 id="通用"><a href="#通用" class="headerlink" title="通用"></a>通用</h3><ul>
+<li><a href="#KISS">KISS (Keep It Simple Stupid)</a></li>
+<li><a href="#YAGNI">YAGNI</a></li>
+<li><a href="#做最简单的事情">做最简单的事情</a></li>
+<li><a href="#关注点分离">关注点分离</a></li>
+<li><a href="#避免重复">避免重复</a></li>
+<li><a href="#为维护者写代码">为维护者写代码</a></li>
+<li><a href="#避免过早优化">避免过早优化</a></li>
+<li><a href="#童子军军规">童子军军规</a></li>
+</ul>
+<h3 id="模块间-类"><a href="#模块间-类" class="headerlink" title="模块间/类"></a>模块间/类</h3><ul>
+<li><a href="#最小化耦合">最小化耦合</a></li>
+<li><a href="#迪米特法则">迪米特法则</a></li>
+<li><a href="#组合优于继承">组合优于继承</a></li>
+<li><a href="#正交性">正交性</a></li>
+<li><a href="#稳健性原则">稳健性原则</a></li>
+<li><a href="#控制反转">控制反转</a></li>
+</ul>
+<h3 id="模块-类"><a href="#模块-类" class="headerlink" title="模块/类"></a>模块/类</h3><ul>
+<li><a href="#最大化聚合">最大化聚合</a></li>
+<li><a href="#里氏代换原则">里氏代换原则</a></li>
+<li><a href="#开放/封闭原则">开放/封闭原则</a></li>
+<li><a href="#单一职责原则">单一职责原则</a></li>
+<li><a href="#隐藏实现细节">隐藏实现细节</a></li>
+<li><a href="#科里定律">科里定律</a></li>
+<li><a href="#封装经常修改的代码">封装经常修改的代码</a></li>
+<li><a href="#接口隔离原则">接口隔离原则</a></li>
+<li><a href="#命令查询分离">命令查询分离</a></li>
+</ul>
+<h2 id="KISS"><a href="#KISS" class="headerlink" title="KISS"></a>KISS</h2><p>大多数系统如果保持简单而不是复杂，效果最好。</p>
+<p>为什么</p>
+<ul>
+<li>更少的代码可以花更少的时间去写，Bug更少，并且更容易修改。</li>
+<li>简单是复杂的最高境界。</li>
+<li>完美境地，非冗杂，而不遗。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/KISS_principle">KISS principle</a></li>
+<li><a target="_blank" rel="noopener" href="http://principles-wiki.net/principles:keep_it_simple_stupid">Keep It Simple Stupid (KISS)</a></li>
+</ul>
+<h2 id="YAGNI"><a href="#YAGNI" class="headerlink" title="YAGNI"></a>YAGNI</h2><p>YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情。</p>
+<p>为什么</p>
+<ul>
+<li>去做任何仅在未来需要的特性，意味着从当前迭代需要完成的功能中分出精力。</li>
+<li>它使代码膨胀；软件变得更大和更复杂。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>在当你真正需要它们的时候，才实现它们，而不是在你预见到你需要它们的时候。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://c2.com/xp/YouArentGonnaNeedIt.html">You Arent Gonna Need It</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.xprogramming.com/Practices/PracNotNeed.html">You’re NOT gonna need it!</a></li>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/You_ain&#39;t_gonna_need_it">You ain’t gonna need it</a></li>
+</ul>
+<h2 id="做最简单的事情"><a href="#做最简单的事情" class="headerlink" title="做最简单的事情"></a>做最简单的事情</h2><p>为什么</p>
+<ul>
+<li>仅有当我们只解决问题本身时，才能最大化地解决实际问题。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>扪心自问：“最简单的事情是什么？”。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://c2.com/xp/DoTheSimplestThingThatCouldPossiblyWork.html">Do The Simplest Thing That Could Possibly Work</a></li>
+</ul>
+<h2 id="关注点分离"><a href="#关注点分离" class="headerlink" title="关注点分离"></a>关注点分离</h2><p>关注点分离是一种将计算机程序分离成不同部分的设计原则，以便每个部分专注于单个关注点。例如，应用程序的业务逻辑是一个关注点而用户界面是另一个关注点。更改用户界面不应要求更改业务逻辑，反之亦然。</p>
+<p>引用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Edsger_W._Dijkstra">Edsger W. Dijkstra</a> (1974)所说：</p>
+<blockquote>
+<p>我有时将其称为“关注点分离”，即使这不可能完全做到，但它也是我所知道的唯一有效的思维整理技巧。这就是我所说的“将注意力集中在某个方面”的意思：这并不意味着忽略其他方面，只是对于从某一方面的视角公正地来看，另一方面是不相关的事情。</p>
+</blockquote>
+<p>为什么</p>
+<ul>
+<li>简化软件应用程序的开发与维护。</li>
+<li>当关注点很好地分开时，各个部分可以被重用，并且可以独立开发和更新。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>将程序功能分成联系部分尽可能少的模块。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Separation_of_concerns">Separation of Concerns</a></li>
+</ul>
+<h2 id="避免重复"><a href="#避免重复" class="headerlink" title="避免重复"></a>避免重复</h2><p>在一个系统内，每一项认识都必须有一个单一的、明确的、权威的表示。</p>
+<p>程序中的每一项重要功能都应该只在源代码中的一个地方实现。相似的函数由不同的代码块执行的情况下，抽象出不同的部分，将它们组合为一个函数通常是有益的。</p>
+<p>为什么</p>
+<ul>
+<li>重复（无意或有意的重复）会造成噩梦般的维护，保养不良和逻辑矛盾。</li>
+<li>对系统中任意单个元素的修改不需要改变其他逻辑上无关的元素。</li>
+<li>此外，相关逻辑的元素的变化都是可预测的和均匀的，因此是保持同步的。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>只在一个处编写业务规则、长表达式、if语句、数学公式、元数据等。</li>
+<li>确定系统中使用的每一项认识的唯一来源，然后使用该源来生成该认识的适用实例（代码、文档、测试等）。</li>
+<li>使用<a herf="http://en.wikipedia.org/wiki/Rule_of_three_(computer_programming)">三法则（Rule of three）</a>。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://c2.com/cgi/wiki?DontRepeatYourself">Dont Repeat Yourself</a></li>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Don&#39;t_repeat_yourself">Don’t repeat yourself</a></li>
+<li><a target="_blank" rel="noopener" href="http://programmer.97things.oreilly.com/wiki/index.php/Don&#39;t_Repeat_Yourself">Don’t Repeat Yourself</a></li>
+</ul>
+<p>相似资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Abstraction_principle_%28computer_programming%29">Abstraction principle</a></li>
+<li><a target="_blank" rel="noopener" href="http://c2.com/cgi/wiki?OnceAndOnlyOnce">Once And Only Once</a> is a subset of DRY (also referred to as the goal of refactoring).</li>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Single_Source_of_Truth">Single Source of Truth</a></li>
+<li>A violation of DRY is <a target="_blank" rel="noopener" href="http://thedailywtf.com/articles/The-WET-Cart">WET</a> (Write Everything Twice)</li>
+</ul>
+<h2 id="为维护者写代码"><a href="#为维护者写代码" class="headerlink" title="为维护者写代码"></a>为维护者写代码</h2><p>为什么</p>
+<ul>
+<li>到目前为止，维护是任何项目中最昂贵的阶段。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li><em>成为</em>维护者。</li>
+<li>不论何时编写代码，要想着最后维护代码的人是一个知道自己住在哪里的暴力精神病人。</li>
+<li>如果某个入门的人掌握了代码，他们就会从阅读和学习代码中获得乐趣，以这样的想法去编写代码和注释。</li>
+<li><a target="_blank" rel="noopener" href="http://www.sensible.com/dmmt.html">别让我想（Don’t make me think）</a>.</li>
+<li>使用<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Principle_of_least_astonishment">最少惊讶原则（Principle of Least Astonishment）</a>。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://c2.com/cgi/wiki?CodeForTheMaintainer">Code For The Maintainer</a></li>
+<li><a target="_blank" rel="noopener" href="http://blog.codinghorror.com/the-noble-art-of-maintenance-programming/">The Noble Art of Maintenance Programming</a></li>
+</ul>
+<h2 id="避免过早优化"><a href="#避免过早优化" class="headerlink" title="避免过早优化"></a>避免过早优化</h2><p>引用<a target="_blank" rel="noopener" href="http://en.wikiquote.org/wiki/Donald_Knuth">Donald Knuth</a>所说：</p>
+<blockquote>
+<p>程序员浪费大量的时间来思考或担心程序的非关键部分的速度，而考虑尝试这些优化实际上在调试和维护时有很强的负面影响。比如说在97%的开发时间，我们应该忽略低效率：过早的优化是万恶之源。然而，我们不应该在关键的3%中放弃我们的机会。</p>
+</blockquote>
+<p>当然，需要理解什么是“过早”什么不是“过早”。</p>
+<p>为什么</p>
+<ul>
+<li>瓶颈在哪是未知的。</li>
+<li>优化后，阅读和维护可能会更困难。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://c2.com/cgi/wiki?MakeItWorkMakeItRightMakeItFast">使它运作，使它正确，使它更快（Make It Work Make It Right Make It Fast）</a></li>
+<li>不要在你不需要的时候优化，只有在你发现一个瓶颈之后才能优化它。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Program_optimization">Program optimization</a></li>
+<li><a target="_blank" rel="noopener" href="http://c2.com/cgi/wiki?PrematureOptimization">Premature Optimization</a></li>
+</ul>
+<h2 id="最小化耦合"><a href="#最小化耦合" class="headerlink" title="最小化耦合"></a>最小化耦合</h2><p>模块/组件之间的耦合是它们互相依赖的程度，较低的耦合更好。换句话说，耦合是代码单元“B”在未知的代码单元“A”更改后“被破坏”的几率。</p>
+<p>为什么</p>
+<ul>
+<li>一个模块的更改通常会导致其他模块的更改，产生涟漪效益。</li>
+<li>由于模块间的依赖性增加，模块装配可能需要更多的工作和/或时间。</li>
+<li>特定的模块可能难以重用和/或测试，因为必须包含相关模块。</li>
+<li>开发人员可能害怕更改代码，因为他们不确定什么会收到影响。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>消除，最小化和降低必要关联的复杂性。</li>
+<li>通过隐藏实现细节，减少耦合。</li>
+<li>使用<a href="#迪米特法则">迪米特法则</a>。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Coupling_%28computer_programming%29">Coupling</a></li>
+<li><a target="_blank" rel="noopener" href="http://c2.com/cgi/wiki?CouplingAndCohesion">Coupling And Cohesion</a></li>
+</ul>
+<h2 id="迪米特法则"><a href="#迪米特法则" class="headerlink" title="迪米特法则"></a>迪米特法则</h2><p>不要和陌生人说话。</p>
+<p>为什么</p>
+<ul>
+<li>这通常会导致更紧密的耦合。</li>
+<li>可能会暴露过多的实现细节。</li>
+</ul>
+<p>怎么做</p>
+<p>对象的方法只能调用以下方法：</p>
+<ol>
+<li>对象自身的方法。</li>
+<li>方法参数中的方法。</li>
+<li>方法中创建的任何对象的方法。</li>
+<li>对象的任何直接属性或字段的方法。</li>
+</ol>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Law_of_Demeter">Law of Demeter</a></li>
+<li><a target="_blank" rel="noopener" href="http://haacked.com/archive/2009/07/14/law-of-demeter-dot-counting.aspx/">The Law of Demeter Is Not A Dot Counting Exercise</a></li>
+</ul>
+<h2 id="组合优于继承"><a href="#组合优于继承" class="headerlink" title="组合优于继承"></a>组合优于继承</h2><p>为什么</p>
+<ul>
+<li>类之间的耦合减少。</li>
+<li>使用继承，子类很容易做出假设，并破坏里氏代换原则（LSP）。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>测试LSP（可替换性）以决定何时继承。</li>
+<li>当存在“有”（或“使用”）的关系时使用组合，当存在“是”的关系时使用继承。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://blogs.msdn.com/b/thalesc/archive/2012/09/05/favor-composition-over-inheritance.aspx">Favor Composition Over Inheritance</a></li>
+</ul>
+<h2 id="正交性"><a href="#正交性" class="headerlink" title="正交性"></a>正交性</h2><blockquote>
+<p>正交性的基本概念是，概念上不相关的东西在系统中不应该相关。</p>
+</blockquote>
+<p>来源：<a target="_blank" rel="noopener" href="http://www.artima.com/intv/dry3.html">Be Orthogonal</a></p>
+<blockquote>
+<p>它越简单，设计越正交，异常就越少。这使得用编程语言学习、读写程序变得更容易。正交特征的含义是独立于环境；关键参数是对称性与一致性。</p>
+</blockquote>
+<p>来源：<a herf="http://en.wikipedia.org/wiki/Orthogonality_(programming)">Orthogonality</a></p>
+<h2 id="稳健性原则"><a href="#稳健性原则" class="headerlink" title="稳健性原则"></a>稳健性原则</h2><blockquote>
+<p>坚持保守自己的作为，自由接受他人的作为。</p>
+</blockquote>
+<p>合作的服务依赖于彼此的接口。通常，接口需要提升，导致另一端接收未指定的数据。如果接收到的数据没有严格遵守规范，那么简单的实现将仅拒绝合作。更复杂的实现却可以忽略它无法识别的数据。</p>
+<p>为什么</p>
+<ul>
+<li>为了能够提高服务，你需要确保提供者可以进行更改以支持新的需求，同时对现有客户端造成最小的破坏。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>向其他机器（或同一机器上的其他程序）发送指令或数据的代码应该完全符合规范，但接受输入的代码应接受不一致的输入，只要其意义明确。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Robustness_principle">Robustness Principle in Wikipedia</a></li>
+<li><a target="_blank" rel="noopener" href="http://martinfowler.com/bliki/TolerantReader.html">Tolerant Reader</a></li>
+</ul>
+<h2 id="控制反转"><a href="#控制反转" class="headerlink" title="控制反转"></a>控制反转</h2><p>控制反转又被称为好莱坞原则，“不要打电话给我们，我们会打电话给你”。它是一种设计原则，计算机程序的自定义编写部分从通用框架接收控制流。控制反转具有强烈的含义，即可重用代码和特定于问题的代码是独立开发的，即使它们在应用程序中一同工作。</p>
+<p>为什么</p>
+<ul>
+<li>控制反转用于提高程序的模块性，使其具有可扩展性。</li>
+<li>将任务的执行与实现分离。</li>
+<li>将模块集中在其设计任务上。</li>
+<li>使模块不受关于其他系统如何执行其任务的假设约束，而是依赖于约定。</li>
+<li>以防止模块更换时出现副作用。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>使用工厂模式</li>
+<li>使用服务定位器模式</li>
+<li>使用依赖注入</li>
+<li>使用依赖查找</li>
+<li>使用模板方法模式</li>
+<li>使用策略模式</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Inversion_of_control">Inversion of Control in Wikipedia</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.martinfowler.com/articles/injection.html">Inversion of Control Containers and the Dependency Injection pattern</a></li>
+</ul>
+<h2 id="最大化聚合"><a href="#最大化聚合" class="headerlink" title="最大化聚合"></a>最大化聚合</h2><p>单个模块/组件的聚合性是其职责形成有意义的单元的程度，越高的聚合性越好。</p>
+<p>为什么</p>
+<ul>
+<li>增加了理解模块的难度。</li>
+<li>增加了维护系统的难度，因为域中逻辑的更改会影响多个模块，并且一个模块的更改需要相关模块的更改。</li>
+<li>由于大多数应用程序不需要模块提供的随机操作集，因此重用模块的难度增加。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>与组相关的功能共享一项职责（例如在一个类中）。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a herf="http://en.wikipedia.org/wiki/Cohesion_(computer_science)">Cohesion</a></li>
+<li><a target="_blank" rel="noopener" href="http://c2.com/cgi/wiki?CouplingAndCohesion">Coupling And Cohesion</a></li>
+</ul>
+<h2 id="里氏代换原则"><a href="#里氏代换原则" class="headerlink" title="里氏代换原则"></a>里氏代换原则</h2><p>里氏代换原则（LSP）完全是关于对象的预期行为：</p>
+<blockquote>
+<p>程序中的对象应该可以替换为其子类型的实例，而不会改变该程序的正确性。</p>
+</blockquote>
+<p>相关资源</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Liskov_substitution_principle">Liskov substitution principle</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.blackwasp.co.uk/lsp.aspx">Liskov Substitution Principle</a></li>
+</ul>
+<h2 id="开放-封闭原则"><a href="#开放-封闭原则" class="headerlink" title="开放/封闭原则"></a>开放/封闭原则</h2><p>软件实体（例如类）应对扩展是开放的，但对修改是封闭的。也就是说，这样的实体可以允许在不改变其源代码的情况下修改其行为。</p>
+<p>为什么</p>
+<ul>
+<li>通过最小化对现有代码的修改来提高可维护性和稳定性</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>编写可以扩展的类（而不是可以修改的类）</li>
+<li>只暴露需要更换的活动部分，隐藏其他所有部分。</li>
+</ul>
+<p>相关资源</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Open/closed_principle">Open Closed Principle</a></li>
+<li><a target="_blank" rel="noopener" href="https://8thlight.com/blog/uncle-bob/2014/05/12/TheOpenClosedPrinciple.html">The Open Closed Principle</a></li>
+</ul>
+<h2 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h2><p>一个类不应该有多个修改的原因。</p>
+<p>长话版：每个类都应该有一个单独的职责，并且该职责应该完全由该类封装。职责可以定义为修改的原因，一次类或模块应该有且仅有一个修改的原因。</p>
+<p>为什么</p>
+<ul>
+<li>可维护性：仅有一个模块或类中需要修改。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>使用<a href="#科里定律">科里定律</a>。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Single_responsibility_principle">Single responsibility principle</a></li>
+</ul>
+<h2 id="隐藏实现细节"><a href="#隐藏实现细节" class="headerlink" title="隐藏实现细节"></a>隐藏实现细节</h2><p>软件模块通过提供接口来隐藏信息（即实现细节），而不泄露任何不必要的信息。</p>
+<p>为什么</p>
+<ul>
+<li>当实现更改时，客户端使用的接口不必更改。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>最小化类和成员的可访问性。</li>
+<li>不要公开成员数据。</li>
+<li>避免将私有实现细节放入类的接口中。</li>
+<li>减少耦合以隐藏更多实现细节。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Information_hiding">Information hiding</a></li>
+</ul>
+<h2 id="科里定律"><a href="#科里定律" class="headerlink" title="科里定律"></a>科里定律</h2><p>科里定律是关于为任何特定代码选择一个明确定义的目标：仅做一件事。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://blog.codinghorror.com/curlys-law-do-one-thing/">Curly’s Law: Do One Thing</a></li>
+<li><a target="_blank" rel="noopener" href="http://fortyplustwo.com/2008/09/06/the-rule-of-one-or-curlys-law/">The Rule of One or Curly’s Law</a></li>
+</ul>
+<h2 id="封装经常修改的代码"><a href="#封装经常修改的代码" class="headerlink" title="封装经常修改的代码"></a>封装经常修改的代码</h2><p>一个好的设计可以辨别出最有可能改变的热点，并将它们封装在API之后。当预期的修改发生时，修改会保持在局部。</p>
+<p>为什么</p>
+<ul>
+<li>在发生更改时，最小化所需的修改。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>封装API背后不同的概念。</li>
+<li>将可能不同的概念分到各自的模块。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://principles-wiki.net/principles:encapsulate_the_concept_that_varies">Encapsulate the Concept that Varies</a></li>
+<li><a target="_blank" rel="noopener" href="http://blogs.msdn.com/b/steverowe/archive/2007/12/26/encapsulate-what-varies.aspx">Encapsulate What Varies</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Information_hiding">Information Hiding</a></li>
+</ul>
+<h2 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h2><p>将臃肿的接口减少到多个更小更具体的客户端特定接口中。接口应该比实现它的代码更依赖于调用它的代码。</p>
+<p>为什么</p>
+<ul>
+<li>如果类实现了不需要的方法，则调用方需要了解该类的方法实现。例如，如果一个类实现了一个方法，但只是简单的抛出异常，那么调用方将需要知道实际上不应该调用这个方法。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>避免臃肿的接口。类不应该实现任何违反<a href="#单一职责原则">单一职责原则</a>的方法。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Interface_segregation_principle">Interface segregation principle</a></li>
+</ul>
+<h2 id="童子军军规"><a href="#童子军军规" class="headerlink" title="童子军军规"></a>童子军军规</h2><p>美国童子军有一条简单的军规，我们可以使用到我们的职业中：“离开营地时比你到达时更干净”。根据童子军军规，我们应该至终保持代码比我们看到时更干净。</p>
+<p>为什么</p>
+<ul>
+<li>当对现有代码库进行更改时，代码质量往往会降低，从而积累技术债务。根据童子军军规，我们应该注意每一个提交（Commit）的质量。无论规模有多小，技术债务都会受到不断重构的抵制。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>每次提交都要确保它不会降低代码库的质量。</li>
+<li>任何时候，如果有人看到一些代码不够清楚，他们就应该抓住机会在那里修复它。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://martinfowler.com/bliki/OpportunisticRefactoring.html">Opportunistic Refactoring</a></li>
+</ul>
+<h2 id="命令查询分离"><a href="#命令查询分离" class="headerlink" title="命令查询分离"></a>命令查询分离</h2><p>命令查询分离原则规定，每个方法都应该是执行操作的命令，或者是向调用者返回数据但不能同时做两件事的查询。提问不应该改变答案。  </p>
+<p>利用这个原则，程序员可以更加自信地进行编码。查询方法可以在任何地方以任何顺序使用，因为它们不会改变状态。而使用命令，你必须更加小心。</p>
+<p>为什么</p>
+<ul>
+<li>通过将方法清晰地分为查询和命令，程序员可以在不了解每个方法的实现细节的情况下，更加自信地编码。</li>
+</ul>
+<p>怎么做</p>
+<ul>
+<li>将每个方法实现为查询或命令。</li>
+<li>对方法名使用命名约定，该方法名表示该方法是查询还是命令。</li>
+</ul>
+<p>相关资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Command%E2%80%93query_separation">Command Query Separation in Wikipedia</a></li>
+<li><a target="_blank" rel="noopener" href="http://martinfowler.com/bliki/CommandQuerySeparation.html">Command Query Separation by Martin Fowler</a></li>
+</ul>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Design-Pattern/">Design Pattern</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2018/10/04/Programming-Principles/" data-title="编程原则（Programming Principles） | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/10/10/Using-VSCode-extension-RESTClient-to-send-HTTP-requests/" title="使用VSCode扩展REST Client发送HTTP请求">
+  <strong>上一篇：</strong><br/>
+  <span>
+  使用VSCode扩展REST Client发送HTTP请求</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/10/04/OpenGL-render-2D-graphics-in-a-region/"  title="OpenGL在一定区域中渲染2D图形">
+ <strong>下一篇：</strong><br/> 
+ <span>OpenGL在一定区域中渲染2D图形
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '编程原则（Programming Principles）',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">目录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E7%94%A8"><span class="toc-number">1.1.</span> <span class="toc-text">通用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E9%97%B4-%E7%B1%BB"><span class="toc-number">1.2.</span> <span class="toc-text">模块间&#x2F;类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97-%E7%B1%BB"><span class="toc-number">1.3.</span> <span class="toc-text">模块&#x2F;类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#KISS"><span class="toc-number">2.</span> <span class="toc-text">KISS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#YAGNI"><span class="toc-number">3.</span> <span class="toc-text">YAGNI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%81%9A%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E4%BA%8B%E6%83%85"><span class="toc-number">4.</span> <span class="toc-text">做最简单的事情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E6%B3%A8%E7%82%B9%E5%88%86%E7%A6%BB"><span class="toc-number">5.</span> <span class="toc-text">关注点分离</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E9%87%8D%E5%A4%8D"><span class="toc-number">6.</span> <span class="toc-text">避免重复</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E7%BB%B4%E6%8A%A4%E8%80%85%E5%86%99%E4%BB%A3%E7%A0%81"><span class="toc-number">7.</span> <span class="toc-text">为维护者写代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E8%BF%87%E6%97%A9%E4%BC%98%E5%8C%96"><span class="toc-number">8.</span> <span class="toc-text">避免过早优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E5%8C%96%E8%80%A6%E5%90%88"><span class="toc-number">9.</span> <span class="toc-text">最小化耦合</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%AA%E7%B1%B3%E7%89%B9%E6%B3%95%E5%88%99"><span class="toc-number">10.</span> <span class="toc-text">迪米特法则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E4%BC%98%E4%BA%8E%E7%BB%A7%E6%89%BF"><span class="toc-number">11.</span> <span class="toc-text">组合优于继承</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E4%BA%A4%E6%80%A7"><span class="toc-number">12.</span> <span class="toc-text">正交性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A8%B3%E5%81%A5%E6%80%A7%E5%8E%9F%E5%88%99"><span class="toc-number">13.</span> <span class="toc-text">稳健性原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%8F%8D%E8%BD%AC"><span class="toc-number">14.</span> <span class="toc-text">控制反转</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%A4%A7%E5%8C%96%E8%81%9A%E5%90%88"><span class="toc-number">15.</span> <span class="toc-text">最大化聚合</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8C%E6%B0%8F%E4%BB%A3%E6%8D%A2%E5%8E%9F%E5%88%99"><span class="toc-number">16.</span> <span class="toc-text">里氏代换原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E6%94%BE-%E5%B0%81%E9%97%AD%E5%8E%9F%E5%88%99"><span class="toc-number">17.</span> <span class="toc-text">开放&#x2F;封闭原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%8E%9F%E5%88%99"><span class="toc-number">18.</span> <span class="toc-text">单一职责原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%90%E8%97%8F%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">19.</span> <span class="toc-text">隐藏实现细节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A7%91%E9%87%8C%E5%AE%9A%E5%BE%8B"><span class="toc-number">20.</span> <span class="toc-text">科里定律</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%81%E8%A3%85%E7%BB%8F%E5%B8%B8%E4%BF%AE%E6%94%B9%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="toc-number">21.</span> <span class="toc-text">封装经常修改的代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99"><span class="toc-number">22.</span> <span class="toc-text">接口隔离原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%A5%E5%AD%90%E5%86%9B%E5%86%9B%E8%A7%84"><span class="toc-number">23.</span> <span class="toc-text">童子军军规</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E6%9F%A5%E8%AF%A2%E5%88%86%E7%A6%BB"><span class="toc-number">24.</span> <span class="toc-text">命令查询分离</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

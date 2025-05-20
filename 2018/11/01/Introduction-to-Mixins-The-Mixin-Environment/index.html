@@ -1,0 +1,685 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>介绍Mixin——Mixin环境 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：Introduction to Mixins The Mixin Environment  现在我们已经了解了Mixin的基本特性（提示：如果你还没有读过，请返回并先阅读它！），让我们快点绕开它，来了解如何使用我们的新创建的Mixin进入游戏环境。 Mixin是如何工作的正如我在上一篇文章中所提到的，通常情况下，最好记住Mixin不是严格意义上的类，也不是在运行时加载的类，而是使用A">
+<meta property="og:type" content="article">
+<meta property="og:title" content="介绍Mixin——Mixin环境">
+<meta property="og:url" content="https://mouse0w0.github.io/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：Introduction to Mixins The Mixin Environment  现在我们已经了解了Mixin的基本特性（提示：如果你还没有读过，请返回并先阅读它！），让我们快点绕开它，来了解如何使用我们的新创建的Mixin进入游戏环境。 Mixin是如何工作的正如我在上一篇文章中所提到的，通常情况下，最好记住Mixin不是严格意义上的类，也不是在运行时加载的类，而是使用A">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_transformer_chain.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_env_0.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_env_1.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_env_2.png">
+<meta property="article:published_time" content="2018-11-01T09:18:21.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.958Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_transformer_chain.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/" title="介绍Mixin——Mixin环境" itemprop="url">介绍Mixin——Mixin环境</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2018-11-01T09:18:21.000Z" itemprop="datePublished"> 发表于 2018-11-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Mixin%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84"><span class="toc-number">1.</span> <span class="toc-text">Mixin是如何工作的</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mixin%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number"></span> <span class="toc-text">Mixin配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%B8%E6%88%8F%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%B8%8E%E4%BD%A0"><span class="toc-number"></span> <span class="toc-text">游戏生命周期与你</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%99%E5%8F%AA%E6%98%AF%E6%88%91%E7%BB%8F%E5%8E%86%E7%9A%84%E4%B8%80%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="toc-number">1.</span> <span class="toc-text">这只是我经历的一个阶段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">关于环境</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%83%E8%B7%83%E6%AC%B2%E8%AF%95"><span class="toc-number">3.</span> <span class="toc-text">跃跃欲试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8FML-CoreMod%E5%BC%95%E5%AF%BCMixin"><span class="toc-number"></span> <span class="toc-text">使用FML CoreMod引导Mixin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E7%AC%AC%E4%B8%80%E7%B1%BBTweaker%E5%BC%95%E5%AF%BCMixin"><span class="toc-number"></span> <span class="toc-text">通过第一类Tweaker引导Mixin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8LiteLoader%E5%BC%95%E5%AF%BCMixin"><span class="toc-number"></span> <span class="toc-text">使用LiteLoader引导Mixin</span></a>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment">Introduction to Mixins The Mixin Environment</a></p>
+</blockquote>
+<p>现在我们已经了解了Mixin的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture/">基本特性</a>（提示：如果你还没有读过，请返回并先阅读它！），让我们快点绕开它，来了解如何使用我们的新创建的Mixin进入游戏环境。</p>
+<h4 id="Mixin是如何工作的"><a href="#Mixin是如何工作的" class="headerlink" title="Mixin是如何工作的"></a>Mixin是如何工作的</h4><p>正如我在上一篇<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture/">文章</a>中所提到的，通常情况下，最好记住<strong>Mixin不是严格意义上的类</strong>，也不是在运行时加载的类，而是使用<a target="_blank" rel="noopener" href="http://asm.ow2.org/">ASM</a>的Tree API解析的原始字节码。这个API生成一个基于节点的底层字节码视图，然后可以通过Mixin转换器（Transformer）<a href="#note1"><sup>1</sup></a>合并到目标类中。</p>
+<p>Mixin本身是独立于常规类，通过转换器链（Transformer Chain）<a href="#note2"><sup>2</sup></a>传输的，这是为了允许重映射转换器（Remapping Transformer）<a href="#note3"><sup>3</sup></a>在Mixin与目标类组合之前完成它们的工作。因此，Mixin转换器在任何重映射转换器的<em>下游</em>是很重要的，这是通过在转换器链中插入代理转换器（Proxy Transformer）来内部处理的。</p>
+<p><img src="/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_transformer_chain.png" alt="Mixin转换器链"></p>
+<p>Mixin需要在类开始载入之前进行处理，以便识别它们的<strong>目标类</strong>，进行<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins"><strong>层次结构验证</strong></a>，并为方法和字段解析任何需要更新的<strong>静态绑定</strong>。你希望使用的Mixin应该在配置文件中指定，你的CoreMod、Tweaker、Jar Metadata或litemod.json将指定模组Jar内的资源位置。</p>
+<blockquote>
+<p>配置路径被作为<em>资源</em>加载，因此可以放在Jar任何包中。重要的是，资源路径必须是相对的，<strong>不要</strong>在文件路径上预先准备一个主斜杠。</p>
+<p>例如，如果您的配置文件在包<code>com.somepackage</code>中，则应该将配置文件的路径指定为<code>com/somepackage/myconfig.json</code>。</p>
+</blockquote>
+<p>每个<strong>配置</strong>定义一个<strong>Mixin集合</strong>，并且对于你的应用程序，可能会有多个<strong>Mixin集合</strong>。当你的Mixin针对不同的<em>环境</em>（见下文）时，只<em>需要</em>分离Mixin到不同集合中。然而有时也为了组织结构而将Mixin拆分到不同集合。</p>
+<h3 id="Mixin配置文件"><a href="#Mixin配置文件" class="headerlink" title="Mixin配置文件"></a>Mixin配置文件</h3><p>除了定义<strong>Mixin集合</strong>之外，Mixin配置文件还定义了集合的附加属性。</p>
+<p>首先，用四个键来定义集合本身：</p>
+<ul>
+<li><code>package</code>为这组Mixin定义了父包（这很重要，因为该包和所有子包在运行时都将被排除在<code>LaunchClassLoader</code>之外）。</li>
+<li><code>mixins</code>为该配置定义了位于<em>父包</em>内的<em>Mixin“类”列表</em>，每个Mixin“类”都相对于<em>父包</em>指定，可以使用子包。此列表中的每一个条目都将应用于客户端和专用服务端（Dedicated Server）<a href="#note4"><sup>4</sup></a>侧。</li>
+<li><code>client</code>定义了一组<strong>仅</strong>应用于<strong>客户端</strong>侧的Mixin。</li>
+<li><code>server</code>定义了一组<strong>仅</strong>应用于<strong>专用服务端</strong>侧的Mixin。</li>
+</ul>
+<p>然后可以定义附加属性：</p>
+<ul>
+<li><code>refmap</code>定义该集合的<strong>引用映射（Reference Map）</strong>文件名（关于如何使用Mixin处理混淆之后再做更多讨论）。</li>
+<li><code>priority</code>定义了这个Mixin集合相对于其他配置的<strong>优先级（Priority）</strong>。</li>
+<li><code>plugin</code>是可选的用于Mixin配置的<strong>伴随插件</strong>的类名，该类可以在运行时以编程方式调整Mixin配置，参见<del>Mixin伴随插件</del>（尚未完成）。</li>
+<li><code>required</code>定义了Mixin集合是否<strong>必须</strong>。当<em>required</em>标志应设为<code>true</code>时，如果单个Mixin未能应用，则应视为整个游戏处于失败状态。</li>
+<li><code>minVersion</code>在当Mixin集合使用一些在特定版本添加的Mixin功能时设置。它可以省略当前版本不可用的Mixin集合。</li>
+<li><code>setSourceFile</code>使Mixin处理器可以用Mixin类的源代码文件覆盖目标类中的<code>source file</code>属性。这在调试Mixin时很有用。</li>
+<li><code>verbos</code>将所有<code>DEBUG</code>级别的日志消息等级调整为Mixin集合的<code>INFO</code>级。这也可以通过<code>mixin.debug.verbose</code><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Mixin-Java-System-Properties">系统属性</a>在全局范围内启用。</li>
+</ul>
+<p>需要注意的最重要的一点是，Mixin“类”必须位于一个包中，且其中没有你的项目的其他类（这包括Mixin主包的子包），因为启动时整个包将被排除在转换类加载器（Transforming Classloader）之外。</p>
+<h3 id="游戏生命周期与你"><a href="#游戏生命周期与你" class="headerlink" title="游戏生命周期与你"></a>游戏生命周期与你</h3><p>为了理解Mixin如何与游戏底层交互，首先理解运行在<code>LaunchWrapper</code>中的游戏生命周期是至关重要的。</p>
+<p><em>LaunchWrapper<a href="#note5"><sup>5</sup></a></em>接管了游戏的正常启动过程，以便允许<em>Tweaker</em><a href="#note6"><sup>6</sup></a>修改游戏。每个<em>Tweaker</em>可以提供<em>类转换器（Class Transformer）<a href="#note1"><sup>1</sup></a></em>，这能够在游戏类加载时修改它。<em>Tweaker</em>在命令行中指定，并由<code>Launch</code>类逐个加载并初始化，该类构成了<em>LaunchWrapper</em>启动逻辑的核心。</p>
+<p>像FML和LiteLoader这样的<em>Tweaker</em>还能够加载和注入它们找到的其他<em>Tweaker</em>，因此<code>Launch</code>在循环中初始化<em>Tweaker</em>，直到不再继续注册更多的<em>Tweaker</em>。我们可以想到<code>Launch</code>中的执行流程如下：</p>
+<p><img src="/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_env_0.png" alt="启动生命周期"></p>
+<p>这个初始化阶段<em>必须</em>在游戏开始加载之前完成，这是绝对必要的，否则因为在<em>Tweak</em>初始化周期中晚点注册的<em>Transformer</em>可能没机会处理它需要的类，并且转换器链也可能不完整。</p>
+<p>在初始化阶段发生的事情：</p>
+<ul>
+<li>像FML和LiteLoader这样的Tweaker寻找Mod，并且注入它们的转换器以及任何它们找到的额外的Tweaker。</li>
+<li>FML的“Core Mod”（又叫载入时插件（Loading Plugin））被初始化并可以注册它们自己的转换器。</li>
+</ul>
+<p>由于Mixin子系统必须在这个早期阶段（在游戏类加载之前）初始化，所以它必须作为CoreMod或Tweaker加载，具体参阅下面的引导部分。</p>
+<p><img src="/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_env_1.png" alt="启动生命周期"></p>
+<p>一旦<em>Tweaker</em>初始化完成，<code>Launch</code>将调用游戏的原始<code>main()</code>方法，该方法启动游戏加载过程。在此之前，转换器链已经完成，因此转换器链可以通过注册的转换器加载和处理游戏类。游戏进入其主循环，按需加载类，并由转换器链（包括Mixin）处理。</p>
+<p>上述内容中应该明白的是，游戏运行因此被分成两个截然不同的<em>阶段</em>，<em>Tweaker</em>在<strong>预初始化阶段（pre-init phase）</strong>被初始化，以及类似于正常的游戏生命周期的<strong>默认阶段（default phase）</strong>，该阶段可不在LaunchWrapper中运行。有必要了解这些阶段及其与Mixin子系统的关系。</p>
+<h4 id="这只是我经历的一个阶段"><a href="#这只是我经历的一个阶段" class="headerlink" title="这只是我经历的一个阶段"></a>这只是我经历的一个阶段</h4><p>在通常情况下，我们的Mixin设置将只处理在<strong>默认</strong>阶段加载的类，并且事情非常简单。在这个阶段，我们已知：</p>
+<ul>
+<li>转换器链是完整的</li>
+<li>游戏类能被安全地载入</li>
+</ul>
+<p>这意味着加载和转换游戏类字节码并应用Mixin是安全的，加载那些以便应用Mixin的必须的<em>类元数据</em>也是安全的（请记住，从上文开始，Mixin的验证和预转换在启动时一次性完成）。如果我们过早地生成元数据（例如，在预初始化之前的阶段），那么就有可能没有注册关键的转换器！这将导致Mixin字节码不完整或无效。</p>
+<p><em>那么为什么要考虑<strong>预初始化</strong>呢？</em></p>
+<p>答案很简单：<em>“那么我们可以融入到其他Tweaker提供的核心类中，特别是FML”</em></p>
+<p>像<em>Sponge</em>这样的平台的要求之一是，有时必须以某种方式挂钩到底层平台，如果转换发生在<strong>Default</strong>阶段，核心类就已经加载（这已经超出了转换器的范围）。然而，正如我们知道的，在<strong>预初始化</strong>阶段加载与游戏相关的Mixin将不会起作用，因为需要的转换器不存在。</p>
+<h4 id="关于环境"><a href="#关于环境" class="headerlink" title="关于环境"></a>关于环境</h4><p>然后，在Mixin处理器中，我们确实将处理过程分割为不同<em><strong>环境</strong></em>（每个阶段一个），然后你可以针对所期望应用的<em>环境</em>拆分你的Mixin集合。典型的Mixin应用情景的解决方式如下：</p>
+<ul>
+<li>一个只组合游戏类的Mixin集合应该在<strong>默认</strong>环境中注册</li>
+<li>当需要在两个阶段应用Mixin时，两个Mixin集合（配置）应该将一个集合指定为<strong>预初始化</strong>Mixin，另一个集合则指定为<strong>默认</strong>Mixin。</li>
+</ul>
+<h4 id="跃跃欲试"><a href="#跃跃欲试" class="headerlink" title="跃跃欲试"></a>跃跃欲试</h4><p>值得注意的是，FML作为一个<em>Tweaker</em>加载它的CoreMod，并使用代理<em>Tweaker</em>将它们重新注入到启动生命周期中。因为我们对启动顺序可能有点微妙的感觉，因此值得注意的是，<em>“第一类（first-class）”</em>Tweaker<a href="#note7"><sup>7</sup></a>和CoreMod初始化期间产生的间接Tweaker有细微区别。</p>
+<p>Mixin库内含一个第一类的Tweaker，它被设计为在尽可能早的时候注册并开始处理类，这在下图中标记为 <strong>(1)</strong> 。正常的CoreMod启动发生于 <strong>(2)</strong> 处的第一次循环，然后游戏加载开始于 <strong>(3)</strong>。</p>
+<p><img src="/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/mixin_env_2.png" alt="启动生命周期"></p>
+<p>如果需要在<strong>预初始化</strong>与类组合，则建议使用第一类Tweaker。</p>
+<h3 id="使用FML-CoreMod引导Mixin"><a href="#使用FML-CoreMod引导Mixin" class="headerlink" title="使用FML CoreMod引导Mixin"></a>使用FML CoreMod引导Mixin</h3><blockquote>
+<p><strong>注意：在生产环境中通过CoreMod引导Mixin目前是不可能的，要在发布版本中使用Mixin和Forge，你必须使用下述的调整方法。</strong>但是，你可能希望通过CoreMod在开发工作空间中加载Mixin，这可能实现，但它必须在生产环境中使用Tweaker：</p>
+</blockquote>
+<p>使用CoreMod在开发环境中引导Mixin：</p>
+<ul>
+<li>在你的CoreMod的构造函数中，使用以下代码初始化Mixin环境并设置Mixin配置文件的名称：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">MyCoreMod</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 该语句必须最先出现，不含有该语句</span></span><br><span class="line">    <span class="comment">// 将导致一个运行时错误</span></span><br><span class="line">    MixinBootstrap.init();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检索默认的Mixin环境和注册配置文件</span></span><br><span class="line">    MixinEnvironment.getDefaultEnvironment()</span><br><span class="line">        .addConfiguration(<span class="string">&quot;mixins.mymod.json&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="通过第一类Tweaker引导Mixin"><a href="#通过第一类Tweaker引导Mixin" class="headerlink" title="通过第一类Tweaker引导Mixin"></a>通过第一类Tweaker引导Mixin</h3><p>Mixin库内建有第一类<em>Tweaker</em>，你可以通过在Mod的Jar元数据中指定Tweaker类来使用。为此，只需像如下所示简单地指定Tweaker类名和你的Mixin配置文件名：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TweakClass: org.spongepowered.asm.launch.MixinTweaker</span><br><span class="line">TweakOrder: 0</span><br><span class="line">MixinConfigs: mixins.mymod.json</span><br></pre></td></tr></table></figure><br>TweakOrder值为<code>0</code>可确保尽可能早地注入Mixin转换器。</p>
+<blockquote>
+<p><strong>重要注意事项：</strong>FML环境中规定Tweaker通常不能是一个CoreMod。然而，为了克服这个限制，Mixin Tweaker从Jar Manifest文件中读取<code>FMLCorePlugin</code>条目，并通过反射将CoreMod类注入FML。</p>
+</blockquote>
+<p><code>MixinConfigs</code>值是一个以逗号分隔的配置文件列表，用于提供给Mixin子系统。</p>
+<h3 id="使用LiteLoader引导Mixin"><a href="#使用LiteLoader引导Mixin" class="headerlink" title="使用LiteLoader引导Mixin"></a>使用LiteLoader引导Mixin</h3><p>Mixin子系统将自动地由LiteLoader引导。只需简单地将<code>mixinConfigs</code>键添加到你的<code>litemod.json</code>文件。<code>mixinConfigs</code>可以是以逗号分割的配置文件列表，也可以是作为字符串的常规JSON数组。</p>
+<blockquote>
+<p>译者注：</p>
+<p><a name="note1"><sup>1</sup></a>转换器（Transformer）是指可修改类字节码达到修改类的目的的类。</p>
+<p><a name="note2"><sup>2</sup></a>转换器链（Transformer Chain）是指一系列以链式结构组合的转换器。</p>
+<p><a name="note3"><sup>3</sup></a>重映射转换器（Remapping Transformer）是指一种具有特殊功能的转换器，它可以对类名、方法名、字段名进行转换，常用于动态反混淆。</p>
+<p><a name="note4"><sup>4</sup></a>专用服务端（Dedicated Server）是指仅具有服务器功能的应用程序，区别于客户端的内建服务端。例如MinecraftServer、Spigot等。</p>
+<p><a name="note5"><sup>5</sup></a>LaunchWrapper是Minecraft用于接管游戏启动过程，更便利地修改游戏的启动包装器。</p>
+<p><a name="note6"><sup>6</sup></a>Tweaker是LaunchWrapper用于配置、调整、修改游戏的接口，通常被各API实现。常见的实现有FML和LiteLoader。</p>
+<p><a name="note7"><sup>7</sup></a>第一类（first-class）Tweaker是指在LaunchWrapper启动时便可加载的Tweaker，其类名由命令行参数直接指定，区别于由FML，LiteLoader等加载的间接Tweaker。</p>
+</blockquote>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/" data-title="介绍Mixin——Mixin环境 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/" title="介绍Mixin——混淆与Mixin">
+  <strong>上一篇：</strong><br/>
+  <span>
+  介绍Mixin——混淆与Mixin</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/11/01/Introduction-to-Mixins-Understanding-Mixin-Architecture/"  title="介绍Mixin——理解Mixin的结构">
+ <strong>下一篇：</strong><br/> 
+ <span>介绍Mixin——理解Mixin的结构
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '介绍Mixin——Mixin环境',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Mixin%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84"><span class="toc-number">1.</span> <span class="toc-text">Mixin是如何工作的</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mixin%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number"></span> <span class="toc-text">Mixin配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%B8%E6%88%8F%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%B8%8E%E4%BD%A0"><span class="toc-number"></span> <span class="toc-text">游戏生命周期与你</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%99%E5%8F%AA%E6%98%AF%E6%88%91%E7%BB%8F%E5%8E%86%E7%9A%84%E4%B8%80%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="toc-number">1.</span> <span class="toc-text">这只是我经历的一个阶段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">关于环境</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%83%E8%B7%83%E6%AC%B2%E8%AF%95"><span class="toc-number">3.</span> <span class="toc-text">跃跃欲试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8FML-CoreMod%E5%BC%95%E5%AF%BCMixin"><span class="toc-number"></span> <span class="toc-text">使用FML CoreMod引导Mixin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E7%AC%AC%E4%B8%80%E7%B1%BBTweaker%E5%BC%95%E5%AF%BCMixin"><span class="toc-number"></span> <span class="toc-text">通过第一类Tweaker引导Mixin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8LiteLoader%E5%BC%95%E5%AF%BCMixin"><span class="toc-number"></span> <span class="toc-text">使用LiteLoader引导Mixin</span></a>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

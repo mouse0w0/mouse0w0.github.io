@@ -1,0 +1,658 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>介绍 Nashorn —— Java 8 JavaScript 引擎 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文我们来介绍一下Java 8的Nashorn JavaScript引擎。Nashorn是于Java 8中用于取代Rhino（Java 6，Java 7）的JavaScript引擎。Nashorn完全支持ECMAScript 5.1规范以及一些扩展。与先前的Rhino引擎相比，它有二到十倍的性能提升。本文中将使用各种各样的例子来说明Nashorn的强大功能。 jjsjjs是个基于Nashorn引擎">
+<meta property="og:type" content="article">
+<meta property="og:title" content="介绍 Nashorn —— Java 8 JavaScript 引擎">
+<meta property="og:url" content="https://mouse0w0.github.io/2018/12/02/Introduction-to-Nashorn/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文我们来介绍一下Java 8的Nashorn JavaScript引擎。Nashorn是于Java 8中用于取代Rhino（Java 6，Java 7）的JavaScript引擎。Nashorn完全支持ECMAScript 5.1规范以及一些扩展。与先前的Rhino引擎相比，它有二到十倍的性能提升。本文中将使用各种各样的例子来说明Nashorn的强大功能。 jjsjjs是个基于Nashorn引擎">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-12-02T11:07:03.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.964Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/12/02/Introduction-to-Nashorn/" title="介绍 Nashorn —— Java 8 JavaScript 引擎" itemprop="url">介绍 Nashorn —— Java 8 JavaScript 引擎</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2018-12-02T11:07:03.000Z" itemprop="datePublished"> 发表于 2018-12-02</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#jjs"><span class="toc-number">1.</span> <span class="toc-text">jjs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8Java%E4%B8%AD%E8%B0%83%E7%94%A8Nashorn%E5%BC%95%E6%93%8E"><span class="toc-number">2.</span> <span class="toc-text">在Java中调用Nashorn引擎</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%AF%91JavaScript%E4%BB%A3%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">编译JavaScript代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E6%95%B0%E6%8D%AE%E5%88%B0%E8%84%9A%E6%9C%AC"><span class="toc-number">4.</span> <span class="toc-text">传递数据到脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8Java%E4%B8%AD%E8%B0%83%E7%94%A8JavaScript%E5%87%BD%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">在Java中调用JavaScript函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E7%94%A8Java%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E5%92%8C%E5%AD%97%E6%AE%B5"><span class="toc-number">6.</span> <span class="toc-text">调用Java静态方法和字段</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAJava%E5%AF%B9%E8%B1%A1"><span class="toc-number">7.</span> <span class="toc-text">创建Java对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BF%E9%97%AEJava%E7%B1%BB%E7%9A%84%E8%A1%A5%E5%85%85%E8%AF%B4%E6%98%8E"><span class="toc-number">8.</span> <span class="toc-text">访问Java类的补充说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%89%A9%E5%B1%95"><span class="toc-number">9.</span> <span class="toc-text">语言扩展</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E6%95%B0%E7%BB%84"><span class="toc-number">9.1.</span> <span class="toc-text">类型数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8foreach%E8%AF%AD%E5%8F%A5%E8%BF%AD%E4%BB%A3%E6%95%B0%E7%BB%84%E6%88%96%E9%9B%86%E5%90%88"><span class="toc-number">9.2.</span> <span class="toc-text">用foreach语句迭代数组或集合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="toc-number">9.3.</span> <span class="toc-text">函数字面量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E6%8D%95%E8%8E%B7%E8%AF%AD%E5%8F%A5"><span class="toc-number">9.4.</span> <span class="toc-text">条件捕获语句</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8Object-setPrototypeOf%E8%AE%BE%E7%BD%AE%E5%AF%B9%E8%B1%A1%E5%8E%9F%E5%9E%8B"><span class="toc-number">9.5.</span> <span class="toc-text">用Object.setPrototypeOf设置对象原型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8C%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="toc-number">9.6.</span> <span class="toc-text">Lambda表达式和数据流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E7%9A%84%E7%BB%A7%E6%89%BF"><span class="toc-number">9.7.</span> <span class="toc-text">类的继承</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E9%87%8D%E8%BD%BD"><span class="toc-number">9.8.</span> <span class="toc-text">函数重载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java-Beans"><span class="toc-number">9.9.</span> <span class="toc-text">Java Beans</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%9E%E6%80%A7%E7%BB%91%E5%AE%9A"><span class="toc-number">9.10.</span> <span class="toc-text">属性绑定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%89%A9%E5%B1%95"><span class="toc-number">9.11.</span> <span class="toc-text">字符串扩展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%8D%E7%BD%AE"><span class="toc-number">9.12.</span> <span class="toc-text">位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="toc-number">9.13.</span> <span class="toc-text">导入作用域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">9.14.</span> <span class="toc-text">数组转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E8%B6%85%E7%B1%BB"><span class="toc-number">9.15.</span> <span class="toc-text">访问超类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A5%9E%E5%A5%87%E7%9A%84noSuchProperty%E5%92%8CnoSuchMethod"><span class="toc-number">9.16.</span> <span class="toc-text">神奇的noSuchProperty和noSuchMethod</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java-asJSONCompatible-%E5%87%BD%E6%95%B0"><span class="toc-number">9.17.</span> <span class="toc-text">Java.asJSONCompatible 函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%BD%E5%85%A5%E8%84%9A%E6%9C%AC"><span class="toc-number">9.18.</span> <span class="toc-text">载入脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ScriptObjectMirror"><span class="toc-number">10.</span> <span class="toc-text">ScriptObjectMirror</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E8%84%9A%E6%9C%AC%E5%AF%B9%E7%89%B9%E5%AE%9AJava%E7%B1%BB%E7%9A%84%E8%AE%BF%E9%97%AE"><span class="toc-number">11.</span> <span class="toc-text">限制脚本对特定Java类的访问</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%84%9A%E6%9C%AC"><span class="toc-number">12.</span> <span class="toc-text">命令行脚本</span></a></li></ol>
+		
+		</div>
+		
+		<p>本文我们来介绍一下Java 8的Nashorn JavaScript引擎。Nashorn是于Java 8中用于取代Rhino（Java 6，Java 7）的JavaScript引擎。Nashorn完全支持ECMAScript 5.1规范以及一些扩展。与先前的Rhino引擎相比，它有二到十倍的性能提升。本文中将使用各种各样的例子来说明Nashorn的强大功能。</p>
+<h2 id="jjs"><a href="#jjs" class="headerlink" title="jjs"></a>jjs</h2><p>jjs是个基于Nashorn引擎的命令行工具。你可以通过该工具快速地在Java上运行JavaScript代码，就像是一个REPL。</p>
+<p>例如，运行一个<code>hello.js</code>文件：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="variable">$JAVA_HOME</span>/bin/jjs hello.js</span></span><br><span class="line">Hello World</span><br></pre></td></tr></table></figure></p>
+<p>或者，你还可以直接运行代码：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="variable">$JAVA_HOME</span>/bin/jjs</span></span><br><span class="line"><span class="meta prompt_">jjs&gt; </span><span class="language-bash"><span class="built_in">print</span>(<span class="string">&quot;Hello World&quot;</span>)</span></span><br><span class="line">Hello World</span><br></pre></td></tr></table></figure></p>
+<h2 id="在Java中调用Nashorn引擎"><a href="#在Java中调用Nashorn引擎" class="headerlink" title="在Java中调用Nashorn引擎"></a>在Java中调用Nashorn引擎</h2><p>本文专注于在Java中调用Nashorn，所以现在在Java代码中实现简单的HelloWorld：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ScriptEngine</span> <span class="variable">engine</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ScriptEngineManager</span>().getEngineByName(<span class="string">&quot;nashorn&quot;</span>);</span><br><span class="line">engine.eval(<span class="string">&quot;print(&#x27;Hello World!&#x27;);&quot;</span>);</span><br></pre></td></tr></table></figure></p>
+<p>或者，我们还可以从文件中运行JS：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ScriptEngine</span> <span class="variable">engine</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ScriptEngineManager</span>().getEngineByName(<span class="string">&quot;nashorn&quot;</span>);</span><br><span class="line">engine.eval(<span class="keyword">new</span> <span class="title class_">FileReader</span>(<span class="string">&quot;hello.js&quot;</span>));</span><br></pre></td></tr></table></figure></p>
+<h2 id="编译JavaScript代码"><a href="#编译JavaScript代码" class="headerlink" title="编译JavaScript代码"></a>编译JavaScript代码</h2><p>你同样可以将脚本编译为Java字节码后调用，这样在多次调用的情况下效率会更高，例如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ScriptEngine</span> <span class="variable">engine</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ScriptEngineManager</span>().getEngineByName(<span class="string">&quot;nashorn&quot;</span>);</span><br><span class="line"><span class="type">CompiledScript</span> <span class="variable">compiledScript</span> <span class="operator">=</span> ((Compilable) engine).complie(<span class="string">&quot;print(&#x27;Hello World!&#x27;);&quot;</span>);</span><br><span class="line">engine.eval();</span><br></pre></td></tr></table></figure></p>
+<h2 id="传递数据到脚本"><a href="#传递数据到脚本" class="headerlink" title="传递数据到脚本"></a>传递数据到脚本</h2><p>数据可以通过定义<code>Bindings</code>传递到引擎中：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Bindings</span> <span class="variable">bindings</span> <span class="operator">=</span> engine.createBindings();</span><br><span class="line">bindings.put(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;Nashorn&quot;</span>);</span><br><span class="line"></span><br><span class="line">engine.eval(<span class="string">&quot;print(&#x27;Hello &#x27; + name);&quot;</span>);</span><br></pre></td></tr></table></figure></p>
+<p>运行该程序将输出<code>Hello Nashorn</code>。</p>
+<h2 id="在Java中调用JavaScript函数"><a href="#在Java中调用JavaScript函数" class="headerlink" title="在Java中调用JavaScript函数"></a>在Java中调用JavaScript函数</h2><p>Nashorn支持从Java代码中直接调用定义在脚本中的JavaScript函数。你可以将Java对象作为函数参数传递，并且使用函数返回值调用Java方法。</p>
+<p>例如在脚本中定义如下代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fun1 = <span class="keyword">function</span>(<span class="params">name</span>) &#123;</span><br><span class="line">    <span class="title function_">print</span>(<span class="string">&#x27;Hello &#x27;</span> + name);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hi!&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> fun2 = <span class="keyword">function</span> (<span class="params">object</span>) &#123;</span><br><span class="line">    <span class="title function_">print</span>(<span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">toString</span>.<span class="title function_">call</span>(object));</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>为了调用函数，你首先需要将脚本引擎转换为<code>Invocable</code>接口。<code>NashornScriptEngine</code>已经实现了<code>Invocable</code>接口，并且定义了<code>invokeFunction</code>方法来调用指定名称的JavaScript函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">ScriptEngine</span> engine = <span class="keyword">new</span> <span class="title class_">ScriptEngineManager</span>().<span class="title function_">getEngineByName</span>(<span class="string">&quot;nashorn&quot;</span>);</span><br><span class="line">engine.<span class="built_in">eval</span>(<span class="keyword">new</span> <span class="title class_">FileReader</span>(<span class="string">&quot;hello.js&quot;</span>));</span><br><span class="line"></span><br><span class="line"><span class="title class_">Invocable</span> invocable = (<span class="title class_">Invocable</span>) engine;</span><br><span class="line"></span><br><span class="line"><span class="title class_">Object</span> result = invocable.<span class="title function_">invokeFunction</span>(<span class="string">&quot;fun1&quot;</span>, <span class="string">&quot;Nashorn&quot;</span>);</span><br><span class="line"><span class="title class_">System</span>.<span class="property">out</span>.<span class="title function_">println</span>(result);</span><br><span class="line"><span class="title class_">System</span>.<span class="property">out</span>.<span class="title function_">println</span>(result.<span class="title function_">getClass</span>());</span><br></pre></td></tr></table></figure>
+<p>最终将输出如下内容：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Hello Nashorn</span><br><span class="line">Hi!</span><br><span class="line">java.lang.String</span><br></pre></td></tr></table></figure></p>
+<p>Java对象在传入时不会在JavaScript上损失任何类型信息。由于脚本在JVM上运行，我们可以在Nashron上使用Java API或外部库的全部类或方法。</p>
+<p>现在让我们传入任意Java对象来调用第二个方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">invocable.invokeFunction(<span class="string">&quot;fun2&quot;</span>, <span class="keyword">new</span> <span class="title class_">Date</span>());</span><br><span class="line"><span class="comment">// [object java.util.Date]</span></span><br><span class="line"></span><br><span class="line">invocable.invokeFunction(<span class="string">&quot;fun2&quot;</span>, LocalDateTime.now());</span><br><span class="line"><span class="comment">// [object java.time.LocalDateTime]</span></span><br><span class="line"></span><br><span class="line">invocable.invokeFunction(<span class="string">&quot;fun2&quot;</span>, <span class="keyword">new</span> <span class="title class_">Person</span>());</span><br><span class="line"><span class="comment">// [object my.package.Person]</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="调用Java静态方法和字段"><a href="#调用Java静态方法和字段" class="headerlink" title="调用Java静态方法和字段"></a>调用Java静态方法和字段</h2><p>在JavaScript中调用Java方法非常容易，就像在Java中所做的一样。首先我们先定义一个Java静态方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">sayHello</span><span class="params">(String name)</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;Hello &quot;</span> + name);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hi!&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后Java类就可以通过<code>Java.type</code>API在JavaScript中引用，就像Java的<code>import</code>一样，例如：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title class_">MyJavaClass</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">`my.package.MyJavaClass`</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> result = <span class="title class_">MyJavaClass</span>.<span class="title function_">sayHello</span>(<span class="string">&#x27;Nashorn&#x27;</span>);</span><br><span class="line"><span class="title function_">print</span>(result);</span><br></pre></td></tr></table></figure></p>
+<p>最终的结果是：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Hello Nashorn</span><br><span class="line">Hi!</span><br></pre></td></tr></table></figure></p>
+<p>为了理解在使用JavaScript原生类型调用Java方法时，Nashorn是如何处理类型转换的。我们将通过简单的例子来展示：</p>
+<p>下面的方法将打印实际的参数类型：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">fun</span><span class="params">(Object obj)</span> &#123;</span><br><span class="line">    System.out.println(obj.getClass());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接下来我们用JavaScript来调用该方法：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(<span class="number">127</span>);</span><br><span class="line"><span class="comment">// class java.lang.Integer</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(<span class="number">49.99</span>);</span><br><span class="line"><span class="comment">// class java.lang.Double</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(<span class="literal">true</span>);</span><br><span class="line"><span class="comment">// class java.lang.Boolean</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(<span class="string">&quot;Hi!&quot;</span>);</span><br><span class="line"><span class="comment">// class java.lang.String</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(<span class="keyword">new</span> <span class="title class_">Number</span>(<span class="number">127</span>));</span><br><span class="line"><span class="comment">// class jdk.nashorn.internal.objects.NativeNumber</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(<span class="keyword">new</span> <span class="title class_">Date</span>());</span><br><span class="line"><span class="comment">// class jdk.nashorn.internal.objects.NativeDate</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(<span class="keyword">new</span> <span class="title class_">RegExp</span>());</span><br><span class="line"><span class="comment">// class jdk.nashorn.internal.objects.NativeRegExp</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(&#123;<span class="attr">foo</span>: <span class="string">&#x27;bar&#x27;</span>&#125;);</span><br><span class="line"><span class="comment">// class jdk.nashorn.internal.scripts.JO4</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="创建Java对象"><a href="#创建Java对象" class="headerlink" title="创建Java对象"></a>创建Java对象</h2><p>创建Java对象也如图调用Java方法一样简单，代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title class_">HashMap</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">`java.util.HashMap`</span>);</span><br><span class="line"><span class="keyword">var</span> mapDef = <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="keyword">var</span> map100 = <span class="keyword">new</span> <span class="title class_">HashMap</span>(<span class="number">100</span>);</span><br></pre></td></tr></table></figure></p>
+<h2 id="访问Java类的补充说明"><a href="#访问Java类的补充说明" class="headerlink" title="访问Java类的补充说明"></a>访问Java类的补充说明</h2><p>同样，访问Java类不一定需要<code>Java.type</code>函数，可直接书写类名访问。例如：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> result = my.<span class="property">package</span>.<span class="property">MyJavaClass</span>.<span class="title function_">sayHello</span>(<span class="string">&#x27;Nashorn&#x27;</span>);</span><br><span class="line"><span class="title function_">print</span>(result);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> mapDef = <span class="keyword">new</span> java.<span class="property">util</span>.<span class="title class_">HashMap</span>();</span><br></pre></td></tr></table></figure></p>
+<p>同样，为了方便，Nashorn默认提供了对几个Java包的访问，分别是：<code>com</code>、<code>edu</code>、<code>java</code>、<code>javafx</code>、<code>javax</code>和<code>org</code>。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">jjs&gt; java.lang</span><br><span class="line">[JavaPackage java.lang]</span><br><span class="line">jjs&gt; typeof java.lang</span><br><span class="line">object</span><br><span class="line">jjs&gt; java.lang.System</span><br><span class="line">[JavaClass java.lang.System]</span><br><span class="line">jjs&gt; typeof java.lang.System</span><br><span class="line">function</span><br><span class="line">jjs&gt; typeof java.lang.System == &quot;function&quot;</span><br><span class="line">true</span><br></pre></td></tr></table></figure></p>
+<h2 id="语言扩展"><a href="#语言扩展" class="headerlink" title="语言扩展"></a>语言扩展</h2><p>Nashorn虽然是面向ECMAScript 5.1实现的但它提供了一些扩展，使JavaScript能更好的运用。</p>
+<h3 id="类型数组"><a href="#类型数组" class="headerlink" title="类型数组"></a>类型数组</h3><p>JavaScript的原生数组是无类型的。Nashron允许你在JavaScript中使用Java的类型数组：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title class_">IntArray</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">&quot;int[]&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> array = <span class="keyword">new</span> <span class="title class_">IntArray</span>(<span class="number">5</span>);</span><br><span class="line">array[<span class="number">0</span>] = <span class="number">5</span>;</span><br><span class="line">array[<span class="number">1</span>] = <span class="number">4</span>;</span><br><span class="line">array[<span class="number">2</span>] = <span class="number">3</span>;</span><br><span class="line">array[<span class="number">3</span>] = <span class="number">2</span>;</span><br><span class="line">array[<span class="number">4</span>] = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    array[<span class="number">5</span>] = <span class="number">23</span>;</span><br><span class="line">&#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">    <span class="title function_">print</span>(e.<span class="property">message</span>);  <span class="comment">// Array index out of range: 5</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">array[<span class="number">0</span>] = <span class="string">&quot;17&quot;</span>;</span><br><span class="line"><span class="title function_">print</span>(array[<span class="number">0</span>]);  <span class="comment">// 17</span></span><br><span class="line"></span><br><span class="line">array[<span class="number">0</span>] = <span class="string">&quot;wrong type&quot;</span>;</span><br><span class="line"><span class="title function_">print</span>(array[<span class="number">0</span>]);  <span class="comment">// 0</span></span><br><span class="line"></span><br><span class="line">array[<span class="number">0</span>] = <span class="string">&quot;17.3&quot;</span>;</span><br><span class="line"><span class="title function_">print</span>(array[<span class="number">0</span>]);  <span class="comment">// 17</span></span><br></pre></td></tr></table></figure></p>
+<p><code>int[]</code>数组就像真实的Java整数数组那样。但在试图向数组添加非整数时，Nashron执行了一些隐式的转换。字符串会自动转换为整数，这十分便利。</p>
+<h3 id="用foreach语句迭代数组或集合"><a href="#用foreach语句迭代数组或集合" class="headerlink" title="用foreach语句迭代数组或集合"></a>用foreach语句迭代数组或集合</h3><p>我们可以在JavaScript使用foreach语句迭代数组或集合：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> list = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];</span><br><span class="line">  <span class="keyword">var</span> result = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">  <span class="keyword">for</span> <span class="title function_">each</span> (<span class="keyword">var</span> i <span class="keyword">in</span> list) &#123;</span><br><span class="line">  result+=i+<span class="string">&#x27;-&#x27;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title function_">print</span>(result);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> <span class="title class_">ArrayList</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">&#x27;java.util.ArrayList&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>();</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&#x27;a&#x27;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&#x27;b&#x27;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&#x27;c&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="title function_">each</span> (<span class="keyword">var</span> el <span class="keyword">in</span> list) &#123;</span><br><span class="line">    <span class="title function_">print</span>(el);  <span class="comment">// a, b, c</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> map = <span class="keyword">new</span> java.<span class="property">util</span>.<span class="title class_">HashMap</span>();</span><br><span class="line">map.<span class="title function_">put</span>(<span class="string">&#x27;foo&#x27;</span>, <span class="string">&#x27;val1&#x27;</span>);</span><br><span class="line">map.<span class="title function_">put</span>(<span class="string">&#x27;bar&#x27;</span>, <span class="string">&#x27;val2&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="title function_">each</span> (<span class="keyword">var</span> e <span class="keyword">in</span> map.<span class="title function_">keySet</span>()) &#123;</span><br><span class="line">    <span class="title function_">print</span>(e);  <span class="comment">// foo, bar</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> <span class="title function_">each</span> (<span class="keyword">var</span> e <span class="keyword">in</span> map.<span class="title function_">values</span>()) &#123;</span><br><span class="line">    <span class="title function_">print</span>(e);  <span class="comment">// val1, val2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="函数字面量"><a href="#函数字面量" class="headerlink" title="函数字面量"></a>函数字面量</h3><p>在简单的函数声明中，可以省略括号<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">increment</span>(<span class="params"><span class="keyword">in</span></span>) ++<span class="keyword">in</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="条件捕获语句"><a href="#条件捕获语句" class="headerlink" title="条件捕获语句"></a>条件捕获语句</h3><p>可以添加特定的catch字句，这些字句仅在指定条件为真时才执行：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="string">&quot;BOOM&quot;</span>;</span><br><span class="line">&#125; <span class="keyword">catch</span>(e <span class="keyword">if</span> <span class="keyword">typeof</span> e === <span class="string">&#x27;string&#x27;</span>) &#123;</span><br><span class="line">    <span class="title function_">print</span>(<span class="string">&quot;String thrown: &quot;</span> + e);</span><br><span class="line">&#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">    <span class="title function_">print</span>(<span class="string">&quot;this shouldn&#x27;t happen!&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="用Object-setPrototypeOf设置对象原型"><a href="#用Object-setPrototypeOf设置对象原型" class="headerlink" title="用Object.setPrototypeOf设置对象原型"></a>用Object.setPrototypeOf设置对象原型</h3><p>Nashorn定义了一个API扩展，它使我们能够更改对象的原型：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Object</span>.<span class="title function_">setPrototypeOf</span>(obj, newProto);</span><br></pre></td></tr></table></figure></p>
+<p>一般认为该函数是对<code>Object.prototype.__proto__</code>的一个更好选择，因为它应该是在所有代码中设置对象原型的首选方法。</p>
+<h3 id="Lambda表达式和数据流"><a href="#Lambda表达式和数据流" class="headerlink" title="Lambda表达式和数据流"></a>Lambda表达式和数据流</h3><p>每个人都热爱lambda和数据流 — Nashron也一样！虽然ECMAScript 5.1没有Java8 lmabda表达式的简化箭头语法，我们可以在任何接受lambda表达式的地方使用函数字面值。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> list = <span class="keyword">new</span> java.<span class="property">util</span>.<span class="title class_">ArrayList</span>();</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;a1&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;a2&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;a3&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;b1&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;b2&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;b3&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;c1&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;c2&quot;</span>);</span><br><span class="line">list.<span class="title function_">add</span>(<span class="string">&quot;c3&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">list</span><br><span class="line">    .<span class="title function_">stream</span>()</span><br><span class="line">    .<span class="title function_">filter</span>(<span class="keyword">function</span>(<span class="params">el</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> el.<span class="title function_">startsWith</span>(<span class="string">&quot;a&quot;</span>);</span><br><span class="line">    &#125;)</span><br><span class="line">    .<span class="title function_">sorted</span>()</span><br><span class="line">    .<span class="title function_">forEach</span>(<span class="keyword">function</span>(<span class="params">el</span>) &#123;</span><br><span class="line">        <span class="title function_">print</span>(el);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// a1, a2, a3</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="类的继承"><a href="#类的继承" class="headerlink" title="类的继承"></a>类的继承</h3><p>Java类型可以由<code>Java.extend</code>轻易继承。如下所示，你甚至可以在脚本中创建多线程的代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title class_">Runnable</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">&#x27;java.lang.Runnable&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> <span class="title class_">Printer</span> = <span class="title class_">Java</span>.<span class="title function_">extend</span>(<span class="title class_">Runnable</span>, &#123;</span><br><span class="line">    <span class="attr">run</span>: <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="title function_">print</span>(<span class="string">&#x27;printed from a separate thread&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> <span class="title class_">Thread</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">&#x27;java.lang.Thread&#x27;</span>);</span><br><span class="line"><span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">Printer</span>()).<span class="title function_">start</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">print</span>(<span class="string">&#x27;printed from another thread&#x27;</span>);</span><br><span class="line">&#125;).<span class="title function_">start</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// printed from a separate thread</span></span><br><span class="line"><span class="comment">// printed from another thread</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="函数重载"><a href="#函数重载" class="headerlink" title="函数重载"></a>函数重载</h3><p>方法和函数可以通过点运算符或方括号运算符来调用：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title class_">System</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">&#x27;java.lang.System&#x27;</span>);</span><br><span class="line"><span class="title class_">System</span>.<span class="property">out</span>.<span class="title function_">println</span>(<span class="number">10</span>);              <span class="comment">// 10</span></span><br><span class="line"><span class="title class_">System</span>.<span class="property">out</span>[<span class="string">&quot;println&quot;</span>](<span class="number">11.0</span>);         <span class="comment">// 11.0</span></span><br><span class="line"><span class="title class_">System</span>.<span class="property">out</span>[<span class="string">&quot;println(double)&quot;</span>](<span class="number">12</span>);   <span class="comment">// 12.0</span></span><br></pre></td></tr></table></figure></p>
+<p>当使用重载参数调用方法时，传递可选参数类型<code>println(double)</code>会指定所调用的具体方法。</p>
+<h3 id="Java-Beans"><a href="#Java-Beans" class="headerlink" title="Java Beans"></a>Java Beans</h3><p>你可以简单地使用属性名称来向Java Beans获取或设置值，不需要显式调用读写器：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title class_">Date</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">&#x27;java.util.Date&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> date = <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">date.<span class="property">year</span> += <span class="number">1900</span>;</span><br><span class="line"><span class="title function_">print</span>(date.<span class="property">year</span>);  <span class="comment">// 3918</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="属性绑定"><a href="#属性绑定" class="headerlink" title="属性绑定"></a>属性绑定</h3><p>两个不同对象的属性可以绑定到一起：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> o1 = &#123;&#125;;</span><br><span class="line"><span class="keyword">var</span> o2 = &#123; <span class="attr">foo</span>: <span class="string">&#x27;bar&#x27;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="title class_">Object</span>.<span class="title function_">bindProperties</span>(o1, o2);</span><br><span class="line"></span><br><span class="line"><span class="title function_">print</span>(o1.<span class="property">foo</span>);    <span class="comment">// bar</span></span><br><span class="line">o1.<span class="property">foo</span> = <span class="string">&#x27;rab&#x27;</span>;</span><br><span class="line"><span class="title function_">print</span>(o2.<span class="property">foo</span>);    <span class="comment">// rab</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="字符串扩展"><a href="#字符串扩展" class="headerlink" title="字符串扩展"></a>字符串扩展</h3><p>Nashorn在String原型上提供了两个简单但非常有用的扩展。这就是<code>trimRight</code>和<code>trimLeft</code>函数，它们可返回String得副本并删除空格：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">print</span>(<span class="string">&quot;   hello world&quot;</span>.<span class="title function_">trimLeft</span>());</span><br><span class="line"><span class="title function_">print</span>(<span class="string">&quot;hello world     &quot;</span>.<span class="title function_">trimRight</span>());</span><br></pre></td></tr></table></figure></p>
+<h3 id="位置"><a href="#位置" class="headerlink" title="位置"></a>位置</h3><p>当前文件名，目录和行可以通过全局变量<code>__FILE__</code>、<code>__LINE__</code>和<code>__DIR__</code>获取：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">print</span>(__FILE__, __LINE__, __DIR__);</span><br></pre></td></tr></table></figure></p>
+<h3 id="导入作用域"><a href="#导入作用域" class="headerlink" title="导入作用域"></a>导入作用域</h3><p>有时一次导入多个Java包会很方便。我们可以使用<code>JavaImporter</code>类，和<code>with</code>语句一起使用。所有被导入包的类文件都可以在<code>with</code>语句的局部域中访问到。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> imports = <span class="keyword">new</span> <span class="title class_">JavaImporter</span>(java.<span class="property">io</span>, java.<span class="property">lang</span>);</span><br><span class="line"><span class="title function_">with</span> (imports) &#123;</span><br><span class="line">    <span class="keyword">var</span> file = <span class="keyword">new</span> <span class="title class_">File</span>(__FILE__);</span><br><span class="line">    <span class="title class_">System</span>.<span class="property">out</span>.<span class="title function_">println</span>(file.<span class="title function_">getAbsolutePath</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="数组转换"><a href="#数组转换" class="headerlink" title="数组转换"></a>数组转换</h3><p>下面的代码将Java的<code>List</code>转换为JavaScript原生数组：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> javaList = <span class="keyword">new</span> java.<span class="property">util</span>.<span class="title class_">ArrayList</span>();</span><br><span class="line">javaList.<span class="title function_">add</span>(<span class="string">&quot;1&quot;</span>);</span><br><span class="line">javaList.<span class="title function_">add</span>(<span class="string">&quot;2&quot;</span>);</span><br><span class="line">javaList.<span class="title function_">add</span>(<span class="string">&quot;3&quot;</span>);</span><br><span class="line"><span class="keyword">var</span> jsArray = <span class="title class_">Java</span>.<span class="title function_">from</span>(javaList);</span><br><span class="line"><span class="title function_">print</span>(jsArray);                                  <span class="comment">// 1, 2, 3</span></span><br><span class="line"><span class="title function_">print</span>(<span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">toString</span>.<span class="title function_">call</span>(jsArray));  <span class="comment">// [object Array]</span></span><br></pre></td></tr></table></figure></p>
+<p>下面的代码执行相反操作：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> javaArray = <span class="title class_">Java</span>.<span class="title function_">to</span>([<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>, <span class="number">11</span>], <span class="string">&quot;int[]&quot;</span>);</span><br></pre></td></tr></table></figure></p>
+<h3 id="访问超类"><a href="#访问超类" class="headerlink" title="访问超类"></a>访问超类</h3><p>在JavaScript中访问被覆盖的成员通常比较困难，因为Java的super关键字在ECMAScript中并不存在。幸运的是，Nashron有一套补救措施。</p>
+<p>首先我们需要在Java代码中定义超类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SuperRunner</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;super run&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面我在JavaScript中覆盖了SuperRunner。要注意创建新的Runner实例时的Nashron语法：覆盖成员的语法取自Java的匿名对象。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="title class_">SuperRunner</span> = <span class="title class_">Java</span>.<span class="title function_">type</span>(<span class="string">&#x27;my.package.SuperRunner&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> <span class="title class_">Runner</span> = <span class="title class_">Java</span>.<span class="title function_">extend</span>(<span class="title class_">SuperRunner</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> runner = <span class="keyword">new</span> <span class="title class_">Runner</span>() &#123;</span><br><span class="line">    <span class="attr">run</span>: <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="title class_">Java</span>.<span class="variable language_">super</span>(runner).<span class="title function_">run</span>();</span><br><span class="line">        <span class="title function_">print</span>(<span class="string">&#x27;my run&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">runner.<span class="title function_">run</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// super run</span></span><br><span class="line"><span class="comment">// my run</span></span><br></pre></td></tr></table></figure></p>
+<p>我们通过Java.super()扩展调用了被覆盖的SuperRunner.run()方法。</p>
+<h3 id="神奇的noSuchProperty和noSuchMethod"><a href="#神奇的noSuchProperty和noSuchMethod" class="headerlink" title="神奇的noSuchProperty和noSuchMethod"></a>神奇的<strong>noSuchProperty</strong>和<strong>noSuchMethod</strong></h3><p>可以在对象上定义方法，每当访问未定义属性或调用未定义方法时，将调用该方法：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> demo = &#123;</span><br><span class="line">    <span class="attr">__noSuchProperty__</span>: <span class="keyword">function</span> (<span class="params">propName</span>) &#123;</span><br><span class="line">        <span class="title function_">print</span>(<span class="string">&quot;Accessed non-existing property: &quot;</span> + propName);</span><br><span class="line">    &#125;,</span><br><span class="line">     </span><br><span class="line">    <span class="attr">__noSuchMethod__</span>: <span class="keyword">function</span> (<span class="params">methodName</span>) &#123;</span><br><span class="line">        <span class="title function_">print</span>(<span class="string">&quot;Invoked non-existing method: &quot;</span> + methodName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line">demo.<span class="property">doesNotExist</span>;</span><br><span class="line">demo.<span class="title function_">callNonExistingMethod</span>()</span><br></pre></td></tr></table></figure></p>
+<p>这将输出：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Accessed non-existing property: doesNotExist</span><br><span class="line">Invoked non-existing method: callNonExistingMethod</span><br></pre></td></tr></table></figure></p>
+<h3 id="Java-asJSONCompatible-函数"><a href="#Java-asJSONCompatible-函数" class="headerlink" title="Java.asJSONCompatible 函数"></a>Java.asJSONCompatible 函数</h3><p>使用该函数，我们可以得到一个与Java JSON库期望兼容的对象。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> engine.eval(<span class="string">&quot;Java.asJSONCompatible(</span></span><br><span class="line"><span class="string">  &#123; number: 42, greet: &#x27;hello&#x27;, primes: [2,3,5,7,11,13] &#125;)&quot;</span>);</span><br><span class="line">Map&lt;String, Object&gt; map = (Map&lt;String, Object&gt;)obj;</span><br><span class="line">  </span><br><span class="line">System.out.println(map.get(<span class="string">&quot;greet&quot;</span>));</span><br><span class="line">System.out.println(map.get(<span class="string">&quot;primes&quot;</span>));</span><br><span class="line">System.out.println(List.class.isAssignableFrom(map.get(<span class="string">&quot;primes&quot;</span>).getClass()));</span><br></pre></td></tr></table></figure></p>
+<p>这将输出：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hello</span><br><span class="line">[2, 3, 5, 7, 11, 13]</span><br></pre></td></tr></table></figure></p>
+<h3 id="载入脚本"><a href="#载入脚本" class="headerlink" title="载入脚本"></a>载入脚本</h3><p>你可以在脚本引擎中载入其他JavaScript文件：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">load</span>(<span class="string">&#x27;classpath:script.js&#x27;</span>);</span><br></pre></td></tr></table></figure></p>
+<p>或者通过URL载入脚本：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">load</span>(<span class="string">&#x27;/script.js&#x27;</span>);</span><br></pre></td></tr></table></figure></p>
+<p>请记住，JavaScript没有命名空间的概念，所以所有的内容都堆放在全局环境中。这使得加载的脚本有可能与你的代码或它们之间的命名冲突。这可以使用<code>loadWithNewGlobal</code>函数尽可能减少这种情况的发生：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> math = <span class="title function_">loadWithNewGlobal</span>(<span class="string">&#x27;classpath:math_module.js&#x27;</span>)</span><br><span class="line">math.<span class="title function_">increment</span>(<span class="number">5</span>);</span><br></pre></td></tr></table></figure></p>
+<p><code>math_module.js</code>的文件内容如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> math = &#123;</span><br><span class="line">    <span class="attr">increment</span>: <span class="keyword">function</span>(<span class="params">num</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> ++num;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line">math;</span><br></pre></td></tr></table></figure></p>
+<p>这里我们定义了一个名为<code>math</code>的对象，其中有一个名为<code>increment</code>的函数。使用这个范例我们可以达成基本的模块化。</p>
+<h2 id="ScriptObjectMirror"><a href="#ScriptObjectMirror" class="headerlink" title="ScriptObjectMirror"></a>ScriptObjectMirror</h2><p>在向Java传递原生JavaScript对象时，你可以使用<code>ScriptObjectMirror</code>类，它实际上是底层JavaScript对象的Java表示。<code>ScriptObjectMirror</code>实现了<code>Map</code>接口，其位于<code>jdk.nashorn.api</code>中。这个包中的类可以用于Java代码。</p>
+<p>下面的例子将参数类型从<code>Object</code>改为<code>ScriptObjectMirror</code>，我们可以从传入的JavaScript对象中获得一些信息。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">fun</span><span class="params">(ScriptObjectMirror mirror)</span> &#123;</span><br><span class="line">    System.out.println(mirror.getClassName() + <span class="string">&quot;: &quot;</span> +</span><br><span class="line">        Arrays.toString(mirror.getOwnKeys(<span class="literal">true</span>)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当向这个方法传递对象（哈希表）时，在Java中可以访问其属性：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(&#123;</span><br><span class="line">    <span class="attr">foo</span>: <span class="string">&#x27;bar&#x27;</span>,</span><br><span class="line">    <span class="attr">bar</span>: <span class="string">&#x27;foo&#x27;</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Object: [foo, bar]</span></span><br></pre></td></tr></table></figure></p>
+<p>我们也可以在Java中调用JavaScript的函数。让我们首先在JavaScript中定义一个<code>Person</code>类型，其含有属性<code>firstName</code>和<code>lastName</code>，以及函数<code>getFullName</code>。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">Person</span>(<span class="params">firstName, lastName</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">firstName</span> = firstName;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">lastName</span> = lastName;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">getFullName</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">firstName</span> + <span class="string">&quot; &quot;</span> + <span class="variable language_">this</span>.<span class="property">lastName</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>JavaScript方法<code>getFullName</code>可以通过<code>callMember()</code>在<code>ScriptObjectMirror</code>上调用。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">fun</span><span class="params">(ScriptObjectMirror person)</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;Full Name is: &quot;</span> + person.callMember(<span class="string">&quot;getFullName&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当向Java方法传递新的<code>Person</code>时，我们会在控制台看到预计的输出：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> person = <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="string">&quot;Peter&quot;</span>, <span class="string">&quot;Parker&quot;</span>);</span><br><span class="line"><span class="title class_">MyJavaClass</span>.<span class="title function_">fun</span>(person);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Full Name is: Peter Parker</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="限制脚本对特定Java类的访问"><a href="#限制脚本对特定Java类的访问" class="headerlink" title="限制脚本对特定Java类的访问"></a>限制脚本对特定Java类的访问</h2><p><code>jdk.nashorn.api.scripting.ClassFilter</code>接口限制通过Nashorn运行的脚本对特定Java类的访问，为JavaScript代码对Java类的访问提供了细粒度的控制。示例代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.script.ScriptEngine;</span><br><span class="line"><span class="keyword">import</span> jdk.nashorn.api.scripting.ClassFilter;</span><br><span class="line"><span class="keyword">import</span> jdk.nashorn.api.scripting.NashornScriptEngineFactory;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyClassFilterTest</span> &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">MyCF</span> <span class="keyword">implements</span> <span class="title class_">ClassFilter</span> &#123; <span class="comment">// 创建类过滤器</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">exposeToScripts</span><span class="params">(String s)</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (s.equals(<span class="string">&quot;java.io.File&quot;</span>)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testClassFilter</span><span class="params">()</span> &#123;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">script</span> <span class="operator">=</span></span><br><span class="line">        <span class="string">&quot;print(java.lang.System.getProperty(\&quot;java.home\&quot;));&quot;</span> +</span><br><span class="line">        <span class="string">&quot;print(\&quot;Create file variable\&quot;);&quot;</span> +</span><br><span class="line">        <span class="string">&quot;var File = Java.type(\&quot;java.io.File\&quot;);&quot;</span>;</span><br><span class="line">    </span><br><span class="line">        <span class="type">NashornScriptEngineFactory</span> <span class="variable">factory</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">NashornScriptEngineFactory</span>();</span><br><span class="line">    </span><br><span class="line">        <span class="type">ScriptEngine</span> <span class="variable">engine</span> <span class="operator">=</span> factory.getScriptEngine(<span class="keyword">new</span> <span class="title class_">MyClassFilterTest</span>.MyCF());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            engine.eval(script);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Exception caught: &quot;</span> + e.toString());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">MyClassFilterTest</span> <span class="variable">myApp</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MyClassFilterTest</span>();</span><br><span class="line">        myApp.testClassFilter();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure><br>最终这会抛出<code>java.lang.ClassNotFoundException</code>异常。</p>
+<h2 id="命令行脚本"><a href="#命令行脚本" class="headerlink" title="命令行脚本"></a>命令行脚本</h2><p>如果你对编写命令行（shell）脚本感兴趣，来试一试<a target="_blank" rel="noopener" href="https://github.com/winterbe/nake">Nake</a>吧。Nake是一个Java 8 Nashron的简化构建工具。你只需要在项目特定的<code>Nakefile</code>中定义任务，之后通过在命令行键入<code>nake -- myTask</code>来执行这些任务。任务编写为JavaScript，并且在Nashron的脚本模式下运行，所以你可以使用你的终端、JDK8 API和任意Java库的全部功能。</p>
+<p>对Java开发者来说，编写命令行脚本是前所未有的简单…</p>
+<blockquote>
+<p>本文部分内容来自：</p>
+<p><a target="_blank" rel="noopener" href="https://wizardforcel.gitbooks.io/modern-java/content/ch3.html">https://wizardforcel.gitbooks.io/modern-java/content/ch3.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/10/nashorn/nashorn-java-api.htm">https://docs.oracle.com/javase/10/nashorn/nashorn-java-api.htm</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-nashorn">https://www.baeldung.com/java-nashorn</a></p>
+</blockquote>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2018/12/02/Introduction-to-Nashorn/" data-title="介绍 Nashorn —— Java 8 JavaScript 引擎 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/12/05/Advanced-Mixin-Usage-Callback-Injectors/" title="高级Mixin用法——回调注入器">
+  <strong>上一篇：</strong><br/>
+  <span>
+  高级Mixin用法——回调注入器</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/11/27/Introduce-to-Pluggable-Annotation-Processing-API/"  title="插入式注解处理API（JSR269）介绍">
+ <strong>下一篇：</strong><br/> 
+ <span>插入式注解处理API（JSR269）介绍
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '介绍 Nashorn —— Java 8 JavaScript 引擎',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#jjs"><span class="toc-number">1.</span> <span class="toc-text">jjs</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8Java%E4%B8%AD%E8%B0%83%E7%94%A8Nashorn%E5%BC%95%E6%93%8E"><span class="toc-number">2.</span> <span class="toc-text">在Java中调用Nashorn引擎</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%AF%91JavaScript%E4%BB%A3%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">编译JavaScript代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E6%95%B0%E6%8D%AE%E5%88%B0%E8%84%9A%E6%9C%AC"><span class="toc-number">4.</span> <span class="toc-text">传递数据到脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8Java%E4%B8%AD%E8%B0%83%E7%94%A8JavaScript%E5%87%BD%E6%95%B0"><span class="toc-number">5.</span> <span class="toc-text">在Java中调用JavaScript函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E7%94%A8Java%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E5%92%8C%E5%AD%97%E6%AE%B5"><span class="toc-number">6.</span> <span class="toc-text">调用Java静态方法和字段</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAJava%E5%AF%B9%E8%B1%A1"><span class="toc-number">7.</span> <span class="toc-text">创建Java对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BF%E9%97%AEJava%E7%B1%BB%E7%9A%84%E8%A1%A5%E5%85%85%E8%AF%B4%E6%98%8E"><span class="toc-number">8.</span> <span class="toc-text">访问Java类的补充说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%89%A9%E5%B1%95"><span class="toc-number">9.</span> <span class="toc-text">语言扩展</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E6%95%B0%E7%BB%84"><span class="toc-number">9.1.</span> <span class="toc-text">类型数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8foreach%E8%AF%AD%E5%8F%A5%E8%BF%AD%E4%BB%A3%E6%95%B0%E7%BB%84%E6%88%96%E9%9B%86%E5%90%88"><span class="toc-number">9.2.</span> <span class="toc-text">用foreach语句迭代数组或集合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="toc-number">9.3.</span> <span class="toc-text">函数字面量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E6%8D%95%E8%8E%B7%E8%AF%AD%E5%8F%A5"><span class="toc-number">9.4.</span> <span class="toc-text">条件捕获语句</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8Object-setPrototypeOf%E8%AE%BE%E7%BD%AE%E5%AF%B9%E8%B1%A1%E5%8E%9F%E5%9E%8B"><span class="toc-number">9.5.</span> <span class="toc-text">用Object.setPrototypeOf设置对象原型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8C%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="toc-number">9.6.</span> <span class="toc-text">Lambda表达式和数据流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E7%9A%84%E7%BB%A7%E6%89%BF"><span class="toc-number">9.7.</span> <span class="toc-text">类的继承</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E9%87%8D%E8%BD%BD"><span class="toc-number">9.8.</span> <span class="toc-text">函数重载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java-Beans"><span class="toc-number">9.9.</span> <span class="toc-text">Java Beans</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%9E%E6%80%A7%E7%BB%91%E5%AE%9A"><span class="toc-number">9.10.</span> <span class="toc-text">属性绑定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%89%A9%E5%B1%95"><span class="toc-number">9.11.</span> <span class="toc-text">字符串扩展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%8D%E7%BD%AE"><span class="toc-number">9.12.</span> <span class="toc-text">位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="toc-number">9.13.</span> <span class="toc-text">导入作用域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">9.14.</span> <span class="toc-text">数组转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E8%B6%85%E7%B1%BB"><span class="toc-number">9.15.</span> <span class="toc-text">访问超类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A5%9E%E5%A5%87%E7%9A%84noSuchProperty%E5%92%8CnoSuchMethod"><span class="toc-number">9.16.</span> <span class="toc-text">神奇的noSuchProperty和noSuchMethod</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java-asJSONCompatible-%E5%87%BD%E6%95%B0"><span class="toc-number">9.17.</span> <span class="toc-text">Java.asJSONCompatible 函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%BD%E5%85%A5%E8%84%9A%E6%9C%AC"><span class="toc-number">9.18.</span> <span class="toc-text">载入脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ScriptObjectMirror"><span class="toc-number">10.</span> <span class="toc-text">ScriptObjectMirror</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%90%E5%88%B6%E8%84%9A%E6%9C%AC%E5%AF%B9%E7%89%B9%E5%AE%9AJava%E7%B1%BB%E7%9A%84%E8%AE%BF%E9%97%AE"><span class="toc-number">11.</span> <span class="toc-text">限制脚本对特定Java类的访问</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%84%9A%E6%9C%AC"><span class="toc-number">12.</span> <span class="toc-text">命令行脚本</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

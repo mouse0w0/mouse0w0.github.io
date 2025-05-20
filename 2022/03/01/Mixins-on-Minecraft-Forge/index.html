@@ -1,0 +1,664 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>在Minecraft Forge中使用Mixin | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：Mixins on Minecraft Forge  Mixin现在作为库与Minecraft Forge一同发布，这意味着不再需要像传统版本那样，将Mixin嵌入到模组Jar中。实际上，这样做会引发问题。 如混淆与Mixin一章中所述，当你为生产环境构建模组时，某些Mixin功能需要特殊处理才能跨越混淆边界。本指南说明了如何在Forge UserDev环境中使用Mixin功能，以及">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在Minecraft Forge中使用Mixin">
+<meta property="og:url" content="https://mouse0w0.github.io/2022/03/01/Mixins-on-Minecraft-Forge/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：Mixins on Minecraft Forge  Mixin现在作为库与Minecraft Forge一同发布，这意味着不再需要像传统版本那样，将Mixin嵌入到模组Jar中。实际上，这样做会引发问题。 如混淆与Mixin一章中所述，当你为生产环境构建模组时，某些Mixin功能需要特殊处理才能跨越混淆边界。本指南说明了如何在Forge UserDev环境中使用Mixin功能，以及">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-01T15:00:00.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.964Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta property="article:tag" content="Forge">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2022/03/01/Mixins-on-Minecraft-Forge/" title="在Minecraft Forge中使用Mixin" itemprop="url">在Minecraft Forge中使用Mixin</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2022-03-01T15:00:00.000Z" itemprop="datePublished"> 发表于 2022-03-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-1-%E6%B7%BB%E5%8A%A0MixinGradle%E6%8F%92%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">步骤 1 - 添加MixinGradle插件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2-%E6%B7%BB%E5%8A%A0Mixin%E6%B3%A8%E8%A7%A3%E5%A4%84%E7%90%86%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">步骤 2 - 添加Mixin注解处理器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2-1-%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%9C%89%E5%85%B6%E5%AE%83%E5%90%AB%E6%9C%89Mixin%E7%9A%84%E6%BA%90%E4%BB%A3%E7%A0%81%E9%9B%86"><span class="toc-number">2.1.</span> <span class="toc-text">步骤 2.1 - 如果你有其它含有Mixin的源代码集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-3-%E9%85%8D%E7%BD%AEMixinGradle"><span class="toc-number">3.</span> <span class="toc-text">步骤 3 - 配置MixinGradle</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E8%A6%81%E8%AE%BE%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">重要设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%94%A8%E8%AE%BE%E7%BD%AE"><span class="toc-number">3.2.</span> <span class="toc-text">实用设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-4-1-%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%9C%89%E5%85%B6%E5%AE%83%E5%90%AB%E6%9C%89Mixin%E7%9A%84%E6%BA%90%E4%BB%A3%E7%A0%81%E9%9B%86"><span class="toc-number">3.3.</span> <span class="toc-text">步骤 4.1 - 如果你有其它含有Mixin的源代码集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E8%A7%A3%E5%A4%84%E7%90%86%E5%99%A8%E9%80%89%E9%A1%B9"><span class="toc-number">4.</span> <span class="toc-text">注解处理器选项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%A6%E6%9C%89%E9%80%89%E9%A1%B9%E7%9A%84mixin%E9%97%AD%E5%8C%85%E7%A4%BA%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">带有选项的mixin闭包示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0Mixin%E7%89%88%E6%9C%AC"><span class="toc-number">6.</span> <span class="toc-text">如何找到Mixin版本</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Mixins-on-Minecraft-Forge">Mixins on Minecraft Forge</a></p>
+</blockquote>
+<p>Mixin现在作为库与<a target="_blank" rel="noopener" href="https://www.minecraftforge.net/">Minecraft Forge</a>一同发布，这意味着不再需要像传统版本那样，将Mixin嵌入到模组Jar中。实际上，这样做会引发问题。</p>
+<p>如<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Obfuscation-and-Mixins">混淆与Mixin</a>一章中所述，当你为生产环境构建模组时，某些Mixin功能需要特殊处理才能跨越<em>混淆边界</em>。本指南说明了如何在Forge UserDev环境中使用Mixin功能，以及如何配置构建，以便为Mixin正确生成混淆信息。</p>
+<p>本指南假定你已经创建了一个<strong>包（Package）</strong>来包含你的Mixin和一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment#mixin-configuration-files">Mixin配置</a>来声明Mixin和选项。</p>
+<p>为了配置要在开发中运行的项目，我们将对<code>build.gradle</code>进行如下更改，并管理混淆：</p>
+<ol>
+<li>添加<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/MixinGradle">MixinGradle</a>插件。</li>
+<li>添加Mixin<strong>注解处理器（Annotation Processor）</strong>依赖。</li>
+<li>通过<code>mixin</code>闭包（Closure）为<strong>MixinGradle</strong>配置选项。</li>
+</ol>
+<blockquote>
+<p>在本指南中，将假定你的Mixin配置名为<code>mixins.mymod.json</code>，而refmap被命名为<code>mixins.mymod.refmap.json</code>，并且你只使用了<code>main</code>源代码集（SourceSet）。</p>
+</blockquote>
+<h2 id="步骤-1-添加MixinGradle插件"><a href="#步骤-1-添加MixinGradle插件" class="headerlink" title="步骤 1 - 添加MixinGradle插件"></a>步骤 1 - 添加MixinGradle插件</h2><p>打开你的<code>build.gradle</code>文件并在文件顶部找到<code>buildscript</code>块。在<code>buildscript</code>块内的<code>repositories</code>块的正下方是<code>dependencies</code>块，它指定了构建脚本本身（而不是项目）所需的依赖关系。我们将添加<strong>MixinGradle</strong>依赖项，以便加载插件：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">       ...</span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="attr">group:</span> <span class="string">&#x27;net.minecraftforge.gradle&#x27;</span>, <span class="attr">name:</span> <span class="string">&#x27;ForgeGradle&#x27;</span>, <span class="attr">version:</span> <span class="string">&#x27;5.1.+&#x27;</span>, <span class="attr">changing:</span> <span class="literal">true</span></span><br><span class="line">        <span class="comment">// 添加 MixinGradle 插件</span></span><br><span class="line">        classpath <span class="string">&#x27;org.spongepowered:mixingradle:0.7.+&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在已经注册了依赖项，我们可以将插件应用到我们的构建中。在<code>buildscript</code>块的正下方，你将看到已经应用了三个插件。我们将在现有插件下面添加<strong>MixinGradle</strong>：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;net.minecraftforge.gradle&#x27;</span></span><br><span class="line"><span class="comment">// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;eclipse&#x27;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;maven-publish&#x27;</span></span><br><span class="line"><span class="comment">// 应用 MixinGradle 插件</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;org.spongepowered.mixin&#x27;</span></span><br></pre></td></tr></table></figure>
+<h2 id="步骤-2-添加Mixin注解处理器"><a href="#步骤-2-添加Mixin注解处理器" class="headerlink" title="步骤 2 - 添加Mixin注解处理器"></a>步骤 2 - 添加Mixin注解处理器</h2><p><strong>MixinGradle</strong>的工作是<em>配置</em>Mixin注解处理器（AP），但是AP不是自动应用的，我们需要将其作为依赖项添加。AP依赖项应该与项目中使用的版本相同或更高（如果不确定使用的是哪个版本的Mixin，请参阅本指南末尾的部分）。</p>
+<p>要将Mixin AP依赖项添加到项目中，请找到该项目的<code>dependencies</code>块。<strong>这_不是_Gradle文件顶部<code>buildscript</code>块中的<code>dependencies</code>块，而是文件下面更大的<code>dependencies</code>块。</strong>在本指南中，我们假定版本为<code>0.8.5</code>（撰写本文时的当前版本）。</p>
+<p>它当前应该包含<code>minecraft</code>依赖项和一组注释，以及您手动添加的任何其它依赖项。<code>main</code>的AP配置称为<code>annotationProcessor</code>。将Mixin AP依赖项添加到<code>dependencies</code>块：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// Specify the version of Minecraft to use. If this is any group other than &#x27;net.minecraft&#x27;, it is assumed</span></span><br><span class="line">    <span class="comment">// that the dep is a ForgeGradle &#x27;patcher&#x27; dependency, and its patches will be applied.</span></span><br><span class="line">    <span class="comment">// The userdev artifact is a special name and will get all sorts of transformations applied to it.</span></span><br><span class="line">    minecraft <span class="string">&#x27;net.minecraftforge:forge:1.17.1-37.0.70&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 应用 Mixin AP</span></span><br><span class="line">    annotationProcessor <span class="string">&#x27;org.spongepowered:mixin:0.8.5:processor&#x27;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，AP依赖项含有额外的<em>分类词</em><code>processor</code>。这是一个特殊的臃肿Jar（Fat Jar），其中包含Mixin AP所需的上游依赖项，因此你不必手动指定它们。</p>
+</blockquote>
+<h3 id="步骤-2-1-如果你有其它含有Mixin的源代码集"><a href="#步骤-2-1-如果你有其它含有Mixin的源代码集" class="headerlink" title="步骤 2.1 - 如果你有其它含有Mixin的源代码集"></a>步骤 2.1 - 如果你有其它含有Mixin的源代码集</h3><p><em>如果你只有一个源代码集（SourceSet）<code>main</code>，你可以跳过本节。</em></p>
+<p>额外的源代码集将有相应的<em>Gradle配置</em>，用于定义它们的依赖关系。如果你有其它含有Mixin的源代码集，那么每个源代码集都需要自己的<strong>参考映射（Reference Map）</strong>（下面将详细介绍），每个源代码集都需要配置Mixin AP依赖项。</p>
+<p>让我们假定你有额外的名为<code>client</code>和<code>api</code>的源代码集。相应的配置名称将是<code>clientAnnotationProcessor</code>和<code>apiAnnotationProcessor</code>，将Mixin AP添加到其中：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// Specify the version of Minecraft to use. If this is any group other than &#x27;net.minecraft&#x27;, it is assumed</span></span><br><span class="line">    <span class="comment">// that the dep is a ForgeGradle &#x27;patcher&#x27; dependency, and its patches will be applied.</span></span><br><span class="line">    <span class="comment">// The userdev artifact is a special name and will get all sorts of transformations applied to it.</span></span><br><span class="line">    minecraft <span class="string">&#x27;net.minecraftforge:forge:1.17.1-37.0.70&#x27;</span></span><br><span class="line"></span><br><span class="line">    annotationProcessor <span class="string">&#x27;org.spongepowered:mixin:0.8.5:processor&#x27;</span></span><br><span class="line">    clientAnnotationProcessor <span class="string">&#x27;org.spongepowered:mixin:0.8.5:processor&#x27;</span></span><br><span class="line">    apiAnnotationProcessor <span class="string">&#x27;org.spongepowered:mixin:0.8.5:processor&#x27;</span></span><br></pre></td></tr></table></figure>
+<h2 id="步骤-3-配置MixinGradle"><a href="#步骤-3-配置MixinGradle" class="headerlink" title="步骤 3 - 配置MixinGradle"></a>步骤 3 - 配置MixinGradle</h2><p><strong>MixinGradle</strong>提供了一个名为<code>mixin</code>的<em>扩展</em>，允许我们配置插件的选项，<strong>MixinGradle</strong>然后将这些设置应用到适当的位置。要配置扩展，请指定扩展名和包含我们设置的闭包。这可以放在构建中的任何地方，但我建议将其放在<code>sourceSets</code>或<code>dependencies</code>块之后：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mixin &#123;</span><br><span class="line">    <span class="comment">// MixinGradle 设置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="重要设置"><a href="#重要设置" class="headerlink" title="重要设置"></a>重要设置</h3><p><strong>MixinGradle</strong>可以配置AP选项，但我们需要告诉它要为每个编译任务生成的refmap的名称，这必须与配置JSON中的refmap名称相对应。</p>
+<blockquote>
+<p>请注意，同一源代码集中的配置都应该指定相同的refmap名称，而不管它们包含哪些Mixin。这是因为refmap与SourceSet的compile任务耦合在一起，而不关心你的配置中的Mixin的组织方式。</p>
+</blockquote>
+<p>我们还可以指定Mixin配置的名称，这将执行两个任务：</p>
+<ul>
+<li>配置将被注入到我们所有的<em>运行配置</em>中。</li>
+<li>配置名称将添加到所有混淆Jar的Manifest中（在<code>MixinConfigs</code>键中）。</li>
+</ul>
+<p>让我们将<code>main</code>源代码集的refmap名称和配置名称添加到<code>mixin</code>闭包中：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mixin &#123;</span><br><span class="line">    <span class="comment">// MixinGradle 设置</span></span><br><span class="line">    add sourceSets.main, <span class="string">&#x27;mixins.mymod.refmap.json&#x27;</span></span><br><span class="line">    config <span class="string">&#x27;mixins.mymod.json&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="实用设置"><a href="#实用设置" class="headerlink" title="实用设置"></a>实用设置</h3><p><code>mixin</code>闭包也可用于配置选项，如Mixin<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Mixin-Java-System-Properties">系统属性</a>（用于开发运行）和<em>Mixin注解处理器</em>的选项。例如，我建议在开发期间设置<code>mixin.debug.verbose</code>和<code>mixin.debug.export</code>。为了方便起见，我们可以在<code>mixin</code>闭包中设置这些属性：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mixin &#123;</span><br><span class="line">    <span class="comment">// MixinGradle 设置</span></span><br><span class="line">    add sourceSets.main, <span class="string">&#x27;mixins.mymod.refmap.json&#x27;</span></span><br><span class="line">    config <span class="string">&#x27;mixins.mymod.json&#x27;</span></span><br><span class="line"></span><br><span class="line">    debug.verbose = <span class="literal">true</span></span><br><span class="line">    debug.export = <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在更改影响运行配置的任何设置后，请记住使用<code>genEclipseRuns</code>，<code>genIntellijRuns</code>或<code>genVSCodeRuns</code>任务重新生成运行配置！</p>
+</blockquote>
+<h3 id="步骤-4-1-如果你有其它含有Mixin的源代码集"><a href="#步骤-4-1-如果你有其它含有Mixin的源代码集" class="headerlink" title="步骤 4.1 - 如果你有其它含有Mixin的源代码集"></a>步骤 4.1 - 如果你有其它含有Mixin的源代码集</h3><p><em>如果你只有一个源代码集（SourceSet）<code>main</code>，你可以跳过本节。</em></p>
+<p>除了<em>Gradle配置</em>，项目中的每一个源代码集都会获得一个对应的<em>Java编译任务</em>，它以源代码集命名。由于每个源代码集都是单独编译的，AP每次都会单独运行，因此每个源代码集都需要一个单独的<em>参考映射</em>（refmap）。基于上面的示例，让我们为<code>client</code>和<code>api</code>源代码集添加refmap名和配置：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mixin &#123;</span><br><span class="line">    add sourceSets.main, <span class="string">&#x27;mixins.mymod.refmap.json&#x27;</span></span><br><span class="line">    add sourceSets.client, <span class="string">&#x27;mixins.mymod.client.refmap.json&#x27;</span></span><br><span class="line">    add sourceSets.api, <span class="string">&#x27;mixins.mymod.api.refmap.json&#x27;</span></span><br><span class="line"></span><br><span class="line">    config <span class="string">&#x27;mixins.mymod.json&#x27;</span></span><br><span class="line">    config <span class="string">&#x27;mixins.mymod.client.json&#x27;</span></span><br><span class="line">    config <span class="string">&#x27;mixins.mymod.api.json&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="注解处理器选项"><a href="#注解处理器选项" class="headerlink" title="注解处理器选项"></a>注解处理器选项</h2><p><strong>MixinGradle</strong>使用所有必需的选项配置AP。但是，Mixin AP选项可以通过<code>mixin</code>闭包进行操纵。以下是一些实用选项：</p>
+<dl>
+  <dt>boolean <tt>disableTargetValidator</tt></dt>
+  <dd>禁用目标验证器（验证Mixin目标是否合理（例如，目标层次结构中存在超类））</dd>
+  <dt>boolean <tt>disableOverwriteChecker</tt></dt>
+  <dd>禁用重写方法检查器，它用来确保<tt>&#64;Overwrite</tt>方法的JavaDoc含有<tt>&#64;author</tt>和<tt>&#64;reason</tt>标记</dd>
+  <dt>String <tt>overwriteErrorLevel</tt></dt>
+  <dd>为重写方法检查器设置错误级别（默认为<tt>warning</tt>，可以被设置为<tt>error</tt>）</dd>
+</dl>
+<dl>
+  <dt><tt>quiet</tt></dt>
+  <dd>抑制来自AP的突出消息和信息输出</dd>
+  <dt><tt>extraMappings</tt></dt>
+  <dd>指定要提供给AP的附加（自定义）TRSG映射文件的名称，这可用于主映射文件中未指定的映射项</dd>
+</dl>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mixin &#123;</span><br><span class="line">    <span class="comment">// AP 设置</span></span><br><span class="line">    disableTargetValidator = <span class="literal">true</span></span><br><span class="line">    overwriteErrorLevel = <span class="string">&#x27;error&#x27;</span></span><br><span class="line">    quiet</span><br><span class="line">    extraMappings file(<span class="string">&quot;my_custom_srgs.tsrg&quot;</span>)</span><br><span class="line">&#125;    </span><br></pre></td></tr></table></figure>
+<h2 id="带有选项的mixin闭包示例"><a href="#带有选项的mixin闭包示例" class="headerlink" title="带有选项的mixin闭包示例"></a>带有选项的<code>mixin</code>闭包示例</h2><p>下面是一个完整的例子，展示了一旦我们配置了所有内容，<code>mixin</code>闭包可能会是什么样子：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mixin &#123;</span><br><span class="line">    <span class="comment">// 每个源代码集的refmap</span></span><br><span class="line">    add sourceSets.main, <span class="string">&#x27;mixins.mymod.refmap.json&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 配置将添加到每个运行配置和Jar</span></span><br><span class="line">    config <span class="string">&#x27;mixins.mymod.json&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 指定开发环境运行配置的选项</span></span><br><span class="line">    debug.verbose = <span class="literal">true</span></span><br><span class="line">    debug.export = <span class="literal">true</span></span><br><span class="line">    dumpTargetOnFailure = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 注解处理器的选项</span></span><br><span class="line">    quiet</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="如何找到Mixin版本"><a href="#如何找到Mixin版本" class="headerlink" title="如何找到Mixin版本"></a>如何找到Mixin版本</h2><p>如果你不确定项目中使用的是哪个版本的Mixin，可以通过以下几种方式找到它：</p>
+<ol>
+<li>在IDE中，检查项目的依赖项列表。例如，在Eclipse中，你可以在<code>Project and External Dependencies</code>容器中查看。</li>
+<li><p>使用<code>gradle dependencies</code>任务将项目的依赖关系树发送到控制台，并使用<code>find</code>（在Windows上）或<code>grep</code>（在Linux上）对其进行过滤：</p>
+<pre><code>gradlew --console=plain dependencies | find &quot;mixin&quot;
+</code></pre><p>这应该会向控制台发出几行代码，辨识Mixin依赖版本应该不会太难。</p>
+</li>
+<li>在开发环境中运行游戏，然后搜索<code>debug.log</code>，查找<code>mixin subsystem version</code>。</li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a><a href="/tags/Forge/">Forge</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2022/03/01/Mixins-on-Minecraft-Forge/" data-title="在Minecraft Forge中使用Mixin | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2022/03/01/Mixin-Java-System-Properties/"  title="Mixin参考——Mixin Java系统属性">
+ <strong>下一篇：</strong><br/> 
+ <span>Mixin参考——Mixin Java系统属性
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '在Minecraft Forge中使用Mixin',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-1-%E6%B7%BB%E5%8A%A0MixinGradle%E6%8F%92%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">步骤 1 - 添加MixinGradle插件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2-%E6%B7%BB%E5%8A%A0Mixin%E6%B3%A8%E8%A7%A3%E5%A4%84%E7%90%86%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">步骤 2 - 添加Mixin注解处理器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-2-1-%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%9C%89%E5%85%B6%E5%AE%83%E5%90%AB%E6%9C%89Mixin%E7%9A%84%E6%BA%90%E4%BB%A3%E7%A0%81%E9%9B%86"><span class="toc-number">2.1.</span> <span class="toc-text">步骤 2.1 - 如果你有其它含有Mixin的源代码集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-3-%E9%85%8D%E7%BD%AEMixinGradle"><span class="toc-number">3.</span> <span class="toc-text">步骤 3 - 配置MixinGradle</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E8%A6%81%E8%AE%BE%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">重要设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%94%A8%E8%AE%BE%E7%BD%AE"><span class="toc-number">3.2.</span> <span class="toc-text">实用设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4-4-1-%E5%A6%82%E6%9E%9C%E4%BD%A0%E6%9C%89%E5%85%B6%E5%AE%83%E5%90%AB%E6%9C%89Mixin%E7%9A%84%E6%BA%90%E4%BB%A3%E7%A0%81%E9%9B%86"><span class="toc-number">3.3.</span> <span class="toc-text">步骤 4.1 - 如果你有其它含有Mixin的源代码集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E8%A7%A3%E5%A4%84%E7%90%86%E5%99%A8%E9%80%89%E9%A1%B9"><span class="toc-number">4.</span> <span class="toc-text">注解处理器选项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%A6%E6%9C%89%E9%80%89%E9%A1%B9%E7%9A%84mixin%E9%97%AD%E5%8C%85%E7%A4%BA%E4%BE%8B"><span class="toc-number">5.</span> <span class="toc-text">带有选项的mixin闭包示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0Mixin%E7%89%88%E6%9C%AC"><span class="toc-number">6.</span> <span class="toc-text">如何找到Mixin版本</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

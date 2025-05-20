@@ -1,0 +1,783 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>介绍Mixin——重写方法 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：Introduction to Mixins Overwriting Methods  到目前为止，我们讲解的Mixin功能本质上都是增添，并且不会从根本上改变目标类的原始行为。但在两种情况下，我们可能希望Mixin修改或替换目标类中的内容：  我们希望更改现有方法的行为。 我们希望在已经存在的目标类中定义一个访问器，但是它的名称在被混淆后可能发生变化。  这两种情况都需要我们能够重">
+<meta property="og:type" content="article">
+<meta property="og:title" content="介绍Mixin——重写方法">
+<meta property="og:url" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：Introduction to Mixins Overwriting Methods  到目前为止，我们讲解的Mixin功能本质上都是增添，并且不会从根本上改变目标类的原始行为。但在两种情况下，我们可能希望Mixin修改或替换目标类中的内容：  我们希望更改现有方法的行为。 我们希望在已经存在的目标类中定义一个访问器，但是它的名称在被混淆后可能发生变化。  这两种情况都需要我们能够重">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_19.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_21.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_20.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_22.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_24.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_25.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_26.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_27.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_28.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_29.png">
+<meta property="article:published_time" content="2018-11-07T03:47:18.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.954Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_19.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/" title="介绍Mixin——重写方法" itemprop="url">介绍Mixin——重写方法</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2018-11-07T03:47:18.000Z" itemprop="datePublished"> 发表于 2018-11-07</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%88%BF%E9%97%B4%E9%87%8C%E7%9A%84%E5%A4%A7%E8%B1%A1-%E9%87%8D%E5%86%99"><span class="toc-number">1.</span> <span class="toc-text">1. 房间里的大象 - 重写</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E5%A3%B0%E6%98%8E%E9%87%8D%E5%86%99%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 声明重写方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-%E8%83%BD%E5%8A%9B%E8%B6%8A%E5%A4%A7%EF%BC%8C%E8%B4%A3%E4%BB%BB%E8%B6%8A%E5%A4%A7"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 能力越大，责任越大</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-%E8%AE%A8%E5%8E%8C%E7%9A%84%E6%B7%B7%E6%B7%86%E8%BE%B9%E7%95%8C"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 讨厌的混淆边界</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-3-1-%E4%BD%BF%E7%94%A8-Overwrite-%E6%B3%A8%E8%A7%A3"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1 使用 @Overwrite 注解</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-Overwrite-%E6%B3%A8%E8%A7%A3%E7%9A%84%E5%85%B6%E4%BB%96%E7%94%A8%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 @Overwrite 注解的其他用法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%9B%BA%E6%9C%89%E4%BB%A3%E7%90%86%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">2. 固有代理方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-The-Intrinsic-Quack-and-the-Obfuscated-Duck-Hunt"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 The Intrinsic Quack and the Obfuscated Duck Hunt</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-The-Polite-Overwrite-Won%E2%80%99t-Fight-for-the-Right-to-um%E2%80%A6-Blight"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 The Polite Overwrite Won’t Fight for the Right to um… Blight?</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E4%BB%A3%E7%90%86%E5%9B%BA%E6%9C%89%E6%96%B9%E6%B3%95"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 代理固有方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.</span> <span class="toc-text">3. 约束</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E5%9C%A8%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%8E%AF%E5%A2%83%E4%B8%AD%E7%AE%A1%E7%90%86%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 在应用程序环境中管理约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E4%BD%BF%E7%94%A8%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 使用约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-%E9%80%89%E6%8B%A9%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 选择约束</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">4. 总结</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods"><br>Introduction to Mixins Overwriting Methods</a></p>
+</blockquote>
+<p>到目前为止，我们讲解的Mixin功能本质上都是<strong>增添</strong>，并且不会从根本上改变目标类的原始行为。但在两种情况下，我们可能希望Mixin修改或替换目标类中的内容：</p>
+<ol>
+<li>我们希望更改现有方法的行为。</li>
+<li>我们希望在已经存在的目标类中定义一个访问器，但是它的名称在被混淆后可能发生变化。</li>
+</ol>
+<p>这两种情况都需要我们能够<strong>重写</strong>目标类中的某些部分。</p>
+<h3 id="1-房间里的大象-重写"><a href="#1-房间里的大象-重写" class="headerlink" title="1. 房间里的大象 - 重写"></a>1. 房间里的大象 - 重写</h3><p><em>重写（Overwrite）</em>是Mixin中最微妙的功能，通常应尽量使用<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Rerouters">回调注入器（Callback Injectors）</a>、<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Callback-Injectors">重路由器（Rerouters）</a>或其他Mixin代码注入功能。</p>
+<p>让我们花一点时间来回顾我们在<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture#6-is-it-a-bird-is-it-a-plane-no-its-superclass">本教程的第一部分</a>中的例子，使用Mixin将<code>setLevel</code>方法添加到目标类中：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_19.png" alt></p>
+<p>Mixin中含有没有多余修饰的附加方法，并且该方法将被添加到目标类中。在Mixin应用之后，该方法将存在于目标类中，就好像它一直存在一样。我已经用<img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_21.png" alt>标记了Mixin方法，以便于合并时更容易找到它：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_20.png" alt></p>
+<p>因此，下一个问题是：<em>如果我们在Mixin中声明一个 <strong>已经存在于目标类中的方法</strong>，会发生什么？</em></p>
+<p>答案是，<strong><em>Mixin</em> 方法完全重写了 <em>原始</em> 方法</strong>。</p>
+<h4 id="1-1-声明重写方法"><a href="#1-1-声明重写方法" class="headerlink" title="1.1 声明重写方法"></a>1.1 声明重写方法</h4><p>让我们来看一个简单的例子。我们将假定<code>EntityPlayer</code>中的<code>getLevel()</code>方法不按接口所需的方式运行。也许按照接口约定，调用<code>getLevel()</code>应该总是返回非负值，但<code>EntityPlayer</code>的内部代码不能避免负等级，我们希望避开这种情况。</p>
+<p>我们将为<code>getLevel()</code>定义一个遵守接口约定的新方法体：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mixin(EntityPlayer.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">MixinEntityPlayer</span></span><br><span class="line">    <span class="keyword">extends</span> <span class="title class_">Entity</span></span><br><span class="line">    <span class="keyword">implements</span> <span class="title class_">LivingThing</span>, Leveller &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Shadow</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> level;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 该方法重写了目标类中的getLevel方法</span></span><br><span class="line"><span class="comment">     * 并确保它返回非负值</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getLevel</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Math.max(<span class="built_in">this</span>.level, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setLevel</span><span class="params">(<span class="type">int</span> newLevel)</span> &#123;</span><br><span class="line">    </span><br><span class="line">        <span class="comment">//... 以下代码略.</span></span><br></pre></td></tr></table></figure>
+<p>现在，当应用Mixin时，在Mixin中定义的<code>getLevel()</code>方法将重写现有的对应部分：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_22.png" alt></p>
+<p>最后类的结构与之前没有什么不同，但包含了我们在<code>getLevel()</code>方法中定义的新逻辑。</p>
+<h4 id="1-2-能力越大，责任越大"><a href="#1-2-能力越大，责任越大" class="headerlink" title="1.2 能力越大，责任越大"></a>1.2 能力越大，责任越大</h4><p>早就应该指出，<strong>重写不是万能的</strong>，它有许多相当明显的缺点，在选择使用它时应该小心。缺点包括但不限于：</p>
+<ul>
+<li>重写完全清除之前应用于该方法的任何转换。这意味着任何其他使用转换器来修改目标方法的Mod都将清除它们的修改。这可能导致另一个Mod，甚至整个游戏变得不稳定。</li>
+<li>和其他Mod一样，其他重写相同方法的Mixin也会发生冲突。拥有最高<strong>优先级</strong>的Mixin将取胜，并且只有来自该Mixin的重写才会实际出现在目标类中。如果稍后有Mixin试图重写拥有较高优先级的Mixin重写的方法，就会发出警告。</li>
+<li>重写更复杂的方法可能导致重写“过时”。例如，如果你决定用原始代码的修改版重写一个方法，那么就应该负责确保该代码在你的Mixin中与其目标保持一致。你可以用<a href="#3-约束">约束</a>（见下文）来帮助你做到这点。</li>
+<li>使用重写可能会导致过早秃头和在交通中大声喊叫的倾向。</li>
+</ul>
+<p>因此，你应该慎重考虑是否使用重写。经过考究，一些适合使用重写的地方是：</p>
+<ul>
+<li><p><strong>简单的方法，例如访问器</strong><br>在这些场景中使用重写以用额外逻辑修饰访问器，可以快速高效地添加诸如参数验证之类的功能。由于获取器和设置器不多变，使用重写来修改它们是快速和直接的。然而，你仍然应该考虑使用<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Callback-Injectors">注入器（Injector）</a>是否更合适。</p>
+</li>
+<li><p><strong>快速原型</strong><br>重写可以方便的另一个地方是，当原型改变，你打算稍后更改使用<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Callback-Injectors">回调注入器（Callback Injector）</a>的方法时。在Mixin中复制原始方法可以快速简单地在开发过程中创建一个“补丁”，尤其是当试图确定最好的方法来改变以适合你需要的方法的行为时。</p>
+</li>
+<li><p><strong>注入器根本无力做到的情况</strong><br>虽然<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Callback-Injectors">回调注入器</a>非常强大，但它们的作用域是有限的，并且你偶尔会遇到它们不符合要求的情况，尤其是在非常复杂或庞大的方法中。与其他情况一样，当选择重写时，应该极度不情愿，但有时这是不得已而为之的。</p>
+</li>
+<li><p><strong>小心那根绳子</strong><br>重写就像是会吊死你的长绳。通过设立一套制度来持续管理所有重写，确保重写不会回头伤害你。我建议你至少：</p>
+<ul>
+<li><strong>当</strong>有人添加重写时，用注释解释<strong>所有</strong>重写的方法，解释<strong>为什么</strong>要使用重写，<strong>谁</strong>添加了重写。持续复查这些注释，以确保重写仍然是必要和有意义的。</li>
+<li>当使用“复制和修改”方式重写时，以原始方法体作为起点，在方法体中<strong>注释你做出的修改</strong>。如果目标方法更改，这将更容易提取和合并更改。</li>
+<li>解释任何用于原型的重写，或“将其转换为注入器”，以便它们不会在代码库中停留过长的时间。</li>
+<li>使用<a href="#3-约束">约束</a>来为重写添加一个健全的检查，下面的章节中提供更多关于这的详细信息。</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-3-讨厌的混淆边界"><a href="#1-3-讨厌的混淆边界" class="headerlink" title="1.3 讨厌的混淆边界"></a>1.3 讨厌的混淆边界</h4><p>你可能想知道<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Obfuscation-and-Mixins">上一节</a>中为什么如此详细地定义了我们所谓的 <em><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Obfuscation-and-Mixins#2-resolving-the-identity-crisis---defining-the-obfuscation-boundary">混淆边界</a></em>。你可能还记得那部分：</p>
+<blockquote>
+<p>任何Mixin特定机制……<strong>将始终使用某种注解进行修饰</strong>。这使得<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor">Mixin注解处理器（Annotation Processor）</a> 能够找到它们，并将处理它们的混淆。</p>
+</blockquote>
+<p>……事实上就是这样。</p>
+<p>如果你仔细想想，这是完全合乎逻辑的：重写方法不会“知道”它将重写一个目标方法<em>直到应用Mixin</em>，此时，它发现它的目标点已经存在原始方法，并且达成了它的重写任务。当不涉及混淆时，这是可行的，但是当存在混淆时，这是非常痛苦的，因为我们需要一些方法“链接”重写与所需的目标方法，以便让注解处理器生成混淆表条目。</p>
+<p>为了做到这一点，我们使用一个简单的注解<code>@Overwrite</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 添加注解到重写中，将其与将被混淆的目标方法链接</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Overwrite</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getLevel</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> Math.max(<span class="built_in">this</span>.level, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-3-1-使用-Overwrite-注解"><a href="#1-3-1-使用-Overwrite-注解" class="headerlink" title="1.3.1 使用 @Overwrite 注解"></a>1.3.1 使用 <code>@Overwrite</code> 注解</h5><p>用<code>@Overwrite</code>来修饰一个方法会使注解处理器在编译时寻找目标方法。如果没有找到混淆映射，注解处理器将发出一个错误。</p>
+<p>这意味着：</p>
+<ul>
+<li><p>在你的Mixin中为一个不是混淆的方法定义一个<strong>重写</strong>，你应该简单地<strong>声明方法</strong>。</p>
+</li>
+<li><p>为一个混淆方法定义一个<strong>重写</strong>，你应该<strong>声明该方法并用<code>@Overwrite</code>注解注解它</strong>。</p>
+</li>
+</ul>
+<p>你还应该记住，任何包含重写方法的Mixin<em>不能超出目标类的范围</em>。原因是，即使所有目标类在MCP环境中定义具有相同名称和相同签名的方法，但这并不表示所有混淆环境的每个方法都具有唯一名称。可能可以使用别名来解决此问题，但这是不推荐的。</p>
+<h4 id="1-4-Overwrite-注解的其他用法"><a href="#1-4-Overwrite-注解的其他用法" class="headerlink" title="1.4 @Overwrite 注解的其他用法"></a>1.4 <code>@Overwrite</code> 注解的其他用法</h4><p><code>@Overwrite</code>注解还有一个最终用途。为目标类中的<code>public static</code>方法定义重写。</p>
+<p>默认情况下，在Mixin中声明一个<code>public static</code>方法会引起<code>Id10t Error</code>，因为无法调用以这种方式定义的方法！然而应该知道的是，重写为这种无意义的操作提供了一个用例。用<code>@Overwrite</code>注解方法将绕过限制，并允许在Mixin中定义<code>public static</code>方法。</p>
+<h3 id="2-固有代理方法"><a href="#2-固有代理方法" class="headerlink" title="2. 固有代理方法"></a>2. 固有代理方法</h3><p>虽然常规的重写的行为易于理解和相当可预测，但是它们缺乏灵活性，给Mixin设计来带了一些挑战，而这些挑战不容易克服。好消息是Mixin提供了内置功能来应对这些问题，坏消息是这个功能最初看起来会相当复杂。为了更清楚地理解这些功能，我们将逐步解决这个问题。</p>
+<h4 id="2-1-The-Intrinsic-Quack-and-the-Obfuscated-Duck-Hunt"><a href="#2-1-The-Intrinsic-Quack-and-the-Obfuscated-Duck-Hunt" class="headerlink" title="2.1 The Intrinsic Quack and the Obfuscated Duck Hunt"></a>2.1 The Intrinsic Quack and the Obfuscated Duck Hunt</h4><p>Mixin的关键任务之一是通过使用Mixin将自己的接口应用到现有对象，在Java应用程序中提供伪鸭子类型功能。有时现有类中的方法<em>已经</em>实现了接口方法，我们称这种类型的方法为<em>固有（Intrinsic）</em>方法，因为它是现有类的一部分：实际上我们的类已经——从本质上——就知道如何嘎嘎叫。</p>
+<p>但是有一个问题：如果固有方法被混淆了会发生什么？答案是——对象一旦被混淆，就不再会嘎嘎叫，一旦越过混淆边界，接口约定就会被破坏。</p>
+<p>让我们来看一个简单的例子。在本例中，我们将使用与前一篇文章中相同的类和接口，但我们将假设<code>Identifyable</code>接口不会与目标对象冲突：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_24.png" alt></p>
+<p>正如我们所见的，Mixin中不需要实现<code>getID</code>，因为类<code>Foo</code>本质上已经实现了接口。但是，混淆之后，类、字段和方法名称都发生了变化，我们遇到了一个问题：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_25.png" alt></p>
+<p>既然方法不再有实现，任何使用者如果试图调用该方法，都会引发<code>AbstractMethodError</code>。</p>
+<p>有一个使用我们已知功能的方法可以解决这个问题：</p>
+<ul>
+<li><p><strong>用原始方法的副本重写该方法</strong><br>这似乎是最直白的，当然也是最简单的方法。如我们所知，省略<code>@Overwrite</code>注解会导致重写<em>不</em>被混淆。这意味着，在我们的开发环境中（方法和字段名不被混淆），该方法将简单地重写目标中的现有方法：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_26.png" alt></p>
+<p>在混淆之后，重写神奇地转换为<em>新</em>的访问器，因为方法合并的语义意味着该方法将简单地添加到目标类：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_27.png" alt></p>
+</li>
+</ul>
+<p>这种方法的两个主要缺点是，首先，它需要将原始方法复制到Mixin中，这对于简单的访问器来说是可以接受的，但对于更复杂的方法可能是有问题的，因为它再次使我们处于需要手动保持功能与目标方法等同的处境。如果目标方法改变，那么我们必须更新重写。其次，我们可能最终需要为那些我们并不真正感兴趣的字段创建影子，并且宁愿通过现有类的公共约定（例如，通过原始访问器）进行访问，而对于更复杂的方法，这可能有更多的影子字段。除了复制原始方法的功能之外，我们对这些字段并不真正感兴趣，因此添加它们只会造成代码混乱。</p>
+<p><strong>固有代理（Intrinsic Proxy）</strong>方法允许我们在出现这种情况时对重写过程进行细粒度控制（Finer-grained Control）。</p>
+<h4 id="2-2-The-Polite-Overwrite-Won’t-Fight-for-the-Right-to-um…-Blight"><a href="#2-2-The-Polite-Overwrite-Won’t-Fight-for-the-Right-to-um…-Blight" class="headerlink" title="2.2 The Polite Overwrite Won’t Fight for the Right to um… Blight?"></a>2.2 The Polite Overwrite Won’t Fight for the Right to um… Blight?</h4><p>我们可以通过引入一种新的重写方式来改善这种状况，具体来说：</p>
+<ul>
+<li><code>“不要重写已经存在的（固有的）方法”</code></li>
+</ul>
+<p>在此情况下，我们创建了上述重写，但是用<code>@Intrinsic</code>注解来修饰它。这有效地声明了重写是针对固有方法的，如果找到了方法，则不应该进行重写。</p>
+<p>虽然这不是一个巨大的改进，但从所有外部代码（目标代码库中的代码）的视角来看，它确实意味着方法的<em>*原始约定保证被保留</em>，这减少了底层方法可能发生的更改，并且不必担忧发生的更改在我们的重写中反映出来。通过运行原始方法始终存在，并且只在生产中添加我们的新方法（供我们自己的代码使用），我们有机会能稍微提高些稳定性。</p>
+<h4 id="2-3-代理固有方法"><a href="#2-3-代理固有方法" class="headerlink" title="2.3 代理固有方法"></a>2.3 代理固有方法</h4><p>当然，这仍然意味着，调用我们的鸭子类型接口的<em>代码</em>调用方法，可能最终与基于环境的方法的不同实现交互，这取决于方法的性质。我们真正希望能够做的是调用原始方法，并在它周围封装一些我们自己的逻辑。</p>
+<p>幸运的是，我们可以把我们的重写定义为一个<strong>固有代理</strong>。</p>
+<p><strong>固有代理方法（Intrinsic Proxy Method）</strong>通过改变重写的行为以工作，使得<em>原始</em>方法是被<em>移动</em>而不是重写。然后，我们可以在所有情况下从重写中调用<em>原始</em>方法。然而，为了定义新的代理方法，我们需要<code>@Shadow</code>原始方法——这会产生冲突。幸运的是，我们确切地知道如何处理冲突：我们使用<strong>软实现</strong>！</p>
+<p>让我们在确切的方向上迈出一小步，将新的访问器转换为软实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mixin(Foo.class)</span></span><br><span class="line"><span class="meta">@Implements(@Interface(iface = Indentifyable.class, prefix = &quot;id$&quot;))</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">MixinFoo</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Shadow</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="type">int</span> <span class="title function_">getID</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 该方法将成为我们的固有代理方法，</span></span><br><span class="line"><span class="comment">     * 它调用访问器的原始（影射）版本。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> id$getID() &#123;</span><br><span class="line">        <span class="comment">// 调用原访问器</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">this</span>.getID();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，在应用Mixin时，前缀将被删除，这意味着在Mixin合并之后，我们将以冲突结束。正如我们所知，Mixin会把这个冲突当作一个<em>重写</em>，让我们回到起点！</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_28.png" alt></p>
+<p>然而，情况变得更糟，因为新方法中对<code>this.getID()</code>的调用<strong>现在变成了自引用</strong>，如果调用该方法，将导致堆栈溢出，因为它将递归地调用自己，直到JVM用完堆栈空间！</p>
+<p>这就是我们的新朋友<code>@Intrinsic</code>再次拯救的地方。<code>@Intrinsic</code>注解具有间接行为，如果目标固有方法已经存在，则它允许目标固有方法不被替换，而是被移动。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 该方法将成为我们的固有代理方法，</span></span><br><span class="line"><span class="comment"> * 它调用访问器的原始（影射）版本。</span></span><br><span class="line"><span class="comment"> * 当方法被重写时，</span></span><br><span class="line"><span class="comment"> * 使用displace参数以避免重入。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Intrinsic(displace = true)</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">int</span> id$getID() &#123;</span><br><span class="line">    <span class="comment">// 调用原始访问器</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">this</span>.getID();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>添加<code>displace</code>参数会导致固有重写以以下方式表现：</p>
+<ul>
+<li>如果固有对应项不存在（例如，如果方法在具有不同名称的混淆环境中），则新代理方法将像往常一样简单地添加到目标类中。</li>
+<li>如果固有对应项确实存在，那么会发生三件事：<ol>
+<li>将固有项重命名为新名称。</li>
+<li>代理中对固有项的引用将被更新为新名称。</li>
+<li>然后将代理方法像以前一样添加到目标类中。</li>
+</ol>
+</li>
+</ul>
+<p>这种新的方式使我们自食其力，因为我们确保自己的代码总是调用代理方法，而且原始访问器的约定也总是保持不变。我们还不需要为任何不相关的目标类成员添加影子，而只需要为固有对应项添加影子，从而使得Mixin代码更加清晰。</p>
+<p>我们的新Mixin行为图是这样的：</p>
+<p><img src="/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/mixin_tut_29.png" alt></p>
+<h3 id="3-约束"><a href="#3-约束" class="headerlink" title="3. 约束"></a>3. 约束</h3><p>如上所述，为了避免破坏目标程序，需要仔细地使用重写功能。虽然在Mixin代码库中对重写使用严格的管理方案会有很大的帮助，但是在现实中管理你的产品可能更棘手，特别是当用户在意外环境中部署你的产品时，例如，使用你打算混合的软件的较新版本。</p>
+<p>因此，约束提供了此前没有的健全检查，前提是你能够提供相关信息到可能需要约束的环境。</p>
+<h4 id="3-1-在应用程序环境中管理约束"><a href="#3-1-在应用程序环境中管理约束" class="headerlink" title="3.1 在应用程序环境中管理约束"></a>3.1 在应用程序环境中管理约束</h4><p>约束采用与单个整数值相关联的字符串标记的形式。这些标记的值必须通过<em>标记提供器（Token Provider）</em>的实例与<code>MixinEnvironment</code>注册到Mixin环境中。</p>
+<p>标记完全取决于你，但一般来说，你将希望表示目标应用程序环境的某些方面。假设你能够从应用程序的单例实例中获取目标应用程序的构建号：一个简单的标记提供程序可能如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyTokenProvider</span> <span class="keyword">implements</span> <span class="title class_">ITokenProvider</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> Integer <span class="title function_">getToken</span><span class="params">(String token)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;BUILD&quot;</span>.equals(token)) &#123;</span><br><span class="line">            <span class="keyword">return</span> TargetApplication.getInstance().getBuildNumber();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该标记提供器为标记<code>BUILD</code>返回了应用程序构建号。它为所有其他标记返回<code>null</code>以表示提供器不支持这个标记。在<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment">引导Mixin库</a><br>时，我们必须注册标记提供器的实例。</p>
+<h4 id="3-2-使用约束"><a href="#3-2-使用约束" class="headerlink" title="3.2 使用约束"></a>3.2 使用约束</h4><p>一旦我们在环境中定义了标记，我们就可以定义对重写的约束：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Overwrite(constraints = &quot;BUILD(1234)&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">someHackyOverwrite</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> &#123;</span><br><span class="line">    <span class="comment">// 做一些修改</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该修改方法用一个约束来定义，该约束指示标记<code>BUILD</code><strong>必须被定义</strong>，并且<strong>其值必须为1234</strong>。如果不满足此约束，则Mixin处理器将发生错误并使应用程序崩溃。</p>
+<p>我们也可以定义在一定区间内定义约束，定义一系列可以写入的值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Overwrite(constraints = &quot;BUILD(1230-1240)&quot;)</span></span><br></pre></td></tr></table></figure>
+<p>这允许在1230到1240（包括）之间的值通过，并且也可以写成这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Overwrite(constraints = &quot;BUILD(1230+10)&quot;)</span></span><br></pre></td></tr></table></figure>
+<p>下面给出了约束标识符的完整列表：</p>
+<table>
+    <thead>
+        <tr>
+            <th>约束字符串</th>
+            <th>意义</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td valign="top"><tt>()</tt></td>
+            <td valign="top">该标记必须存在于环境中，但可以有任何值</td>
+        </tr>
+        <tr>
+            <td valign="top"><tt>(1234)</tt>
+            </td><td valign="top">标记值必须为<tt>1234</tt></td>
+        </tr>
+        <tr>
+            <td valign="top"><tt>(1234+)</tt><br>
+<tt>(1234-)</tt><br>
+<tt>(1234&gt;)</tt></td>
+            <td valign="top">所有这些变体都有相同的意义，都可以认为是“1234及以上”</td>
+        </tr>
+        <tr>
+            <td valign="top"><tt>(&lt;1234)</tt></td>
+            <td valign="top">小于1234</td>
+        </tr>
+        <tr>
+            <td valign="top"><tt>(&lt;=1234)</tt></td>
+            <td valign="top">小于或等于1234（相当于<tt>1234&lt;</tt>）</td>
+        </tr>
+        <tr>
+            <td valign="top"><tt>(&gt;1234)</tt></td>
+            <td valign="top">大于1234</td>
+        </tr>
+        <tr>
+            <td valign="top"><tt>(&gt;=1234)</tt></td>
+            <td valign="top">大于或等于1234（相当于<tt>1234&gt;</tt>）</td>
+         </tr>
+        <tr>
+            <td valign="top"><tt>(1234-1300)</tt></td>
+            <td valign="top">值必须在1234至1300（包括）之间</td>
+         </tr>
+        <tr>
+            <td valign="top"><tt>(1234+10)</tt>
+            </td><td valign="top">值必须在1234至1234+10之间（1234-1244包括）</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>可以被表示为整数的目标环境的任何特征都可以作为约束的基础。例如，布尔状态可以表示为1或0。</p>
+<h4 id="3-3-选择约束"><a href="#3-3-选择约束" class="headerlink" title="3.3 选择约束"></a>3.3 选择约束</h4><p>究竟使用哪种约束取决于环境，以及预计方法的变动性。例如，重写一个简单的访问器可认为比重写一个复杂的访问器风险要小得多，因此可以得到更大的约束。对于极易变的方法（在本例中，变动性是方法改变的可能性），那么较小的约束可能是个好主意。</p>
+<p>当然，确切值的“大小”将取决于标记，例如，在一个每天有多个构建的项目上使用构建号，“小”的值可能是100。而对于一个每年只变化几次的项目来说，“小”的值可能是2。当在环境中定义标记时使用你的判断，并在应用程序的开发人员说明中说明标记的预期变动。</p>
+<h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h3><p>重写和固有代理提供了强大的功能，但是必须仔细设计它们，同时考虑诸多因素，并应尽可能避免使用重写和固有代理。</p>
+<p>使用重写作为代码库中的另一个工具，可以在设计Mixin时提供很大的灵活性和权利，不计后果地使用它们，并且不考虑潜在的陷阱，这几乎肯定会在你的应用程序生命周期之后导致问题。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2018/11/07/Introduction-to-Mixins-Overwriting-Methods/" data-title="介绍Mixin——重写方法 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/11/27/Introduce-to-Pluggable-Annotation-Processing-API/" title="插入式注解处理API（JSR269）介绍">
+  <strong>上一篇：</strong><br/>
+  <span>
+  插入式注解处理API（JSR269）介绍</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/11/06/Introduction-to-Mixins-Resolving-Method-Signature-Conflicts/"  title="介绍Mixin——解决方法签名冲突">
+ <strong>下一篇：</strong><br/> 
+ <span>介绍Mixin——解决方法签名冲突
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '介绍Mixin——重写方法',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%88%BF%E9%97%B4%E9%87%8C%E7%9A%84%E5%A4%A7%E8%B1%A1-%E9%87%8D%E5%86%99"><span class="toc-number">1.</span> <span class="toc-text">1. 房间里的大象 - 重写</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E5%A3%B0%E6%98%8E%E9%87%8D%E5%86%99%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 声明重写方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-%E8%83%BD%E5%8A%9B%E8%B6%8A%E5%A4%A7%EF%BC%8C%E8%B4%A3%E4%BB%BB%E8%B6%8A%E5%A4%A7"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 能力越大，责任越大</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-%E8%AE%A8%E5%8E%8C%E7%9A%84%E6%B7%B7%E6%B7%86%E8%BE%B9%E7%95%8C"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 讨厌的混淆边界</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-3-1-%E4%BD%BF%E7%94%A8-Overwrite-%E6%B3%A8%E8%A7%A3"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1 使用 @Overwrite 注解</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-Overwrite-%E6%B3%A8%E8%A7%A3%E7%9A%84%E5%85%B6%E4%BB%96%E7%94%A8%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">1.4 @Overwrite 注解的其他用法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%9B%BA%E6%9C%89%E4%BB%A3%E7%90%86%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">2. 固有代理方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-The-Intrinsic-Quack-and-the-Obfuscated-Duck-Hunt"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 The Intrinsic Quack and the Obfuscated Duck Hunt</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-The-Polite-Overwrite-Won%E2%80%99t-Fight-for-the-Right-to-um%E2%80%A6-Blight"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 The Polite Overwrite Won’t Fight for the Right to um… Blight?</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E4%BB%A3%E7%90%86%E5%9B%BA%E6%9C%89%E6%96%B9%E6%B3%95"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 代理固有方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.</span> <span class="toc-text">3. 约束</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E5%9C%A8%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%8E%AF%E5%A2%83%E4%B8%AD%E7%AE%A1%E7%90%86%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 在应用程序环境中管理约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E4%BD%BF%E7%94%A8%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 使用约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-%E9%80%89%E6%8B%A9%E7%BA%A6%E6%9D%9F"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 选择约束</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">4. 总结</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

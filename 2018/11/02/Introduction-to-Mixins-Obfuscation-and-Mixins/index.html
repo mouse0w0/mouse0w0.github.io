@@ -1,0 +1,694 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>介绍Mixin——混淆与Mixin | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：Introduction to Mixins Obfuscation and Mixins  在我们进一步研究Mixin架构之前，先让我们绕过它去讨论另一个重要主题：Minecraft代码库中的混淆以及它与Mixin的关系。  混淆（Obfuscation）是将原本人类可读的代码符号转换为混淆的代码符号的过程，使得人难以阅读它（事实上，混淆这个词的意思仅仅是“故意使模糊”）。  1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="介绍Mixin——混淆与Mixin">
+<meta property="og:url" content="https://mouse0w0.github.io/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：Introduction to Mixins Obfuscation and Mixins  在我们进一步研究Mixin架构之前，先让我们绕过它去讨论另一个重要主题：Minecraft代码库中的混淆以及它与Mixin的关系。  混淆（Obfuscation）是将原本人类可读的代码符号转换为混淆的代码符号的过程，使得人难以阅读它（事实上，混淆这个词的意思仅仅是“故意使模糊”）。  1.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_lifecycle.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_environments.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/mixin_transformer_chain.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/mixin_transformer_chain_obf.png">
+<meta property="article:published_time" content="2018-11-02T04:39:35.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.953Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_lifecycle.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/" title="介绍Mixin——混淆与Mixin" itemprop="url">介绍Mixin——混淆与Mixin</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2018-11-02T04:39:35.000Z" itemprop="datePublished"> 发表于 2018-11-02</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9C%A8%E6%B7%B7%E6%B7%86%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BC%80%E5%8F%91%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">1.</span> <span class="toc-text">1. 在混淆时代的开发生命周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8C%96%E8%A7%A3%E8%AF%86%E5%88%AB%E5%8D%B1%E6%9C%BA-%E5%AE%9A%E4%B9%89%E2%80%9C%E6%B7%B7%E6%B7%86%E8%BE%B9%E7%95%8C%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">2. 化解识别危机 - 定义“混淆边界”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C"><span class="toc-number">3.</span> <span class="toc-text">3. 如何工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%8EMixin%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">4.</span> <span class="toc-text">4. 与Mixin的关系</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-%E5%A4%84%E7%90%86%E5%BD%B1%E5%AD%90%E5%AD%97%E6%AE%B5%E5%92%8C%E6%96%B9%E6%B3%95%E7%9A%84%E6%B7%B7%E6%B7%86"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 处理影子字段和方法的混淆</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-%E5%85%B6%E4%BB%96Mixin%E7%89%B9%E6%80%A7%E7%9A%84%E6%B7%B7%E6%B7%86"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 其他Mixin特性的混淆</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-The-Nitty-Gritty"><span class="toc-number">5.</span> <span class="toc-text">5. The Nitty Gritty</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-1-%E2%80%9C%E7%A1%AC%E2%80%9D%E4%B8%8E%E2%80%9C%E8%BD%AF%E2%80%9D%E6%B7%B7%E6%B7%86%E5%BC%95%E7%94%A8"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 “硬”与“软”混淆引用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#5-1-1-Mixin%E5%BC%95%E7%94%A8%E6%98%A0%E5%B0%84"><span class="toc-number">5.1.1.</span> <span class="toc-text">5.1.1 Mixin引用映射</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%8D%E6%B7%B7%E6%B7%86%E4%B8%8EMixin"><span class="toc-number">5.2.</span> <span class="toc-text">5.2  运行时反混淆与Mixin</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-%E4%B8%8D%E5%8F%AF%E9%A2%84%E6%B5%8B%E7%9A%84%E6%88%90%E5%91%98%E5%90%8D%E7%A7%B0-%E5%90%88%E6%88%90%E6%8A%8A%E6%88%8F%E7%9A%84%E5%9B%B0%E6%89%B0"><span class="toc-number">5.3.</span> <span class="toc-text">5.3  不可预测的成员名称 - 合成把戏的困扰</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#5-3-1-%E5%88%AB%E5%90%8D"><span class="toc-number">5.3.1.</span> <span class="toc-text">5.3.1 别名</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Obfuscation-and-Mixins">Introduction to Mixins Obfuscation and Mixins</a></p>
+</blockquote>
+<p>在我们进一步研究Mixin架构之前，先让我们绕过它去讨论另一个重要主题：Minecraft代码库中的<em>混淆</em>以及它与Mixin的关系。</p>
+<blockquote>
+<p><em>混淆（Obfuscation）</em>是将原本人类可读的代码符号转换为混淆的代码符号的过程，使得人难以阅读它（事实上，<em>混淆</em>这个词的意思仅仅是“<em>故意使模糊</em>”）。</p>
+</blockquote>
+<h3 id="1-在混淆时代的开发生命周期"><a href="#1-在混淆时代的开发生命周期" class="headerlink" title="1. 在混淆时代的开发生命周期"></a>1. 在混淆时代的开发生命周期</h3><p>由于Minecraft是使用Java编写的，如果不使用混淆技术，则很容易将其反编译为可读代码。Mojang在发布之前对Minecraft进行了混淆，这对模组开发者造成了问题，原因有两个：</p>
+<ol>
+<li>混淆的使用将所有的内容都放在“默认包”中，这使得无法从代码库<code>import</code>类。</li>
+<li>使用混淆后的名称将是一场噩梦，因为代码基本上不可读。</li>
+</ol>
+<p>这就意味着，为了能够基于Minecraft编译我们的代码，有必要预先对Java类进行<strong>反</strong>混淆处理，一个名为<em>Mod Coder Pack</em>（简称MCP）的社区项目提供了遍历的方法。</p>
+<p>一旦我们编写了代码，我们需要<strong>重</strong>混淆我们的Mod代码，以便它可以与原始的（混淆的）代码库一起工作。因此，开发生命周期看起来如下图所示：</p>
+<p><img src="/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_lifecycle.png" alt="混淆生命周期"></p>
+<h3 id="2-化解识别危机-定义“混淆边界”"><a href="#2-化解识别危机-定义“混淆边界”" class="headerlink" title="2. 化解识别危机 - 定义“混淆边界”"></a>2. 化解识别危机 - 定义“混淆边界”</h3><p>让我们从基础知识开始：</p>
+<p>当在开发Minecraft Mod时，字段和方法<strong>至多有3个名称</strong>：</p>
+<ol>
+<li><p><strong>混淆名（简称“OBF名”）</strong> - 这是Mojang分配的名称，作为其<em>混淆</em>代码库的一部分，它通常只有1-2个字母长，例如，一个混淆方法也许名为<code>k</code>。</p>
+</li>
+<li><p><strong>“Searge名”（简称“SRG名”）</strong> - 这是一个分配给字段或方法的唯一的代号，以便使反编译成为可能。它由前缀、唯一ID和成员的（原始）名称组成，例如<code>func_1234_k</code>。</p>
+</li>
+<li><p><strong>“MCP名”</strong> - 这是一个来自社区的更可读的名字，以便使代码库更容易理解。例如<code>getHealth</code>。</p>
+</li>
+</ol>
+<p>在反编译过程中，字段将从一种名称转换为另一种名称，最终止于“友好的”<em>MCP名</em>。在重混淆过程中，反向进行处理。在我们的示例中，方法<code>k</code>变为<code>func_1234_k</code>最终变为<code>getName</code>。</p>
+<p>在每个阶段<strong>所有</strong>字段和方法被重命名，因此每组混淆形成不相关的混淆<em>环境</em>，所有字段和方法具有对应于该环境的名称：</p>
+<p><img src="/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_environments.png" alt="混淆环境"></p>
+<p>我们还将把这些假想环境之间的假想边界称为“<em>混淆边界（Obfuscation Boundary）</em> ”，因为显然<em>跨越</em>边界可能会造成问题。例如，方法<code>getHealth</code>（MCP名）总是希望<code>takeDamage</code>方法在任何特定执行周期都是它的MCP名称，如果同时存在来自不同环境的名称，那么很有可能发生问题。</p>
+<h3 id="3-如何工作"><a href="#3-如何工作" class="headerlink" title="3. 如何工作"></a>3. 如何工作</h3><p>混淆环境之间的转换必须“同时进行”，并且有<em>映射文件（Mapping File）</em>的协助，文件中包含一个名称到另一个名称的映射。这些映射文件包含一个条目，用于代码库中的<em>每一个</em>字段、方法、参数和类。</p>
+<blockquote>
+<p>严格来说，这并不正确，因为MCP名是多人管理的，所以有很多成员没有定义MCP名，但是现在我们假装所有混淆都一直存在，因为现在并不需要讨论该例外。让我们设想一下，未映射的MCP名与SRG名是相同的。</p>
+</blockquote>
+<p>为了确保不仅重命名了符号的声明，而且重命名了对该符号的所有引用，必须同时将重映射应用于整个代码库。虽然SRG名是唯一的并且可以被确定性地重映射，但其他的符号并不那么简单，因此重映射工具需要同时载入和理解整个代码库以便有效进行重映射。</p>
+<p>正因为工具以这种方式工作，对代码结构和关系<em>有</em>一个基本的了解（例如，派生类中重写的方法），所以重映射器才能够重映射对混淆类的引用，甚至在不属于源代码库的类中。通过这种方式，派生类（例如我们在模组中添加的类）和有对重映射方法调用的类（比如我们可以在模组中添加的类）<em>也</em>将重映射这些方法的调用和字段的访问！</p>
+<h3 id="4-与Mixin的关系"><a href="#4-与Mixin的关系" class="headerlink" title="4. 与Mixin的关系"></a>4. 与Mixin的关系</h3><p>你可能想知道为什么你需要了解上述内容，它和Mixin有什么关系？现在你应该清楚的是：</p>
+<ol>
+<li>要以某种方式与游戏类交互的<strong>所有内容</strong>都<strong>必须</strong>通过混淆工具才能用于生产环境。</li>
+<li>任何<strong>直接引用</strong>游戏中的字段、方法和类的东西，都将由重映射器自动处理，因为重映射器已经<strong>理解</strong>了这些关系。</li>
+</ol>
+<p>然而，这并不符合Mixin的情况，因为我们可以在Mixin中创建影子字段和方法，而不是直接引用它们的对应物！</p>
+<h4 id="4-1-处理影子字段和方法的混淆"><a href="#4-1-处理影子字段和方法的混淆" class="headerlink" title="4.1 处理影子字段和方法的混淆"></a>4.1 处理影子字段和方法的混淆</h4><p>你可能会回想起本系列<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture#5-to-light-a-candle-is-to-cast-a-shadow">第一部分</a>，可以将<em>影子</em>成员添加到我们的Mixin中，以指定在运行时目标类中存在的特定方法或字段。这导致的主要问题是混淆器没有建立对这些成员的理解，从而将无法自动混淆它们。</p>
+<p>Mixin通过在编译时解析<code>@Shadow</code>注解，并将影子成员的适当混淆条目直接添加到混淆表中，以解决这个问题。这是由<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor">注解处理器</a>处理的，它插入到Java编译器中。</p>
+<p>众所周知，混淆器已经能够理解派生类中的字段和方法的引用，因此我们只需要为影子成员本身添加混淆表条目，然后自动处理对那些成员的引用。然后，Mixin可以安全地通过混淆边界。</p>
+<h4 id="4-2-其他Mixin特性的混淆"><a href="#4-2-其他Mixin特性的混淆" class="headerlink" title="4.2 其他Mixin特性的混淆"></a>4.2 其他Mixin特性的混淆</h4><p>在本系列之后的内容，你将了解到其他Mixin特性，这些特性需要通过特殊处理来通过混淆边界。在此之上要记住的关键是：</p>
+<ul>
+<li><p>你的Mixin中的任何<strong>直接引用</strong>游戏代码库中的类将被自动处理，例如：</p>
+<ul>
+<li>当Mixin从游戏类派生时，引用父类方法。</li>
+<li>你的Mixin中任何复写了游戏类或接口中的方法的<code>@Override</code>方法。</li>
+<li>你的Mixin中任何对游戏类或成员的外部引用。</li>
+</ul>
+</li>
+<li><p>任何<strong>Mixin特定机制</strong>，例如<em>Shadow</em>、<em>Overwrite</em>（将在下一节中介绍）和<em>Injector</em>（将在稍后介绍），将始终使用某种注解进行修饰。这使得<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor">Mixin注解处理器（Annotation Processor）</a> 能够发现它们，它将处理它们的混淆。</p>
+</li>
+</ul>
+<h3 id="5-The-Nitty-Gritty"><a href="#5-The-Nitty-Gritty" class="headerlink" title="5. The Nitty Gritty"></a>5. The Nitty Gritty</h3><p>如果你正在阅读本系列的介绍，你应该在这里停一下。以下部分提供了一些更详细的技术细节，并且仅出于完整性考虑，这将在之后的部分中引用。它们并不打算仅仅只是介绍一下而已，现在已经给你打过预防针了。</p>
+<h4 id="5-1-“硬”与“软”混淆引用"><a href="#5-1-“硬”与“软”混淆引用" class="headerlink" title="5.1 “硬”与“软”混淆引用"></a>5.1 “硬”与“软”混淆引用</h4><p>传递到SpecialSource<a href="#note1"><sup>1</sup></a>的符号引用当然会像我们预期的那样被重混淆，并且底层字节码中的引用也会因此被重混淆。这种“硬”的重混淆适用于以下类型的成员：</p>
+<ul>
+<li>类引用（仅当混淆到“Notch名”<a href="#note2"><sup>2</sup></a>时，不会应用于Forge）</li>
+<li>方法名</li>
+<li>字段名</li>
+</ul>
+<p>但是，某些成员引用在注解中定义为字符串，特别是：</p>
+<ul>
+<li>Injector声明</li>
+<li>Rerouter声明</li>
+</ul>
+<p>由于SpecialSource不能重映射这些“软”引用，所以使用不同的机制</p>
+<h5 id="5-1-1-Mixin引用映射"><a href="#5-1-1-Mixin引用映射" class="headerlink" title="5.1.1 Mixin引用映射"></a>5.1.1 Mixin引用映射</h5><p>为了允许混淆“软”引用，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor">注解处理器</a>处理映射文件，该映射文件被包含在生产用Jar中，并在<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment#mixin-configuration-files">配置文件</a>中指定。这个<em>引用表（Reference Map，或简称“refmap”）</em>包含Mixin集合中所有到它们混淆的对象的软引用。</p>
+<p>每个编译阶段都放出一个引用映射，因此在对应转换期间编译的每个Mixin集合都应该对该转换使用相同的引用映射。应该选择引用映射的唯一名称以避免冲突。</p>
+<p>例如，假设我们在模组中定义如下的Mixin集合：</p>
+<pre><code>mixins.myproject.core.json
+mixins.myproject.extra.json
+</code></pre><p>我们可以为这两个集合定义一个引用映射文件，并将其命名为<code>mixins.myproject.refmap.json</code>以使其一致。</p>
+<p>注意，在生产用Jar中包含引用映射文件是绝对重要的，并要在Mixin配置中制定他。如果不这样做，将会在Mixin应用时导致错误，因为Mixin的引用将不由Mixin处理器解决。</p>
+<p>在如下情况下，可以省略引用映射文件：</p>
+<ul>
+<li>你的Mixin里没有使用Injector和Rerouter。</li>
+</ul>
+<h4 id="5-2-运行时反混淆与Mixin"><a href="#5-2-运行时反混淆与Mixin" class="headerlink" title="5.2  运行时反混淆与Mixin"></a>5.2  运行时反混淆与Mixin</h4><p>一些特定环境使用部分运行时反混淆。也就是说，它们在运行时将符号反混淆为中间名（SRG名），而其他的则不反混淆。这个部分的转换是为了让模组能够有更稳定的混淆环境，以实现跨多个版本的游戏的目标。</p>
+<p>显然，在应用运行时反混淆后，将Mixin字节码和目标类组合是非常重要的，因此环境中的混淆映射需与Mixin中的混淆映射相匹配。让我们重新看看前文中的图，转换器链中的Mixin概述：</p>
+<p><img src="/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/mixin_transformer_chain.png" alt></p>
+<p>当我们考虑在此图中（在上游转换器链中）在哪里应用运行时反混淆时，我们可以看到反混淆转换器本身如何表示混淆边界，以及为什么必须在该转换器的下游应用Mixin：</p>
+<p><img src="/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/mixin_transformer_chain_obf.png" alt></p>
+<h4 id="5-3-不可预测的成员名称-合成把戏的困扰"><a href="#5-3-不可预测的成员名称-合成把戏的困扰" class="headerlink" title="5.3  不可预测的成员名称 - 合成把戏的困扰"></a>5.3  不可预测的成员名称 - 合成把戏的困扰</h4><p>OBF -&gt; SRG -&gt; MCP的确定性规则的例外是目标类中的合成成员（Synthetic Member）<a href="#note3"><sup>3</sup></a>造成的。虽然混淆代码库中的合成成员也像它们的外部类一样具有混淆名称，但是在开发中会出现问题，因为重新建立的内部类关系导致这些合成成员被剥离，然后被编译器重新创建。</p>
+<p>例如，让我们思考一个非静态内部类对其外部类的引用，通常在由<code>javac</code>生成的类中将其命名为<code>this$0</code>。当被混淆时，这个成员会得到一个使人混乱的名称“<code>a</code>”，并且在反编译过程中交替地重命名为“<code>field_999_a</code>”，最后才得到易于理解的MCP名称“<code>myOuter</code>”。然而，由于在建立开发工作环境的最后阶段就是在源代码中重新集成内部类及其外部类，因此，最终将剥离合成字段，并允许编译器重新创建该字段，从而在原先的“<code>this$0</code>”开发工作空间中给该字段一个名称。</p>
+<p>这造成了一个问题，如果我们希望影射该字段，那么必须将其命名为<code>myOuter</code>（因为映射文件中出现的值就是这样命名的），但如果这样做，那么Shadow在开发时就不能工作，因为实际上并不存在名为<code>myOuter</code>的字段！</p>
+<h5 id="5-3-1-别名"><a href="#5-3-1-别名" class="headerlink" title="5.3.1 别名"></a>5.3.1 别名</h5><p>可以通过指定影子字段的<em>别名</em>来解决这个问题。当试图定位影子字段的目标时，别名作为Mixin处理器的最后一个解决方案存在。如果Mixin处理器无法在目标类中找到所需的字段，那么它会首先检查别名列表，然后再出现错误。</p>
+<p>若要指定Shadow或者Overwrite注解的别名，只需要在注释上确定<code>aliases</code>的值：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Shadow(aliases = &#123;&quot;this$0&quot;&#125;)</span></span><br><span class="line"><span class="keyword">private</span> MyOuterClassType myOuter;</span><br></pre></td></tr></table></figure></p>
+<p>请注意，别名只能用于<code>private</code>字段和方法。这是因为别名只能在Mixin应用时解析，因此字段的重命名只能涉及到所包含的类，而不能进一步扩散（因为此时可能已经加载并使用了派生的类Mixin或其他引用类）。然而，这通常不是问题，因为作为别名机制的起因的合成字段几乎总是私有的或者是包私有的。</p>
+<blockquote>
+<p>译者注：</p>
+<p><a name="note1"><sup>1</sup></a>SpecialSource是Jar混淆映射的自动生成器和重命名器，通常被用于Minecraft反混淆和重混淆的混淆映射表的生成。</p>
+<p><a name="note2"><sup>2</sup></a>Notch名其实就是混淆名（又叫OBF名）。</p>
+<p><a name="note3"><sup>3</sup></a>合成成员（Synthetic Member）是由Java编译器生成的一种特殊的字段（如非静态内部类就有一个引用父类的合成字段）、方法（例如泛型的桥方法，且内部类引用了外部类的字段或方法都会产生相应的合成方法）或类。</p>
+</blockquote>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2018/11/02/Introduction-to-Mixins-Obfuscation-and-Mixins/" data-title="介绍Mixin——混淆与Mixin | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/11/03/How-to-configurate-c-c-debug-in-vscode/" title="如何在VSCode中配置C/C++ Debug">
+  <strong>上一篇：</strong><br/>
+  <span>
+  如何在VSCode中配置C/C++ Debug</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/11/01/Introduction-to-Mixins-The-Mixin-Environment/"  title="介绍Mixin——Mixin环境">
+ <strong>下一篇：</strong><br/> 
+ <span>介绍Mixin——Mixin环境
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '介绍Mixin——混淆与Mixin',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9C%A8%E6%B7%B7%E6%B7%86%E6%97%B6%E4%BB%A3%E7%9A%84%E5%BC%80%E5%8F%91%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">1.</span> <span class="toc-text">1. 在混淆时代的开发生命周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8C%96%E8%A7%A3%E8%AF%86%E5%88%AB%E5%8D%B1%E6%9C%BA-%E5%AE%9A%E4%B9%89%E2%80%9C%E6%B7%B7%E6%B7%86%E8%BE%B9%E7%95%8C%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">2. 化解识别危机 - 定义“混淆边界”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C"><span class="toc-number">3.</span> <span class="toc-text">3. 如何工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%8EMixin%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">4.</span> <span class="toc-text">4. 与Mixin的关系</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-%E5%A4%84%E7%90%86%E5%BD%B1%E5%AD%90%E5%AD%97%E6%AE%B5%E5%92%8C%E6%96%B9%E6%B3%95%E7%9A%84%E6%B7%B7%E6%B7%86"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 处理影子字段和方法的混淆</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-%E5%85%B6%E4%BB%96Mixin%E7%89%B9%E6%80%A7%E7%9A%84%E6%B7%B7%E6%B7%86"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 其他Mixin特性的混淆</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-The-Nitty-Gritty"><span class="toc-number">5.</span> <span class="toc-text">5. The Nitty Gritty</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-1-%E2%80%9C%E7%A1%AC%E2%80%9D%E4%B8%8E%E2%80%9C%E8%BD%AF%E2%80%9D%E6%B7%B7%E6%B7%86%E5%BC%95%E7%94%A8"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 “硬”与“软”混淆引用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#5-1-1-Mixin%E5%BC%95%E7%94%A8%E6%98%A0%E5%B0%84"><span class="toc-number">5.1.1.</span> <span class="toc-text">5.1.1 Mixin引用映射</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8F%8D%E6%B7%B7%E6%B7%86%E4%B8%8EMixin"><span class="toc-number">5.2.</span> <span class="toc-text">5.2  运行时反混淆与Mixin</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-3-%E4%B8%8D%E5%8F%AF%E9%A2%84%E6%B5%8B%E7%9A%84%E6%88%90%E5%91%98%E5%90%8D%E7%A7%B0-%E5%90%88%E6%88%90%E6%8A%8A%E6%88%8F%E7%9A%84%E5%9B%B0%E6%89%B0"><span class="toc-number">5.3.</span> <span class="toc-text">5.3  不可预测的成员名称 - 合成把戏的困扰</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#5-3-1-%E5%88%AB%E5%90%8D"><span class="toc-number">5.3.1.</span> <span class="toc-text">5.3.1 别名</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,739 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>Mixin参考——Mixin Java系统属性 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：Mixin Java System Properties  下表汇总了Mixin支持的Java系统属性，以启用各种调试和审计功能。将任何属性设置为true以启用该选项：                系统属性描述                       mixin.debug       启用所有Mixin调试选项                 mixin.debug.expo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mixin参考——Mixin Java系统属性">
+<meta property="og:url" content="https://mouse0w0.github.io/2022/03/01/Mixin-Java-System-Properties/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：Mixin Java System Properties  下表汇总了Mixin支持的Java系统属性，以启用各种调试和审计功能。将任何属性设置为true以启用该选项：                系统属性描述                       mixin.debug       启用所有Mixin调试选项                 mixin.debug.expo">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-01T07:00:00.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.964Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2022/03/01/Mixin-Java-System-Properties/" title="Mixin参考——Mixin Java系统属性" itemprop="url">Mixin参考——Mixin Java系统属性</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2022-03-01T07:00:00.000Z" itemprop="datePublished"> 发表于 2022-03-01</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Mixin-Java-System-Properties">Mixin Java System Properties</a></p>
+</blockquote>
+<p>下表汇总了Mixin支持的<code>Java系统属性</code>，以启用各种调试和审计功能。将任何属性设置为<code>true</code>以启用该选项：</p>
+<table width="100%">
+  <thead>
+    <tr>
+      <th>系统属性</th><th>描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td valign="top"><code>mixin.debug</code></td>
+      <td valign="top">启用<b>所有</b>Mixin调试选项</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.export</code></td>
+      <td valign="top">
+        <code>export</code>调试选项使Mixin处理器为所有Mixin目标向磁盘导出混入后的字节码。字节码被输出到你的运行目录下的<code>.mixin.out</code>文件夹下的典型包/类结构中。
+        <p>将Fernflower的jar放在运行时类路径上时也会导致这些类文件被反编译。</p>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.export.filter</code></td>
+      <td valign="top">导出过滤器，如果为缺省值，允许导出所有转换的类。如果指定值，则作为要导出的类名的过滤器，并且只导出匹配的类。这在使用Fernflower时非常有用，否则导出可能非常慢。允许使用以下通配符。
+      <dl>
+        <dt>*</dt><dd>匹配除点（.）以外的一个或多个字符</dd>
+        <dt>**</dt><dd>匹配任意数量的字符</dd>
+        <dt>?</dt><dd>仅匹配一个字符</dd>
+      </dl></td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.export.decompile</code></td>
+      <td valign="top">如果设置为false，即使在类路径上找到Fernflower，也会禁用它。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.export.decompile.async</code></td>
+      <td valign="top">在单独的线程中运行Fernflower。一般来说，这将使导出对启动耗时的影响降低（反编译通常会增加大约20%的加载时间），同时注意崩溃可能导致导出未反编译。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.verify</code></td>
+      <td valign="top"><code>verify</code>选项在混入后的字节码上运行ASM的<code>CheckClassAdapter</code>以检查是否正确应用了Mixin转换。此选项仅用于Mixin库，不建议在Mixin的常规调试期间启用。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.verbose</code></td>
+      <td valign="top"><code>verbose</code>选项将Mixin处理器生成的所有<code>DEBUG</code>级别日志消息提升到<code>INFO</code>级别，以便在运行时将它们发送到控制台。当使用Mixin开发时，这是一个非常有用的选项，因为它允许对Mixin应用进程进行更交互式的监控。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.countInjections</code></td>
+      <td valign="top">将失败的注入提升到错误状态。详细信息请参见<a target="_blank" rel="noopener" href="http://jenkins.liteloader.com/job/Mixin/javadoc/org/spongepowered/asm/mixin/injection/Inject.html#expect--"><code>Inject.expect</code></a>。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.strict</code></td>
+      <td valign="top">启用严格检查。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.strict.unique</code></td>
+      <td valign="top">如果为false（默认值），<a target="_blank" rel="noopener" href="http://jenkins.liteloader.com/job/Mixin/javadoc/org/spongepowered/asm/mixin/Unique.html">Unique</a>公共方法仅在遇到问题时发出警告，不会合并到目标中。如果为true，则会抛出异常。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.strict.targets</code></td>
+      <td valign="top">启用对Mixin目标的严格检查。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.debug.profiler</code></td>
+      <td valign="top">为所有Mixin操作启用性能分析器（通常仅在Mixin准备操作期间启用）。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.dumpTargetOnFailure</code></td>
+      <td valign="top">有时，Mixin会失败，并显示一条神秘的消息，例如目标中不存在影子目标，或其他意外错误，这表明目标类未处于特定Mixin预期的状态。有时，这可能是因为另一个转换器正在以Mixin转换器无法预料的方式对字节码进行转换，或者目标类发生了其它意外的更改。启用此选项会导致<code>InvalidMixinException</code>和其他运行时Mixin错误，从而将<i>传入的</i>（未经混入的）类字节码转储到磁盘。这可以使用<code>javap</code>或其它Java反汇编程序检查目标类字节码，以确定不匹配的原因。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.checks</code></td>
+      <td valign="top">启用<b>所有</b>Mixin检查操作</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.checks.interfaces</code></td>
+      <td valign="top">
+        <p>启用<i>接口实现审计模式</i>。启用此模式后，Mixin处理器将为每个应用的Mixin输出一个审计报告，该报告提供了由类方法声明但<i>未由类或任何超类实现</i>的接口方法的摘要，实际上，那些方法在被调用时会导致抛出<code>AbstractMethodError</code>。</p>
+        <p>报告被生成到<code>标准错误（STDERR）</code>输出，也会写入你的运行目录下的<code>.mixin.out</code>文件夹下的平面文件。</p>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.checks.interfaces.strict</code></td>
+      <td valign="top">如果启用了接口检查，“严格模式”（默认）会将实现检查应用于抽象目标类。将此选项设置为<code>false</code>会导致在生成实现报告时跳过抽象目标。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.ignoreConstraints</code></td>
+      <td valign="top">禁用<em>约束检查</em>，将违反约束的情况从致命错误降级为仅输出警告。用于开发或out-of-band目标的in-the-wild测试</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.hotSwap</code></td>
+      <td valign="top">启用热插拔代理。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env</code></td>
+      <td valign="top">环境设置的父级。实际上并不是一个设置。总是为<code>false</code>。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env.obf</code></td>
+      <td valign="top">在必要时强制指定refmap的混淆类型。总是为<code>false</code>。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env.disableRefMap</code></td>
+      <td valign="top">在必要时禁用refmap。
+    </td></tr>
+    <tr>
+      <td valign="top"><code>mixin.env.remapRefMap</code></td>
+      <td valign="top">你可能希望在运行时重新映射现有的refmap，而不是禁用refmap。这可以通过设置此属性，并为<code>mixin.env.refMapRemappingFile</code>和<code>mixin.env.refMapRemappingEnv</code>属性设置值实现。不过，如果通过<code>GradleStart</code>启动，则可以忽略这些属性（如果通过GradleStart加载，此属性也会自动启用）。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env.refMapRemappingFile</code></td>
+      <td valign="top">如果启用<tt>mixin.env.remapRefMap</tt>，则可以使用此设置覆盖从文件中读取的SRG文件名。映射的源类型必须为<code>searge</code>且目标类型必须与当前的开发环境相匹配。 如果源类型不是<code>searge</code>，那么<code>mixin.env.refMapRemappingEnv</code>应设置为正确的源环境类型。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env.refMapRemappingEnv</code></td>
+      <td valign="top">使用<code>mixin.env.refMapRemappingFile</code>时，此设置将覆盖默认源环境（searge）。但是请注意，指定的环境类型必须存在于原始refmap中。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env.ignoreRequired</code></td>
+      <td valign="top">全局忽略所有配置的<code>required</code>属性。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env.compatLevel</code></td>
+      <td valign="top">操作时的默认兼容性级别。</td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.env.shiftByViolation</code></td>
+      <td valign="top">在Mixin中超过<a target="_blank" rel="noopener" href="http://jenkins.liteloader.com/job/Mixin/javadoc/org/spongepowered/asm/mixin/injection/At.html#by--">At.by</a>所定义的最大值时的行为。当前行为是<code>warn</code>. 在Mixin的更高版本中，这可能会升级为<code>error</code>.
+        <p>此选项的可用值包括：</p>
+        <dl>
+          <dt>ignore</dt>
+          <dd>Pre-0.7行为，遇到违规行为时不采取任何操作</dd>
+          <dt>warn</dt>
+          <dd>当前行为，针对违规行为会发出一条<tt>WARN</tt>级别的消息</dd>
+          <dt>error</dt>
+          <dd>违规行为会抛出异常</dd>
+        </dl>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><code>mixin.initialiserInjectionMode</code></td>
+      <td valign="top">初始化注入的行为，当前支持的选项有<code>default</code>和<code>safe</code>。</td>
+    </tr>
+  </tbody>
+</table>
+
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2022/03/01/Mixin-Java-System-Properties/" data-title="Mixin参考——Mixin Java系统属性 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2022/03/01/Mixins-on-Minecraft-Forge/" title="在Minecraft Forge中使用Mixin">
+  <strong>上一篇：</strong><br/>
+  <span>
+  在Minecraft Forge中使用Mixin</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2020/06/25/Introduction-to-PlantUML/"  title="介绍PlantUML">
+ <strong>下一篇：</strong><br/> 
+ <span>介绍PlantUML
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: 'Mixin参考——Mixin Java系统属性',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ 
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

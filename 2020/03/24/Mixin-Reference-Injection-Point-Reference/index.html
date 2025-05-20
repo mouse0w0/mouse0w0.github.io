@@ -1,0 +1,801 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>Mixin参考——注入点参考 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：Injection Point Reference  快速导航     简写名全名     HEADorg.spongepowered.asm.mixin.injection.points.MethodHead     RETURNorg.spongepowered.asm.mixin.injection.points.BeforeReturn     TAILorg.spongep">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mixin参考——注入点参考">
+<meta property="og:url" content="https://mouse0w0.github.io/2020/03/24/Mixin-Reference-Injection-Point-Reference/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：Injection Point Reference  快速导航     简写名全名     HEADorg.spongepowered.asm.mixin.injection.points.MethodHead     RETURNorg.spongepowered.asm.mixin.injection.points.BeforeReturn     TAILorg.spongep">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-03-24T06:03:15.000Z">
+<meta property="article:modified_time" content="2025-05-20T11:48:56.964Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2020/03/24/Mixin-Reference-Injection-Point-Reference/" title="Mixin参考——注入点参考" itemprop="url">Mixin参考——注入点参考</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2020-03-24T06:03:15.000Z" itemprop="datePublished"> 发表于 2020-03-24</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E5%AF%BC%E8%88%AA"><span class="toc-number">1.</span> <span class="toc-text">快速导航</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E6%96%B9%E6%B3%95%E8%B5%B7%E5%A7%8B"><span class="toc-number"></span> <span class="toc-text">在方法起始</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%BF%94%E5%9B%9E%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在返回之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-1"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-1"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-1"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E6%9C%80%E7%BB%88%E8%BF%94%E5%9B%9E%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在最终返回之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-2"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-2"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-2"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%B0%83%E7%94%A8%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在调用之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-3"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-3"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-3"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E4%BB%85%E6%9C%89%E4%B8%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8F%82%E6%95%B0%E7%9A%84Void%E8%BF%94%E5%9B%9E%E5%80%BC%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在仅有一字符串参数的Void返回值方法调用之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-4"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-4"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-4"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%B0%83%E7%94%A8%E4%B9%8B%E5%90%8E"><span class="toc-number"></span> <span class="toc-text">在调用之后</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-5"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-5"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-5"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E5%AD%97%E6%AE%B5%E8%AE%BF%E9%97%AE%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在字段访问之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-6"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-6"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-6"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%B0%83%E7%94%A8%E5%AF%B9%E8%B1%A1%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在调用对象构造方法之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-7"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-7"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-7"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E5%B8%B8%E9%87%8F%E4%BD%BF%E7%94%A8%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在常量使用之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-8"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-8"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-8"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Injection-Point-Reference">Injection Point Reference</a></p>
+</blockquote>
+<h3 id="快速导航"><a href="#快速导航" class="headerlink" title="快速导航"></a>快速导航</h3><table width="100%">
+    <tr><th>简写名</th><th>全名</th></tr>
+    <tr><td><a href="#head">HEAD</a></td><td>org.spongepowered.asm.mixin.injection.points.MethodHead</td></tr>
+    <tr><td><a href="#return">RETURN</a></td><td>org.spongepowered.asm.mixin.injection.points.BeforeReturn</td></tr>
+    <tr><td><a href="#tail">TAIL</a></td><td>org.spongepowered.asm.mixin.injection.points.BeforeFinalReturn</td></tr>
+    <tr><td><a href="#invoke">INVOKE</a></td><td>org.spongepowered.asm.mixin.injection.points.BeforeInvoke</td></tr>
+    <tr><td><a href="#invokestring">INVOKE_STRING</a></td><td>org.spongepowered.asm.mixin.injection.points.BeforeStringInvoke</td></tr>
+    <tr><td><a href="#invokeassign">INVOKE_ASSIGN</a></td><td>org.spongepowered.asm.mixin.injection.points.AfterInvoke</td></tr>
+    <tr><td><a href="#field">FIELD</a></td><td>org.spongepowered.asm.mixin.injection.points.BeforeFieldAccess</td></tr>
+    <tr><td><a href="#new">NEW</a></td><td>org.spongepowered.asm.mixin.injection.points.BeforeNew</td></tr>
+    <tr><td><a href="#constant">CONSTANT</a></td><td>org.spongepowered.asm.mixin.injection.points.BeforeConstant</td></tr>
+</table>
+
+<p><a name="head"></a></p>
+<h2 id="在方法起始"><a href="#在方法起始" class="headerlink" title="在方法起始"></a>在方法起始</h2><blockquote>
+<h3 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>HEAD</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.MethodHead</tt></td></tr>
+<tr><td><b>选项</b></td><td><i>无</i></td></tr>
+<tr><td><b>参数</b></td><td><i>无</i></td></tr>
+</table>
+
+<h3 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h3><p>此注入点始终返回候选列表中的第一条指令。在方法中选择时，始终是方法中的第一条指令；在指令片段（slice）中选择时，始终是指令片段中的第一条指令。</p>
+<h3 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h3><p>此注入点保证只选择一条指令。</p>
+</blockquote>
+<hr>
+<p><a name="return"></a></p>
+<h2 id="在返回之前"><a href="#在返回之前" class="headerlink" title="在返回之前"></a>在返回之前</h2><blockquote>
+<h3 id="概览-1"><a href="#概览-1" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>RETURN</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.BeforeReturn</tt></td></tr>
+<tr><td><b>选项</b></td><td>
+<dl><dt>ordinal</dt><dd>要选中的<tt>RETURN</tt>指令的序号（从<tt>0</tt>开始索引）</dd></dl>
+</td></tr>
+<tr><td><b>参数</b></td><td><i>无</i></td></tr>
+</table>
+
+<h3 id="描述-1"><a href="#描述-1" class="headerlink" title="描述"></a>描述</h3><p>此注入点选择目标指令列表中的<tt>RETURN</tt>（返回）操作符。如果未指定<tt>ordinal</tt>（序号），则选择所有<tt>RETURN</tt>指令。</p>
+<table><thead><tr><th>序号</th><th>检索范围</th><th>结果</th><th>原因</th></tr></thead>
+<tbody>
+<tr><td>省略的</td><td>方法</td><td>1个或更多指令</td><td>方法保证至少有1个<tt>RETURN</tt></td></tr>
+<tr><td>指定的</td><td>方法</td><td>0或1个指令</td><td>与<tt>ordinal</tt>匹配的<tt>RETURN</tt>可能不存在</td></tr>
+<tr><td>省略的</td><td>指令片段</td><td>0个或更多指令</td><td>匹配指令片段中的所有<tt>RETURN</tt>，其中也可能不包含任何<tt>RETURN</tt></td></tr>
+<tr><td>指定的</td><td>指令片段</td><td>0或1个指令</td><td>匹配指令片段中的一个<tt>RETURN</tt>，其中也可能不包含期望的指令</td></tr>
+</tbody></table>
+
+<h3 id="注释-1"><a href="#注释-1" class="headerlink" title="注释"></a>注释</h3><p>这是<tt>&#64;Inject</tt>注入器注入构造函数时唯一允许使用的注入点。</p>
+<p>当与<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Callback-Injectors#5-targets-with-non-void-return-types">可取消的非空注入</a>结合使用时，此注入点将使返回类型在<tt>CallbackInfoReturnable</tt>中通过<tt>getReturnType()</tt>方法可用。</p>
+</blockquote>
+<hr>
+<p><a name="tail"></a></p>
+<h2 id="在最终返回之前"><a href="#在最终返回之前" class="headerlink" title="在最终返回之前"></a>在最终返回之前</h2><blockquote>
+<h3 id="概览-2"><a href="#概览-2" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>TAIL</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.BeforeFinalReturn</tt></td></tr>
+<tr><td><b>选项</b></td><td><i>无</i></td></tr>
+<tr><td><b>参数</b></td><td><i>无</i></td></tr>
+</table>
+
+<h3 id="描述-2"><a href="#描述-2" class="headerlink" title="描述"></a>描述</h3><p>此注入点返回目标方法中最后一个<code>RETURN</code>操作符。</p>
+<h3 id="注释-2"><a href="#注释-2" class="headerlink" title="注释"></a>注释</h3><p>请注意，最后一个“RETURN”操作符可能与原Java源代码中方法的概念上的“最后”不对应，因为条件表达式可能导致编译得到的字节码与原Java源代码的顺序有显著差异。</p>
+</blockquote>
+<hr>
+<p><a name="invoke"></a></p>
+<h2 id="在调用之前"><a href="#在调用之前" class="headerlink" title="在调用之前"></a>在调用之前</h2><blockquote>
+<h3 id="概览-3"><a href="#概览-3" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>INVOKE</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.BeforeInvoke</tt></td></tr>
+<tr><td><b>选项</b></td><td>
+<dl>
+<dt>target</dt><dd>被调用的目标，如果被重映射，则必须写上全名</dd>
+<dt>ordinal</dt><dd>要选中的已匹配的调用的索引序号（如果忽略该项，则全选）</dd>
+</dl>
+</td></tr>
+<tr><td><b>参数</b></td><td>
+<dl>
+<dt><tt>boolean</tt> log</dt><dd>当注入器扫描方法时，在控制台中生成详细的输出，这对诊断不正确的行为或以意外方式注入的注入器非常有帮助</dd>
+</dl>
+</td></tr>
+</table>
+
+<h3 id="描述-3"><a href="#描述-3" class="headerlink" title="描述"></a>描述</h3><p>此注入点在目标指令列表中搜索<em>invoke</em>指令，并返回与条件匹配的指令。<code>target</code>应该是一个可解析的<a target="_blank" rel="noopener" href="http://jenkins.liteloader.com/job/Mixin/javadoc/index.html?org/spongepowered/asm/mixin/injection/struct/MemberInfo.html">MemberInfo</a>，它指定要搜索的调用（省略<code>target</code>将返回目标中的所有调用指令。序号指定要选择的调用的索引，如果省略，则返回所有匹配的调用。</p>
+<h3 id="注释-3"><a href="#注释-3" class="headerlink" title="注释"></a>注释</h3><p><code>ordinal</code>值是<em>在与<code>target</code>匹配的指令</em>中选择，因此如果目标方法中有4个调用指令，但只有2个与<code>target</code>中指定的值匹配，那么给定<code>ordinal=1</code>将选择与<code>target</code>匹配的第二个指令，而不是方法中的第二个调用。换句话说，<code>target</code>总应用在<code>ordinal</code>前。</p>
+</blockquote>
+<hr>
+<p><a name="invokestring"></a></p>
+<h2 id="在仅有一字符串参数的Void返回值方法调用之前"><a href="#在仅有一字符串参数的Void返回值方法调用之前" class="headerlink" title="在仅有一字符串参数的Void返回值方法调用之前"></a>在仅有一字符串参数的Void返回值方法调用之前</h2><blockquote>
+<h3 id="概览-4"><a href="#概览-4" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>INVOKE_STRING</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.BeforeStringInvoke</tt></td></tr>
+<tr><td><b>选项</b></td><td>
+<dl>
+<dt>target</dt><dd>被调用的目标，如果被重映射，则必须写上全名</dd>
+<dt>ordinal</dt><dd>要选中的已匹配的调用的索引序号（如果忽略该项，则全选）</dd>
+</dl>
+</td></tr>
+<tr><td><b>参数</b></td><td>
+<dl>
+<dt><tt>string</tt> ldc</dt><dd>要匹配的常量值，请参见描述</dd>
+<dt><tt>boolean</tt> log</dt><dd>当注入器扫描方法时，在控制台中生成详细的输出，这对诊断不正确的行为或以意外方式注入的注入器非常有帮助</dd>
+</dl>
+</td></tr>
+</table>
+
+<h3 id="描述-4"><a href="#描述-4" class="headerlink" title="描述"></a>描述</h3><p>如同<a href="#invoke">BeforeInvoke</a>，此注入点在目标指令列表中搜素<em>invoke</em>指令，并返回与条件匹配的指令。此特化版本只匹配接受单个<code>String</code>并返回<code>void</code>的方法，字符串本身必须是文本字符串，并作为查询过程的一部分进行匹配。</p>
+<p>此查询的主要目的是特定匹配<code>Profiler::startSection</code>的调用和只接受文本字符串的类似方法。</p>
+<p>应使用名为<code>ldc</code>的参数指定要匹配的字符串常量。</p>
+<h3 id="注释-4"><a href="#注释-4" class="headerlink" title="注释"></a>注释</h3><p>此查询只能用于匹配参数作为字符串文本传递的调用。</p>
+<p>关于<code>target</code>与<code>ordinal</code>的应用顺序，请参见<a href="#invoke">BeforeInvoke</a>中的注释。</p>
+</blockquote>
+<hr>
+<p><a name="invokeassign"></a></p>
+<h2 id="在调用之后"><a href="#在调用之后" class="headerlink" title="在调用之后"></a>在调用之后</h2><blockquote>
+<h3 id="概览-5"><a href="#概览-5" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>INVOKE_ASSIGN</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.AfterInvoke</tt></td></tr>
+<tr><td><b>选项</b></td><td>
+<dl>
+<dt>target</dt><dd>被调用的目标，必须是非void返回类型，如果重映射，则必须写上全名</dd>
+<dt>ordinal</dt><dd>要选中的已匹配的调用的索引序号（如果忽略该项，则全选）</dd>
+</dl>
+</td></tr>
+<tr><td><b>参数</b></td><td>
+<dl>
+<dt><tt>boolean</tt> log</dt><dd>当注入器扫描方法时，在控制台中生成详细的输出，这对诊断不正确的行为或以意外方式注入的注入器非常有帮助</dd>
+</dl>
+</td></tr>
+</table>
+
+<h3 id="描述-5"><a href="#描述-5" class="headerlink" title="描述"></a>描述</h3><p>与<code>BeforeInvoke</code>类似，此注入点在目标指令列表中搜索<em>invoke</em>指令，并返回符合条件的指令。但是目标指令<em>必须</em>返回一个值。如果满足此条件，则注入点立即返回调用之后的指令。如果调用紧接着是的<code>STORE</code>指令（例如，调用的结果储存在一个局部变量中），则注入点返回紧跟在<code>STORE</code>指令之后的指令。</p>
+<h3 id="注释-5"><a href="#注释-5" class="headerlink" title="注释"></a>注释</h3><p>此注入点以与<code>BeforeInvoke</code>完全相同的方式选择候选指令，因此注意事项相同。</p>
+</blockquote>
+<hr>
+<p><a name="field"></a></p>
+<h2 id="在字段访问之前"><a href="#在字段访问之前" class="headerlink" title="在字段访问之前"></a>在字段访问之前</h2><blockquote>
+<h3 id="概览-6"><a href="#概览-6" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>FIELD</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.BeforeFieldAccess</tt></td></tr>
+<tr><td><b>选项</b></td><td>
+<dl>
+<dt>target</dt><dd>被访问的目标字段，如果重映射，则必须写上全名</dd>
+<dt>opcode</dt><dd>要搜索的指令操作符（必须是<tt>GETSTATIC</tt>、<tt>PUTSTATIC</tt>、<tt>GETFIELD</tt>或<tt>PUTFIELD</tt>中的一个），如未指定则匹配所有字段访问</dd>
+<dt>ordinal</dt><dd>要选择的字段访问的索引序号（如果省略，则全选）</dd>
+</dl>
+</td></tr>
+<tr><td><b>参数</b></td><td>
+<dl>
+<dt><tt>boolean</tt> log</dt><dd>当注入器扫描方法时，在控制台中生成详细的输出，这对诊断不正确的行为或以意外方式注入的注入器非常有帮助</dd>
+</dl>
+</td></tr>
+</table>
+
+<h3 id="描述-6"><a href="#描述-6" class="headerlink" title="描述"></a>描述</h3><p>此注入点在目标指令列表中搜索<code>GETFIELD</code>和<code>PUTFIELD</code>指令（及其静态的等效指令），并返回符合条件的指令。<code>target</code>应该是一个可解析的<a target="_blank" rel="noopener" href="http://jenkins.liteloader.com/job/Mixin/javadoc/index.html?org/spongepowered/asm/mixin/injection/struct/MemberInfo.html">MemberInfo</a>，它指定要搜索的字段名（省略<code>target</code>将返回目标中相应类型的所有访问指令）。序号指定要选择的指令的索引，如果省略，则返回所有匹配的字段访问指令。</p>
+<h3 id="注释-6"><a href="#注释-6" class="headerlink" title="注释"></a>注释</h3><p><code>ordinal</code>值是<em>在与<code>target</code>匹配的指令</em>中选择，因此如果目标方法中有4个字段访问指令，但只有2个与<code>target</code>中指定的值匹配，那么给定<code>ordinal=1</code>将选择与<code>target</code>匹配的第二个指令，而不是方法中的第二个字段访问。换句话说，<code>target</code>总应用在<code>ordinal</code>前。</p>
+</blockquote>
+<hr>
+<p><a name="new"></a></p>
+<h2 id="在调用对象构造方法之前"><a href="#在调用对象构造方法之前" class="headerlink" title="在调用对象构造方法之前"></a>在调用对象构造方法之前</h2><blockquote>
+<h3 id="概览-7"><a href="#概览-7" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>NEW</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.BeforeNew</tt></td></tr>
+<tr><td><b>选项</b></td><td>
+<dl>
+<dt>target</dt><dd>要重映射的构造方法描述符，改描述符必须<b>仅</b>包含<i>类名</i>或<i>类名和构造方法签名</i></dd>
+<dt>ordinal</dt><dd>要选择的NEW操作符的索引序号（如果省略，则为全部）</dd>
+</dl>
+</td></tr>
+<tr><td><b>参数</b></td><td>
+<dl>
+<dt><tt>String</tt> class</dt><dd>为后向兼容的替代<tt>target</tt>（ <tt>NEW</tt>最初仅支持此参数）。与<tt>target</tt>相同，仅能指定一个或另一个构造方法</dd>
+</dl>
+</td></tr>
+</table>
+
+<h3 id="描述-7"><a href="#描述-7" class="headerlink" title="描述"></a>描述</h3><p>此注入点在目标指令列表中搜索<code>NEW</code>指令，并返回符合条件的指令。如果指定了<code>target</code>，则只返回指定类型的<code>NEW</code>指令。如果<code>target</code>包含方法签名（该签名<strong>必须</strong>指定void（<code>V</code>)为返回类型），则只返回后跟有给定签名的<tt>INVOKESPECIAL(&lt;init&gt;)</tt>指令的<code>NEW</code>指令。注意，<strong>总是返回<code>NEW</code>指令，而不是<code>INVOKESPECIAL</code></strong>。</p>
+<h3 id="注释-7"><a href="#注释-7" class="headerlink" title="注释"></a>注释</h3><p>注意，与其他注入点一样，<code>ordinal</code>适用于其他注入点参数的相同结论。因此，如果使用<code>target</code>标识<code>NEW</code>操作符的子集，<code>ordinal</code>将基于此子集进行选择，而不是在目标中的整个<code>NEW</code>操作符池中进行选择。在词语顺序中，<code>ordinal</code>始终<em>最后</em>应用。</p>
+</blockquote>
+<hr>
+<p><a name="constant"></a></p>
+<h2 id="在常量使用之前"><a href="#在常量使用之前" class="headerlink" title="在常量使用之前"></a>在常量使用之前</h2><blockquote>
+<h3 id="概览-8"><a href="#概览-8" class="headerlink" title="概览"></a>概览</h3><table> 
+<tr><td nowrap><b>简写名</b></td><td><tt>CONSTANT</tt></td></tr>
+<tr><td><b>全名</b></td><td><tt>org.spongepowered.asm.mixin.injection.points.BeforeConstant</tt></td></tr>
+<tr><td><b>选项</b></td><td>
+<dl>
+<dt>ordinal</dt><dd>要选择的NEW操作符的索引序号（如果省略，则为全部）</dd>
+</dl>
+</td></tr>
+<tr><td><b>参数</b></td><td>
+<dl>
+<dt><tt>boolean</tt> nullValue</dt><dd>将此值设置为<tt>true</tt>以匹配方法体中的<tt>null</tt></dd>
+<dt><tt>int</tt> intValue</dt><dd>将此值设置为要在方法体中匹配的整数。请注意，如果要匹配构成条件表达式中的一部分0值，可能还需要设置<tt>expandZeroConditions</tt>参数</dd>
+<dt><tt>float</tt> floatValue</dt><dd>将此值设置为要在方法体中匹配的单精度浮点数</dd>
+<dt><tt>long</tt> longValue</dt><dd>将此值设置为要在方法体中匹配的长整数</dd>
+<dt><tt>double</tt> doubleValue</dt><dd>将此值设置为要在方法体中匹配的双精度浮点数</dd>
+<dt><tt>String</tt> stringValue</dt><dd>将此值设置为要在方法体中匹配的文本</dd>
+<dt><tt>String</tt> class</dt><dd>将此值设置为要在方法体中匹配的<tt>Class</tt></dd>
+<dt><tt>boolean</tt> log</dt><dd>将此值设置为<tt>true</tt>以在应用此注入点查询时发出日志信息</dd>
+<dt><tt>String</tt> expandZeroConditions</dt><dd>虽然大多数常量可以相对容易地位于编译后的方法中，但在条件表达式中使用0时存在特殊情况。例如：<blockquote><code>if (x >= 0)</code></blockquote>出现这种特殊情况是因为Java包含用于这种类型的比较的显式指令，因此编译后的代码可能更像这样：<blockquote><code>if (x.isGreaterThanOrEqualToZero())</code></blockquote>当然如果我们知道正在搜索的常量是比较表达式的一部分，那么我们可以显式地搜索<tt>isGreaterThanOrEqualToZero</tt>并将其转换为原始形式，以便像任何其他常量访问一样重定向它<br><br>如要启用此行为，可以基于要展开的表达式类型为次参数指定一个或多个值。因为Java编译器习惯将某些表达式编译为与其源代码对应的<i>逆</i>表达式（例如，编译<i>当大于某值时做某事</i>结构为<i>如果小于或等于某值则不做某事</i>）；指定特定的表达式类型也隐式包括逆表达式。<br><br>值得注意的是，其对序号的影响可能很难预测，因此应注意确保所选注入点与预期位置匹配<br><br>指定此选项具有以下效果：<br><br><ul><li>目标方法中的条件匹配操作符被识别为注入候选</li><li><tt>intValue</tt>为<tt>0</tt>是隐式的，不需要显式定义</li><li>但是，显式指定<tt>intValue</tt>为<tt>0</tt>将导致此选择器也与方法体重的显示<tt>0</tt>常量匹配</li></ul>要为该选项指定值，请用逗号或空格分隔<tt>条件值</tt>，例如：<blockquote><code>"expandZeroConditions=LESS_THAN_ZERO,GREATER_THAN_ZERO"</code></blockquote></dd>
+</dl>
+</td></tr>
+</table>
+
+<h3 id="描述-8"><a href="#描述-8" class="headerlink" title="描述"></a>描述</h3><p>此注入点在目标指令列表中搜索字面值（常量），并返回与条件相匹配的指令。请注意，所有鉴别参数都是互斥的，并且只应指定<em>一个</em>鉴别参数。指定多个鉴别参数将抛出异常。</p>
+<h3 id="注释-8"><a href="#注释-8" class="headerlink" title="注释"></a>注释</h3><p>注意，与其他注入点一致，<code>ordinal</code>适用于注入点其他参数的总体结果。在词语顺序中，<code>ordinal</code>始终<em>最后</em>应用。</p>
+</blockquote>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2020/03/24/Mixin-Reference-Injection-Point-Reference/" data-title="Mixin参考——注入点参考 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2020/06/25/Introduction-to-PlantUML/" title="介绍PlantUML">
+  <strong>上一篇：</strong><br/>
+  <span>
+  介绍PlantUML</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2019/05/10/First-try-JNI/"  title="初试JNI">
+ <strong>下一篇：</strong><br/> 
+ <span>初试JNI
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: 'Mixin参考——注入点参考',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E5%AF%BC%E8%88%AA"><span class="toc-number">1.</span> <span class="toc-text">快速导航</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E6%96%B9%E6%B3%95%E8%B5%B7%E5%A7%8B"><span class="toc-number"></span> <span class="toc-text">在方法起始</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%BF%94%E5%9B%9E%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在返回之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-1"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-1"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-1"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E6%9C%80%E7%BB%88%E8%BF%94%E5%9B%9E%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在最终返回之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-2"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-2"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-2"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%B0%83%E7%94%A8%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在调用之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-3"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-3"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-3"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E4%BB%85%E6%9C%89%E4%B8%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8F%82%E6%95%B0%E7%9A%84Void%E8%BF%94%E5%9B%9E%E5%80%BC%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在仅有一字符串参数的Void返回值方法调用之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-4"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-4"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-4"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%B0%83%E7%94%A8%E4%B9%8B%E5%90%8E"><span class="toc-number"></span> <span class="toc-text">在调用之后</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-5"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-5"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-5"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E5%AD%97%E6%AE%B5%E8%AE%BF%E9%97%AE%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在字段访问之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-6"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-6"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-6"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E8%B0%83%E7%94%A8%E5%AF%B9%E8%B1%A1%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在调用对象构造方法之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-7"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-7"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-7"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E5%B8%B8%E9%87%8F%E4%BD%BF%E7%94%A8%E4%B9%8B%E5%89%8D"><span class="toc-number"></span> <span class="toc-text">在常量使用之前</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%A7%88-8"><span class="toc-number">1.</span> <span class="toc-text">概览</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0-8"><span class="toc-number">2.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E9%87%8A-8"><span class="toc-number">3.</span> <span class="toc-text">注释</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>13</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>9</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2025 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
