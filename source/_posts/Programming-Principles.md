@@ -139,7 +139,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 相似资料
 
-* [Abstraction principle](http://en.wikipedia.org/wiki/Abstraction_principle_\(computer_programming\))
+* [Abstraction principle](http://en.wikipedia.org/wiki/Abstraction_principle_%28computer_programming%29)
 * [Once And Only Once](http://c2.com/cgi/wiki?OnceAndOnlyOnce) is a subset of DRY (also referred to as the goal of refactoring).
 * [Single Source of Truth](http://en.wikipedia.org/wiki/Single_Source_of_Truth)
 * A violation of DRY is [WET](http://thedailywtf.com/articles/The-WET-Cart) (Write Everything Twice)
@@ -205,7 +205,7 @@ YAGNI的意思是“你不需要它”：在必要之前不要做多余的事情
 
 相关资料
 
-* [Coupling](http://en.wikipedia.org/wiki/Coupling_(computer_programming))
+* [Coupling](http://en.wikipedia.org/wiki/Coupling_%28computer_programming%29)
 * [Coupling And Cohesion](http://c2.com/cgi/wiki?CouplingAndCohesion)
 
 ## 迪米特法则
