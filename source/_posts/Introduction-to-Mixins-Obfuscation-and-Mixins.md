@@ -1,4 +1,4 @@
----
+﻿--
 title: 介绍Mixin——混淆与Mixin
 date: 2018-11-02 12:39:35
 tags: [Java, Bytecode, Mixin]
@@ -8,7 +8,7 @@ categories: Mixin
 
 在我们进一步研究Mixin架构之前，先让我们绕过它去讨论另一个重要主题：Minecraft代码库中的*混淆*以及它与Mixin的关系。
 
-> *混淆（Obfuscation）*是将原本人类可读的代码符号转换为混淆的代码符号的过程，使得人难以阅读它（事实上，*混淆*这个词的意思仅仅是“*故意使模糊*”）。
+> *混淆（Obfuscation）*是将原本人类可读的代码符号转换为混淆的代码符号的过程，使得它难以阅读（事实上，*混淆*这个词的意思仅仅是“*故意使模糊*”）。
 
 ### 1. 在混淆时代的开发生命周期
 
@@ -17,7 +17,7 @@ categories: Mixin
 1. 混淆的使用将所有的内容都放在“默认包”中，这使得无法从代码库`import`类。
 2. 使用混淆后的名称将是一场噩梦，因为代码基本上不可读。
 
-这就意味着，为了能够基于Minecraft编译我们的代码，有必要预先对Java类进行**反**混淆处理，一个名为*Mod Coder Pack*（简称MCP）的社区项目提供了遍历的方法。
+这就意味着，为了能够基于Minecraft编译我们的代码，有必要预先对Java类进行**反**混淆处理，一个名为*Mod Coder Pack*（简称MCP）的社区项目提供了相应的工具。
 
 一旦我们编写了代码，我们需要**重**混淆我们的Mod代码，以便它可以与原始的（混淆的）代码库一起工作。因此，开发生命周期看起来如下图所示：
 
@@ -35,13 +35,13 @@ categories: Mixin
 
 3. **“MCP名”** - 这是一个来自社区的更可读的名字，以便使代码库更容易理解。例如`getHealth`。
 
-在反编译过程中，字段将从一种名称转换为另一种名称，最终止于“友好的”*MCP名*。在重混淆过程中，反向进行处理。在我们的示例中，方法`k`变为`func_1234_k`最终变为`getName`。
+在反编译过程中，字段将从一种名称转换为另一种名称，最终止于“友好的”*MCP名*。在重混淆过程中，反向进行处理。在我们的示例中，方法`k`变为`func_1234_k`最终变为`getHealth`。
 
-在每个阶段**所有**字段和方法被重命名，因此每组混淆形成不相关的混淆*环境*，所有字段和方法具有对应于该环境的名称：
+在每个阶段**所有**字段和方法被重命名，因此每组混淆形成独立的混淆*环境*，所有字段和方法具有对应于该环境的名称：
   
 ![混淆环境](./Introduction-to-Mixins-Obfuscation-and-Mixins/obfuscation_environments.png)
 
-我们还将把这些假想环境之间的假想边界称为“*混淆边界（Obfuscation Boundary）* ”，因为显然*跨越*边界可能会造成问题。例如，方法`getHealth`（MCP名）总是希望`takeDamage`方法在任何特定执行周期都是它的MCP名称，如果同时存在来自不同环境的名称，那么很有可能发生问题。
+我们还将把这些概念环境之间的概念边界称为“*混淆边界（Obfuscation Boundary）*”，因为显然*跨越*边界可能会造成问题。例如，方法`getHealth`（MCP名）总是希望`takeDamage`方法在任何特定执行周期都是它的MCP名称，如果同时存在来自不同环境的名称，那么很有可能发生问题。
 
 ### 3. 如何工作
 
@@ -82,7 +82,7 @@ Mixin通过在编译时解析`@Shadow`注解，并将影子成员的适当混淆
 
 * 任何**Mixin特定机制**，例如*Shadow*、*Overwrite*（将在下一节中介绍）和*Injector*（将在稍后介绍），将始终使用某种注解进行修饰。这使得[Mixin注解处理器（Annotation Processor）](https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor) 能够发现它们，它将处理它们的混淆。
 
-### 5. The Nitty Gritty
+### 5. 深入细节
 
 如果你正在阅读本系列的介绍，你应该在这里停一下。以下部分提供了一些更详细的技术细节，并且仅出于完整性考虑，这将在之后的部分中引用。它们并不打算仅仅只是介绍一下而已，现在已经给你打过预防针了。
 
@@ -103,7 +103,7 @@ Mixin通过在编译时解析`@Shadow`注解，并将影子成员的适当混淆
 
 ##### 5.1.1 Mixin引用映射
 
-为了允许混淆“软”引用，[注解处理器](https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor)处理映射文件，该映射文件被包含在生产用Jar中，并在[配置文件](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment#mixin-configuration-files)中指定。这个*引用表（Reference Map，或简称“refmap”）*包含Mixin集合中所有到它们混淆的对象的软引用。
+为了允许混淆“软”引用，[注解处理器](https://github.com/SpongePowered/Mixin/wiki/Using-the-Mixin-Annotation-Processor)生成映射文件，该映射文件被包含在生产用Jar中，并在[配置文件](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---The-Mixin-Environment#mixin-configuration-files)中指定。这个*引用表（Reference Map，或简称“refmap”）*包含Mixin集合中所有到它们混淆的对象的软引用。
 
 每个编译阶段都放出一个引用映射，因此在对应转换期间编译的每个Mixin集合都应该对该转换使用相同的引用映射。应该选择引用映射的唯一名称以避免冲突。
 
@@ -114,7 +114,7 @@ Mixin通过在编译时解析`@Shadow`注解，并将影子成员的适当混淆
 
 我们可以为这两个集合定义一个引用映射文件，并将其命名为`mixins.myproject.refmap.json`以使其一致。
 
-注意，在生产用Jar中包含引用映射文件是绝对重要的，并要在Mixin配置中制定他。如果不这样做，将会在Mixin应用时导致错误，因为Mixin的引用将不由Mixin处理器解决。
+注意，在生产用Jar中包含引用映射文件是绝对重要的，并要在Mixin配置中指定它。如果不这样做，将会在Mixin应用时导致错误，因为Mixin的引用将不由Mixin处理器解决。
 
 在如下情况下，可以省略引用映射文件：
 
@@ -132,19 +132,19 @@ Mixin通过在编译时解析`@Shadow`注解，并将影子成员的适当混淆
 
 ![](./Introduction-to-Mixins-Obfuscation-and-Mixins/mixin_transformer_chain_obf.png)
 
-#### 5.3  不可预测的成员名称 - 合成把戏的困扰
+#### 5.3  不可预测的成员名称 - 合成成员的困扰
 
-OBF -> SRG -> MCP的确定性规则的例外是目标类中的合成成员（Synthetic Member）[<sup>3</sup>](#note3)造成的。虽然混淆代码库中的合成成员也像它们的外部类一样具有混淆名称，但是在开发中会出现问题，因为重新建立的内部类关系导致这些合成成员被剥离，然后被编译器重新创建。
+OBF -> SRG -> MCP的确定性规则的例外是目标类中的合成成员（Synthetic Member）[<sup>3</sup>](#note3)造成的。虽然混淆代码库中的合成成员像它们的一等公民兄弟一样具有混淆名称，但是在开发中会出现问题，因为重新建立的内部类关系导致这些合成成员被剥离，然后被编译器重新创建。
 
-例如，让我们思考一个非静态内部类对其外部类的引用，通常在由`javac`生成的类中将其命名为`this$0`。当被混淆时，这个成员会得到一个使人混乱的名称“`a`”，并且在反编译过程中交替地重命名为“`field_999_a`”，最后才得到易于理解的MCP名称“`myOuter`”。然而，由于在建立开发工作环境的最后阶段就是在源代码中重新集成内部类及其外部类，因此，最终将剥离合成字段，并允许编译器重新创建该字段，从而在原先的“`this$0`”开发工作空间中给该字段一个名称。
+例如，让我们思考一个非静态内部类对其外部类的引用，通常在由`javac`生成的类中将其命名为`this$0`。当被混淆时，这个成员会得到一个令人困惑的名称“`a`”，并且在反编译过程中交替地重命名为“`field_999_a`”，最后才得到易于理解的MCP名称“`myOuter`”。然而，由于在建立开发工作环境的最后阶段就是在源代码中重新集成内部类及其外部类，因此，最终将剥离合成字段，并允许编译器重新创建该字段，从而在原先的“`this$0`”开发工作空间中给该字段一个名称。
 
-这造成了一个问题，如果我们希望影射该字段，那么必须将其命名为`myOuter`（因为映射文件中出现的值就是这样命名的），但如果这样做，那么Shadow在开发时就不能工作，因为实际上并不存在名为`myOuter`的字段！
+这造成了一个问题，如果我们希望映射该字段，那么必须将其命名为`myOuter`（因为映射文件中出现的值就是这样命名的），但如果这样做，那么Shadow在开发时就不能工作，因为实际上并不存在名为`myOuter`的字段！
 
 ##### 5.3.1 别名
 
 可以通过指定影子字段的*别名*来解决这个问题。当试图定位影子字段的目标时，别名作为Mixin处理器的最后一个解决方案存在。如果Mixin处理器无法在目标类中找到所需的字段，那么它会首先检查别名列表，然后再出现错误。
 
-若要指定Shadow或者Overwrite注解的别名，只需要在注释上确定`aliases`的值：
+若要指定Shadow或者Overwrite注解的别名，只需要在注解中指定`aliases`的值：
 ```java
 @Shadow(aliases = {"this$0"})
 private MyOuterClassType myOuter;
