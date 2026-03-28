@@ -1,4 +1,4 @@
----
+﻿---
 title: 高级Mixin用法——回调注入器
 date: 2018-12-05 12:51:16
 tags: [Java, Bytecode, Mixin]
@@ -43,7 +43,7 @@ categories: Mixin
 
 #### 1.1 概括——你已经知道的东西
 
-到目前为止很无聊。假设我们想进入`update()`操作，我们想要添加一些自定义逻辑——也许通知一些观察者类——在调用`update()`时。我们已知可以通过用[修改后的版本重写它](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods)甚至使用 *[内部代理](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods#2-intrinsic-proxy-methods)替代*以保持原始方法。然而，我们也知道重写在可维护性和互操作性方法有**很多**[缺点](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods#12-with-great-power-comes-great-possibility-to-screw-things-up)。
+到目前为止很无聊。假设我们想进入`update()`操作，我们想要添加一些自定义逻辑——也许通知一些观察者类——在调用`update()`时。我们已知可以通过用[修改后的版本重写它](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods)甚至使用*[内部代理置换](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods#2-intrinsic-proxy-methods)*来保留原始方法。然而，我们也知道重写在可维护性和互操作性方面有**很多**[缺点](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Overwriting-Methods#12-with-great-power-comes-great-possibility-to-screw-things-up)。
 
 那么，如何在不重写的情况下向方法添加自定义逻辑呢？
 
@@ -53,7 +53,7 @@ categories: Mixin
 
 #### 1.2 你要调用谁？onUpdate！
 
-在我们了解注入器的旅程中，第一步实际上也是我们已知的：将*新*的方法添加到目标类中。我们将注入的方法称为**处理方法**，并且通常我们使用前缀“`on`”标记处理方法，这与许多框架中使用的事件接受器的命名约定非常相似。
+在我们了解注入器的旅程中，第一步实际上也是我们已知的：将*新*的方法添加到目标类中。我们将注入的方法称为**处理方法**，并且通常我们使用前缀“`on`”标记处理方法，这与许多框架中使用的事件接收器的命名约定非常相似。
 
 我们将本例中这个新的**处理**方法命名为`onUpdate`，因为我们将挂钩到`update`方法。
 
@@ -63,7 +63,7 @@ categories: Mixin
 
 ![](./Advanced-Mixin-Usage-Callback-Injectors/flard_02.png)
 
-好，一切都很好，但是我们的新方法基本上只是呆在那里，除此之外什么都不做，所以让我们看看我们如何做注入器的实际*注入*部分：
+好，一切都很好，但是我们的新方法实际上只是放在那里，除此之外什么都不做，所以让我们看看我们如何做注入器的实际*注入*部分：
 
 #### 1.3 头（HEAD）, 肩膀, 膝盖, 返回（RETURN）, 膝盖, 返回（RETURN）!
 
@@ -106,7 +106,7 @@ protected void onUpdate() {
 2. 编写你的**处理方法**。
 3. 用一个`@Inject`注解来修饰处理方法以创建注入关系。
 
-现在我们理解了基础知识，我们已经准备好深入研究这个问题。
+现在我们理解了基础知识，我们已经准备好深入研究其中的细节了。
 
 ### 2. 构建处理方法
 
@@ -121,7 +121,7 @@ protected void onUpdate(CallbackInfo ci) {
 }
 ```
 
-> 上面的示例也得到了简化，因为目标方法不接收参数并返回`void`。
+> 上面的示例也得到了简化，因为目标方法没有参数且返回`void`。
 
 #### 2.1 获取目标参数
 
@@ -150,11 +150,11 @@ protected void onSetPos(int x, int y, CallbackInfo ci) {
 }
 ```
 
-注意我们仍需包含`CallbackInfo`参数。注入`setPos`的代码先现在看起来是这样的，注意调用在调用**处理**方法`onSetPos`时传递了参数`x`和`y`：
+注意我们仍需包含`CallbackInfo`参数。注入`setPos`的代码现在看起来是这样的，注意在调用**处理**方法`onSetPos`时传递了参数`x`和`y`：
 
 ![](./Advanced-Mixin-Usage-Callback-Injectors/flard_06.png)
 
-方法参数和CallbackInfo一同为注入提供**环境（Context）**，并允许你相应地更改处理器的行为。例如：
+方法参数和CallbackInfo一同为注入提供**上下文（Context）**，并允许你相应地更改处理器的行为。例如：
 
 ```java
 /**
@@ -206,9 +206,9 @@ protected void onSetPos(int x, int y, CallbackInfo ci) {
 
 > 注意：在*不可取消*的`CallbackInfo`上调用`cancel()`将引发异常！
 
-对于我们**在方法`HEAD`处，并且有条件地返回的注入**，被称为**短路注入（Short Circuit Injection）**，这对于那些本来是需要`@Overwrite`的东西是非常好的替代方案。也可以写一个总是取消的短路注入，这种类型的注入器被称为**永久短路注入（Permanent Short Circuit）**或**阻断注入（RoadBlock Injection）**。
+对于我们**在方法`HEAD`处注入并有条件地返回**的情况，被称为**短路注入（Short Circuit Injection）**，这对于那些本来是需要`@Overwrite`的东西是非常好的替代方案。也可以写一个总是取消的短路注入，这种类型的注入器被称为**永久短路注入（Permanent Short Circuit）**或**阻断注入（RoadBlock Injection）**。
 
-> 注意，大多数情况下，阻断注入最好是重写。其原因是因为它允许其他转换器对原始方法进行操作，而不会引起错误；还因为将注入的代码保持在单独的方法中，这使得在注入的代码中发生异常时，堆栈追踪更有用。
+> 注意，在大多数情况下，阻断注入优于重写。其原因是因为它允许其他转换器对原始方法进行操作，而不会引起错误；还因为将注入的代码保持在单独的方法中，这使得在注入的代码中发生异常时，堆栈追踪更有用。
 
 ### 4. 瞄准——注入点
 
@@ -218,7 +218,7 @@ protected void onSetPos(int x, int y, CallbackInfo ci) {
 
 #### 4.1 在草垛中寻找操作符
 
-关于注入点，首先需要明白的是，它们本质上是*查询*目标方法运行字节码中一个*或更多*个与其标准匹配的操作符。没错：一个注入点可以匹配不止一次。
+关于注入点，首先需要明白的是，它们本质上是*查询*目标方法运行字节码中一个*或更多*个匹配其条件的操作符。没错：一个注入点可以匹配不止一次。
 
 举一个例子，让我们思考一下`RETURN`注入点的含义。`RETURN`注入点的定义如下：
 
@@ -251,7 +251,7 @@ protected void onResetPos(int x, int y, CallbackInfo ci) {
 > 
 > 选择正确的注入器目标可能是极其主观的，并且很多时候将取决于你试图通过特定注入实现什么，以及其他因素，例如所讨论的对象的子类，以及范围中可用的变量。
 > 
-> 例如，在上述发方法中，注入`reset()`会在同一点引发回调，但是如果`reset()`被子类重载了怎么办？`reset()`方法也不接收参数`x`和`y`的副本，这是我们可能需要的。另外，如果从代码中的其他点调用`reset()`方法会怎么样呢？所有这些事情都应该考虑。
+> 例如，在上述方法中，注入`reset()`会在同一点引发回调，但是如果`reset()`被子类重写了怎么办？`reset()`方法也不接收参数`x`和`y`的副本，这是我们可能需要的。另外，如果从代码中的其他点调用`reset()`方法会怎么样呢？所有这些事情都应该考虑。
 > 
 > 选择合适的注入点在很大程度上取决于所讨论的类的结构（和层次结构）以及注入后打算做什么。在确定注入点是，应该考虑注入目标的使用及其性质的所有方面。
 
@@ -340,7 +340,7 @@ protected void onGetPos(CallbackInfoReturnable<Point> cir) {
 }
 ```
 
-可以想象，这种注入器非常强大，并且不限于注入`HEAD`，你可以使用任何你希望的注入点。然而，带使用可取消可返回注入时，会发生一些特殊情况：
+可以想象，这种注入器非常强大，并且不限于注入`HEAD`，你可以使用任何你希望的注入点。然而，当使用可取消的可返回注入时，会发生一些特殊情况：
 
 你可能会想 *“但在这个非常简单的方法中，`HEAD`和`RETURN`的基本上意思是一样的，对吧？”*
 
@@ -359,11 +359,11 @@ protected void onGetPos(CallbackInfoReturnable<Point> cir) {
 
 这种方法有很多好处：
 
-* 现在我们的注入器Key更松散地耦合到**目标方法**的实现中。换句话说，如果**目标**方法更改，我们的处理方法不需要知道更改，因为它只关心返回的值。
-* 如果**目标**反复有多个`RETURN`操作符，则返回的值仍可被处理，而不需要额外的上下文。
-* 它运行我们进行“观察者”注入，该注入仅*检查*返回的值，而不实际更改它或担心方法的实现。
+* 现在我们的注入器更松散地耦合到**目标方法**的实现中。换句话说，如果**目标**方法更改，我们的处理方法不需要知道更改，因为它只关心返回的值。
+* 如果**目标方法**有多个`RETURN`操作符，则返回的值仍可被处理，而不需要额外的上下文。
+* 它允许我们进行“观察者”注入，该注入仅*检查*返回的值，而不实际更改它或担心方法的实现。
 
-例如，让我们更改上述例子，用`RETURN`代替`HEAD`。我们关系的是让这个方法不返回`null`，所以我们的代码变成：
+例如，让我们更改上述例子，用`RETURN`代替`HEAD`。我们关心的是让这个方法不返回`null`，所以我们的代码变成：
 
 ```java
 @Inject(method = "getPos", at = @At("RETURN"), cancellable = true)
@@ -395,7 +395,7 @@ private void onConstructed(CallbackInfo ci) {
 }
 ```
 
-这个注入器向类中的所有构造方法注入回调。如果目标类具有多个重载的构造方法，并且你仅希望将其注入到所有构造方法中，那么这非常有用。
+这个注入器向类中的所有构造方法注入回调。如果目标类具有多个重载的构造方法，并且你只是想注入到所有构造方法中，那么这非常有用。
 
 目标通配符可以与任何方法名一起使用，但是，如果通配符匹配具有`void`返回类型和非`void`返回类型的方法，则注入将失败并出错，因为对于非`void`的目标需要使用`CallbackInfoReturnable`。
 
@@ -409,7 +409,7 @@ private void onConstructed(CallbackInfo ci) {
 2. 必须初始化任何`final`字段。
 3. 作为第1点造成的结果，你不能在`super`调用中内联调用实例方法，这里进行的任何调用都必须是静态的。
 
-但在*字节码*层面，构造方法更加精致。由于编译后的`<init>`方法混杂着原先构造方法的代码，任何类的字段初始化器（复制到所有构造方法），以及在某些情况下合成的（编译器生成的）代码（例如`Enum`的构造方法）。由于它们的性质，它们就是字节码层面变换的雷区。
+但在*字节码*层面，构造方法更加复杂。由于编译后的`<init>`方法混杂着原先构造方法的代码，任何类的字段初始化器（复制到所有构造方法），以及在某些情况下合成的（编译器生成的）代码（例如`Enum`的构造方法）。由于它们的性质，它们就是字节码层面变换的雷区。
 
 因此，Mixin对注入器施加以下限制：
 
@@ -432,7 +432,7 @@ private void onConstructed(CallbackInfo ci) {
 
 ##### 7.2.1 Require
 
-`require`参数很简单，为`require`指定特定值要求注入器必须成功*至少几次*。
+`require`参数很简单，为`require`指定特定值要求注入器必须成功*至少这么多次*。
 
 ```java
 @Inject(method = "foo", at = @At(value = "INVOKE", target = "someMethod"), require = 2)
@@ -440,7 +440,7 @@ private void onInvokeSomeMethodInFoo(CallbackInfo ci) {
     // ...
 ```
 
-在本例中，我们希望我们的注入点匹配**目标**方法中的2个调用.指定`require`意味着如果少于2次注入结果，就会发生错误。
+在本例中，我们希望我们的注入点匹配**目标**方法中的2个调用。指定`require`意味着如果注入结果少于2次，就会发生错误。
 
 还可以在Mixin配置文件中为`require`指定一个配置域的值。
 
@@ -464,11 +464,11 @@ private void onInvokeSomeMethodInFoo(CallbackInfo ci) {
 
 ##### 7.2.4 注入器组
 
-虽然`require`语句运行你规定单个注入器的行为额，但你可能会遇到希望为单个情境提供多个替代注入器的情况。如果Mixin面向多个环境，或者已知其他转换器已定义良好的方式修改特定目标方法，则这非常有用。
+虽然`require`语句允许你规定单个注入器的行为，但你可能会遇到希望为单个情境提供多个替代注入器的情况。如果Mixin面向多个环境，或者已知其他转换器以定义良好的方式修改特定目标方法，则这非常有用。
 
 在这些情况下，你可以提供两个或多个注入器，其中对于给定的环境，只有一个预期成功。这当然提出了一个问题，即如何利用这些注入器的`require`值，因为如果在给定情景中预计至少有一个注入器会故障，那么这就不可能使用`require`。
 
-为了解决这一问题，注入器支持*组*的声明。使用注入器组允许*为组*指定`min`和`max`注入次数，聪哥确保注入仍然可以验证为有效，但是应该只发生指定的注入次数。
+为了解决这一问题，注入器支持*组*的声明。使用注入器组允许*为组*指定`min`和`max`注入次数，从而确保注入仍然可以验证为有效，但是应该只发生指定的注入次数。
 
 为了使用注入器组，只需让每个注入器**处理方法**声明`@Group`注解。第一个注解应该指定`min`和（可选地）`max`。如果在单个Mixin中使用多个注入器组，那么应该在Mixin中的所有`@Group`注解上指定该组的唯一`name`。
 
@@ -476,17 +476,17 @@ private void onInvokeSomeMethodInFoo(CallbackInfo ci) {
 
 当定义回调注入器**处理**方法时，将使用正常的Mixin行为将方法合并到**目标类**中。然而，这对子类，特别是派生类型中定义的注入器有影响。
 
-* **处理方法在合并前重命名**——所有**处理**方法再被合并到目标类之前被*修饰*。这确保了如果*相同*类的另一个Mixin定义了*相同的*注入器，那么这两个处理方法将不会冲突。
+* **处理方法在合并前重命名**——所有**处理**方法在被合并到目标类之前被*修饰*。这确保了如果*相同*类的另一个Mixin定义了*相同的*注入器，那么这两个处理方法将不会冲突。
 
 * **处理方法使用适合其访问级别的操作符来调用**——如果你的处理方法是`private`，那么将使用`INVOKESPECIAL`（静态绑定）调用它，如果**处理**方法是非私有的，则将使用`INVOKEVIRTUAL`调用它，这将允许你在派生的Mixin中`@Override`处理方法。
 
 * **如果在派生的Mixin中`@Override`一个处理方法，它将被重命名以匹配其超Mixin对应方法的修饰**——这样做是为了使得派生类中的方法永远不能“意外”覆盖你的**处理**方法。
 
-通常，除非明确计划为特定处理方法使用重写语句，否则建议**处理**方法是`private`的。
+通常，除非你明确计划为特定处理方法使用重写策略，否则建议**处理**方法是`private`的。
 
 ### 8. 总结
 
-这似乎要思考很多，回调注入器功能强大，非常精细，因此这不是一种合理的思考方式！让我们回顾一下要点，把一切都理清楚：
+这里有很多内容需要消化，回调注入器功能强大，非常精细！让我们回顾一下要点，把一切都理清楚：
 
 * 回调注入器只是常规的Mixin方法，具有*注入*回调到目标类中一些位置的特殊行为。
 
@@ -494,9 +494,9 @@ private void onInvokeSomeMethodInFoo(CallbackInfo ci) {
 
 * 回调注入器方法总是接收一个`CallbackInfo`，并且可以接收其他参数，例如**目标**方法的参数。
 
-* 回调可以是*可取消的*，允许从目标方法提前返回。
+* 回调可以*被取消*，允许从目标方法提前返回。
 
-* 对于注入器存在不同的故障处理方法，`require`是最有效的设置，你应该经常使用它。
+* 对于注入器存在不同的故障处理方法，`require`是最有用的设置，你应该经常使用它。
 
 值得一提的是，回调注入器不能或不应该这样做：
 
@@ -509,16 +509,17 @@ private void onInvokeSomeMethodInFoo(CallbackInfo ci) {
 回调注入器仅是Mixin提供的最基本的注入器形式。在下列的教程文章中，我们将介绍其他更专业的注入器：
 
 * __[用回调注入器捕获局部变量](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Capture-Locals)__<br />
-A secondary feature of regular Callback Injectors, not covered in this introduction, is the ability to capture the local variables at the target location. In this article I introduce the concept of local capture, and the use of surrogates and argument coercion.
+常规回调注入器的一个次要特性（本介绍中未涵盖）是能够在目标位置捕获局部变量。在本文中，我将介绍局部捕获的概念，以及代理和参数强制转换的使用。
 
 * __[介绍重定向注入器](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Redirect-Injectors)__<br />
-Probably the most powerful injector type. Redirect injectors allow a target method call or field access to be "redirected" to a custom callback. This type of injector can be leveraged extremely effectively to "wrap around" a method call, change the return value of a method call, or inhibit a method call altogether.
+可能是最强大的注入器类型。重定向注入器允许将目标方法调用或字段访问"重定向"到自定义回调。这种类型的注入器可以被极其有效地用于"包装"方法调用、更改方法调用的返回值，或完全阻止方法调用。
 
 * __[使用ModifyArg注入器修改方法调用参数](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyArg-Injectors)__<br />
-**Redirect**'s baby brother, this type of injector allows a single argument to a method to be altered on-the-fly using a callback method.
+**重定向**的小兄弟，这种类型的注入器允许使用回调方法即时更改方法的单个参数。
 
 * __[使用ModifyVariable注入器修改方法中的局部变量](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyVariable-Injectors)__<br />
-Whilst delicate and one of the more tricky injectors to use, **ModifyVariable** injectors are the only injector type which can directly edit the value of a local variable within a method.
+虽然微妙且是较难使用的注入器之一，但**ModifyVariable**注入器是唯一可以直接编辑方法内局部变量值的注入器类型。
 
 * __[使用ModifyConstant注入器挂钩和修改文本值](https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---ModifyConstant-Injectors)__<br />
-This type of injector can be used to turn a constant value used in a method into a method call to a callback. Extremely useful for hooking into loop logic, conditionals, or other "hard coded" parts of a target method that you wish to alter.
+这种类型的注入器可用于将方法中使用的常量值转换为对回调的方法调用。对于挂钩循环逻辑、条件语句或目标方法中你希望更改的其他"硬编码"部分非常有用。
+
