@@ -1,0 +1,844 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>该死的Mixin，到底是怎么工作的？ | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：Flippin’ Mixins, how do they work?  我时不时会看到有人批评Mixin，说它太复杂了，或者对于特定的工作来说有些大材小用。因此，本文旨在准确解释Mixin是如何工作的，以消除人们对其过于复杂的担忧——事实上，我希望能够展示，它恰恰具有完成其工作所需的复杂程度——通过解释子系统中每个部分的功能及其运作方式。 本文的目标是让那些熟悉字节码操作，特别是熟悉">
+<meta property="og:type" content="article">
+<meta property="og:title" content="该死的Mixin，到底是怎么工作的？">
+<meta property="og:url" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：Flippin’ Mixins, how do they work?  我时不时会看到有人批评Mixin，说它太复杂了，或者对于特定的工作来说有些大材小用。因此，本文旨在准确解释Mixin是如何工作的，以消除人们对其过于复杂的担忧——事实上，我希望能够展示，它恰恰具有完成其工作所需的复杂程度——通过解释子系统中每个部分的功能及其运作方式。 本文的目标是让那些熟悉字节码操作，特别是熟悉">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_00.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_01.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_02.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_03.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_02.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_04.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_05.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_06.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_06a.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_07.png">
+<meta property="article:published_time" content="2026-03-29T03:04:32.000Z">
+<meta property="article:modified_time" content="2026-03-29T06:10:06.605Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/how_00.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2026/03/29/Flippin-Mixins-how-do-they-work/" title="该死的Mixin，到底是怎么工作的？" itemprop="url">该死的Mixin，到底是怎么工作的？</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2026-03-29T03:04:32.000Z" itemprop="datePublished"> 发表于 2026-03-29</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">1. 原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%8A%9F%E8%83%BD%E9%9B%86"><span class="toc-number">2.</span> <span class="toc-text">2. 功能集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%9B%AE%E6%A0%87%E7%B1%BB%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 目标类作用域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E2%80%9C%E8%BD%AF%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 “软”操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E5%AF%B9%E5%85%B6%E4%BB%96Mixin%E7%9A%84%E6%84%9F%E7%9F%A5"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 对其他Mixin的感知</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E5%BF%AB%E9%80%9F%E5%A4%B1%E8%B4%A5%E6%88%96%E5%AE%89%E5%85%A8%E5%A4%B1%E8%B4%A5"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 快速失败或安全失败</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E5%85%BC%E5%AE%B9%E6%80%A7%E5%92%8C%E7%8E%AF%E5%A2%83%E6%84%9F%E7%9F%A5"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 兼容性和环境感知</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E6%95%88%E7%8E%87"><span class="toc-number">2.6.</span> <span class="toc-text">2.5 效率</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">3.</span> <span class="toc-text">3. 生命周期</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%90%AF%E5%8A%A8"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E5%BC%80%E5%A7%8B%E4%B8%80%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 开始一个阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-1-%E9%80%89%E6%8B%A9%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.1.</span> <span class="toc-text">3.2.1 选择配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-2-%E5%87%86%E5%A4%87%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.2.</span> <span class="toc-text">3.2.2 准备配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-1-%E8%A7%A3%E6%9E%90Mixin"><span class="toc-number">3.2.2.1.</span> <span class="toc-text">3.2.2.1 解析Mixin</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-2-%E5%AE%8C%E6%88%90%E9%85%8D%E7%BD%AE%E5%87%86%E5%A4%87"><span class="toc-number">3.2.2.2.</span> <span class="toc-text">3.2.2.2 完成配置准备</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-3-%E9%AA%8C%E8%AF%81%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.3.</span> <span class="toc-text">3.2.3 验证配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-4-%E6%BF%80%E6%B4%BB%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.4.</span> <span class="toc-text">3.2.4 激活配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E5%BA%94%E7%94%A8Mixin"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 应用Mixin</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-1-%E5%88%9D%E5%A7%8B%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.3.1.</span> <span class="toc-text">3.3.1 初始步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-1-1-%E5%86%85%E9%83%A8%E7%B1%BB%E7%94%9F%E6%88%90%E5%99%A8"><span class="toc-number">3.3.1.1.</span> <span class="toc-text">3.3.1.1 内部类生成器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-1-2-%E5%8F%82%E6%95%B0%E7%B1%BB%E7%94%9F%E6%88%90%E5%99%A8"><span class="toc-number">3.3.1.2.</span> <span class="toc-text">3.3.1.2 参数类生成器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-2-%E5%87%86%E5%A4%87Mixin%E4%BB%A5%E8%BF%9B%E8%A1%8C%E5%BA%94%E7%94%A8"><span class="toc-number">3.3.2.</span> <span class="toc-text">3.3.2 准备Mixin以进行应用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-1-%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8%E5%99%A8%E5%92%8C%E9%A2%84%E5%A4%84%E7%90%86Mixin"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">3.3.2.1 创建应用器和预处理Mixin</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-3-%E5%BA%94%E7%94%A8Mixin"><span class="toc-number">3.3.3.</span> <span class="toc-text">3.3.3 应用Mixin</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-1-%E4%B8%BB%E5%BA%94%E7%94%A8%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.1.</span> <span class="toc-text">3.3.3.1 主应用阶段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-2-%E9%A2%84%E6%B3%A8%E5%85%A5%E5%BA%94%E7%94%A8%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.2.</span> <span class="toc-text">3.3.3.2 预注入应用阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E6%B3%A8%E5%85%A5%E5%99%A8"><span class="toc-number">3.3.3.2.1.</span> <span class="toc-text">准备注入器</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-3-%E6%B3%A8%E5%85%A5%E5%BA%94%E7%94%A8%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.3.</span> <span class="toc-text">3.3.3.3 注入应用阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A1%AB%E5%85%85%E8%AE%BF%E9%97%AE%E5%99%A8"><span class="toc-number">3.3.3.3.1.</span> <span class="toc-text">填充访问器</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-4-%E5%8D%87%E7%BA%A7%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.4.</span> <span class="toc-text">3.3.3.4 升级阶段</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E7%A7%BB%E5%8A%A8%E5%88%B0%E6%96%B0%E9%98%B6%E6%AE%B5"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 移动到新阶段</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">4. 总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E6%9C%AC%E6%96%87%E6%9C%AA%E6%B6%B5%E7%9B%96%E7%9A%84Mixin%E6%96%B9%E9%9D%A2"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 本文未涵盖的Mixin方面</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-1-%E5%B9%B3%E5%8F%B0%E5%A4%84%E7%90%86%E7%A8%8B%E5%BA%8F%E5%92%8C%E5%B9%B3%E5%8F%B0%E7%89%B9%E5%AE%9A%E5%8A%9F%E8%83%BD"><span class="toc-number">4.1.1.</span> <span class="toc-text">4.1.1 平台处理程序和平台特定功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-2-%E6%B3%A8%E8%A7%A3%E5%A4%84%E7%90%86%E5%99%A8"><span class="toc-number">4.1.2.</span> <span class="toc-text">4.1.2 注解处理器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-3-%E5%AE%A1%E8%AE%A1%E5%8A%9F%E8%83%BD"><span class="toc-number">4.1.3.</span> <span class="toc-text">4.1.3 审计功能</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E6%9C%80%E5%90%8E%E7%9A%84%E8%AF%9D"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 最后的话</span></a></li></ol></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Flippin&#39;-Mixins,-how-do-they-work%3F">Flippin’ Mixins, how do they work?</a></p>
+</blockquote>
+<p>我时不时会看到有人批评Mixin，说它太复杂了，或者对于特定的工作来说有些大材小用。因此，本文旨在准确解释Mixin是如何工作的，以消除人们对其过于复杂的担忧——事实上，我希望能够展示，它<em>恰恰具有完成其工作所需的复杂程度</em>——通过解释子系统中每个部分的功能及其运作方式。</p>
+<p>本文的目标是让那些熟悉字节码操作，特别是熟悉ASM的人，对Mixin的核心有一个全面的了解，理解其生命周期以及某些乍看之下可能显得晦涩的设计决策背后的原因。</p>
+<blockquote>
+<p>为了避免本文变得难以导航，我将假设读者对Mixin的功能集、Java类和字节码的结构以及ASM有一定的了解。这是一篇技术文章，真正适合的是那些对Mixin内部工作原理和生命周期感兴趣的人。我已经尽力用通俗易懂的英语来写，但如果你对前面提到的主题没有很好的理解，我不能保证这篇文章会有什么意义。</p>
+</blockquote>
+<h1 id="1-原理"><a href="#1-原理" class="headerlink" title="1. 原理"></a>1. 原理</h1><p>归根结底，Mixin的核心是获取两组字节码——目标类的字节码和Mixin“类”的字节码——然后将它们合并在一起。ASM提供了多种方法来实现这一点，但坦率地说，任何使用ASM超过五分钟的人都会意识到一个重要的事实：</p>
+<ul>
+<li>使用ASM合并字节码极其简单</li>
+</ul>
+<p>事实上，它简单到我们可以用8行ASM代码将一个方法从一个类复制到另一个类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ClassNode</span> <span class="variable">source</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassNode</span>();</span><br><span class="line"><span class="type">ClassNode</span> <span class="variable">dest</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassNode</span>();</span><br><span class="line"><span class="keyword">new</span> <span class="title class_">ClassReader</span>(sourceBytes).accept(source);</span><br><span class="line"><span class="keyword">new</span> <span class="title class_">ClassReader</span>(destBytes).accept(dest);</span><br><span class="line">source.methods.stream().filter(m -&gt; m.name.equals(<span class="string">&quot;foo&quot;</span>)).forEach(dest.methods::add);</span><br><span class="line"><span class="type">ClassWriter</span> <span class="variable">cw</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassWriter</span>(<span class="number">0</span>);</span><br><span class="line">dest.accept(cw);</span><br><span class="line"><span class="keyword">return</span> cw.toByteArray();</span><br></pre></td></tr></table></figure>
+<p>这甚至不是最简单或最有效的方法，只是最短的方法。</p>
+<p>显然，我们知道这只有在源方法经过精心设计的情况下才能工作，而且如果已经存在冲突的方法，事情就会立即崩溃。由于ASM不检查我们所做的工作是否有效，它只是为我们提供操作底层类字节的工具，所以这很容易出错。</p>
+<p>但是，假设我们可以检查明显的前提条件——这肯定很容易检查——<strong>那么所有的复杂性从何而来</strong>？</p>
+<p>答案是，Mixin承担了大量的工作，以确保传入的Mixin代码既合理又正确，同时还提供了远远超出单个目标类范围的功能。事实是：</p>
+<ul>
+<li>以<strong>安全可靠的方式</strong>使用ASM合并字节码是非同寻常的困难</li>
+</ul>
+<p>接下来的章节将介绍Mixin提供的一些功能，它试图解决的问题，并解释它如何尝试解决这些问题。这主要是通过梳理Mixin的生命周期并解释它的功能及其运作方式来实现的。</p>
+<h1 id="2-功能集"><a href="#2-功能集" class="headerlink" title="2. 功能集"></a>2. 功能集</h1><p>如果Mixin作者对自己的行为承担全部责任，理解JVM的内部工作原理，并且能够精心设计传入的Mixin以不违反任何规则，那么以简单的方式合并字节码是可以的。然而，Mixin的主要目标之一一直是一种变形者版本的希波克拉底誓言——“不造成伤害”。如果Mixin无效，Mixin应该快速失败，理想情况下应该提供有意义的错误信息。这样，责任就落在Mixin作者身上——<em>编写有效的Mixin</em>，而Mixin的责任是将<em>有效的Mixin</em>转换为目标中的<em>有效的字节码</em>。我们还希望为Mixin作者提供功能，使他们能够以直接的方式编写强大的Mixin。</p>
+<h2 id="2-1-目标类作用域"><a href="#2-1-目标类作用域" class="headerlink" title="2.1 目标类作用域"></a>2.1 目标类作用域</h2><p>Mixin中导致最多支撑代码的功能之一是支持超出目标类范围的操作，特别是引用父类或同一类上其他Mixin添加的成员的操作。</p>
+<p>验证层次结构操作最复杂的方面之一是访问目标类父类上的字段和方法，而这些字段和方法本身是由另一个Mixin添加的，这是通过让派生Mixin扩展超Mixin来实现的。这是一个如此复杂的话题，以至于它已经有了<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins">自己的文章</a>。</p>
+<h2 id="2-2-“软”操作"><a href="#2-2-“软”操作" class="headerlink" title="2.2 “软”操作"></a>2.2 “软”操作</h2><p>由于JVM的工作方式，我们可以在Mixin中做一些在Java中永远不会有效，但在字节码中有效的事情。支持这些操作需要为这些操作定义一种“软”语法，这种语法可以在应用时转换为真正的代码。示例包括“软实现”接口、定义<em>内联代理</em>，以及合并具有冲突签名但返回类型不同的方法。</p>
+<h2 id="2-3-对其他Mixin的感知"><a href="#2-3-对其他Mixin的感知" class="headerlink" title="2.3 对其他Mixin的感知"></a>2.3 对其他Mixin的感知</h2><p>Mixin的设计考虑到了对其他Mixin的感知。Mixin之间的协商通过简单的优先级系统、更复杂的<em>伴生插件</em>系统以及诸如<code>@Final</code>注解之类的契约功能来提供。</p>
+<p>特定目标类的所有消费者提供的所有Mixin都在一次处理流程中应用，因此Mixin以可预测且最终确定性的方式相互交互。</p>
+<h2 id="2-4-快速失败或安全失败"><a href="#2-4-快速失败或安全失败" class="headerlink" title="2.4 快速失败或安全失败"></a>2.4 快速失败或安全失败</h2><p>归根结底，我们永远不希望最终处于一种允许“坏”字节码一路进入ClassLoader的情况。我们希望我们的Mixin以可预测的方式快速失败——理想情况下提供尽可能多的信息，或者至少“安全失败”，即注入的代码始终有效或完全保持未合并状态。</p>
+<h2 id="2-5-兼容性和环境感知"><a href="#2-5-兼容性和环境感知" class="headerlink" title="2.5 兼容性和环境感知"></a>2.5 兼容性和环境感知</h2><p>除了Mixin解决<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Obfuscation-and-Mixins#2-resolving-the-identity-crisis---defining-the-obfuscation-boundary">混淆边界</a>概念和不同混淆环境的核心功能外，Mixin进行的实际转换应始终考虑运行时环境中其他类转换器的操作。这种感知有助于实现上一个目标：如果转换器以我们意想不到的方式更改了类，我们要检测到这种情况，<em>快速失败或安全失败</em>。</p>
+<h2 id="2-5-效率"><a href="#2-5-效率" class="headerlink" title="2.5 效率"></a>2.5 效率</h2><p>我们希望以最有效的方式实现上述所有目标。显然，速度和内存使用之间存在权衡，通常Mixin会倾向于使用更多内存作为获得更快速度的机会。</p>
+<p>在Mixin的最近版本中，我已经开始对Mixin过程的不同部分进行性能分析，正如预期的那样，绝大多数时间实际上都花在侧加载和转换类上（见下面关于ClassInfo的章节），这些最终无论如何都需要发生。总的来说，考虑到其功能，Mixin处理器的核心速度是可以接受的。</p>
+<h1 id="3-生命周期"><a href="#3-生命周期" class="headerlink" title="3. 生命周期"></a>3. 生命周期</h1><p>现在我们知道了我们想要实现什么，现在是时候深入了解转换器的内部，看看不同的类是如何交互的。本讨论将讨论Mixin核心中不同类的作用，因此我将尽可能链接到相关的源代码。</p>
+<p>我将跳过子系统中的平台特定操作，只讨论Mixin过程本身。这主要是因为平台特定的处理程序负责低级别的jar、Tweaker和重映射代理的编组，整个话题坦率地说相当枯燥，并不能增加对Mixin本身的理解，所以我不会离题。</p>
+<h2 id="3-1-启动"><a href="#3-1-启动" class="headerlink" title="3.1 启动"></a>3.1 启动</h2><p>Mixin作为一个子系统需要在某个地方启动，这通常由一个或多个代理发起。环境中的所有消费者将与Mixin子系统的单个实例交互，因此负责引导的方除了使用哪个版本外，对Mixin的操作影响不大。</p>
+<p>除了注册相关的伴生对象外，消费者执行的主要任务是将他们的Mixin配置文件注册到子系统本身。</p>
+<p>有些人会惊讶地发现，Mixin要求将Mixin添加到配置文件中。<em>“为什么”</em>——他们问——<em>“Mixin不能像我们扫描模组那样扫描jar中的Mixin类呢？”</em>对此的回答是，主要原因是速度，扫描jar相当昂贵，使用配置文件意味着我们还可以指定很多重要的附带信息。这也意味着jar中可以存在未应用的Mixin，或者通过使用伴生插件选择性地应用Mixin。</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_00.png" alt></p>
+<p>当添加配置时，它们会通过内部反序列化为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>实例来立即解析。解析配置确定以下属性：</p>
+<ul>
+<li><p>所需的兼容性级别——如果所需的级别不可用，我们可以快速失败</p>
+</li>
+<li><p>所需的Mixin子系统版本——同样，如果使用的版本太旧，快速失败</p>
+</li>
+<li><p>配置所需的<em>阶段</em>——稍后详细介绍阶段</p>
+</li>
+</ul>
+<p>配置中的Mixin列表被反序列化但未被解析，配置中的Mixin在配置本身被阶段开始激活之前不会被解析。</p>
+<p>除了收集配置外，Mixin还注册自己的<em>类转换器</em>，这然后成为Mixin大部分其余功能的入口点。</p>
+<h2 id="3-2-开始一个阶段"><a href="#3-2-开始一个阶段" class="headerlink" title="3.2 开始一个阶段"></a>3.2 开始一个阶段</h2><p>首先，让我们回答这个问题<em>“为什么Mixin有阶段？”</em></p>
+<p>正如我们稍后将会看到的，在开始应用Mixin之前，我们实际上需要收集相当多的信息。依赖于付Mixin或其他类转换器所做转换的Mixin需要知道父Mixin是可用的，它们的目标类如预期的那样等等。这意味着在我们开始应用Mixin之前，我们需要知道我们计划应用的所有Mixin。</p>
+<p>通常这没问题。Mixin像普通类一样通过转换器链，所有东西一次性加载和处理，然后我们就可以在目标类通过ClassLoader中的实时转换器链时应用Mixin。</p>
+<p>然而，由于可能希望——特别是对于其他子系统级技术，如Sponge——将Mixin应用到加载器基础架构的其他部分。简单的解决方案似乎是 <em>“只需更早地加载Mixin”</em>。问题是某些Mixin将依赖于被——例如——<em>Side Transformer</em>转换，或者在某些情况下依赖于反混淆转换器。在游戏生命周期的最开始，这些转换器不是活动的，因为它们构成了我们希望转换的框架的一部分！</p>
+<p>答案是引入<em>阶段</em>。因此，<code>PREINIT</code>阶段包含需要混入基础设施类的Mixin，这些类不需要依赖于转换器链的完成。稍后的<code>DEFAULT</code>阶段Mixin则在转换器链基本完成且游戏处于“准备加载”状态时加载。</p>
+<h3 id="3-2-1-选择配置"><a href="#3-2-1-选择配置" class="headerlink" title="3.2.1 选择配置"></a>3.2.1 选择配置</h3><p>我们已经知道哪些配置希望参与哪个阶段，因此阶段的开始是由满足开始该阶段条件的第一个类通过转换器链触发的。因此，在进入时，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTransformer.java#L451">MixinTransformer的首要任务之一</a>是检查是否开始了新阶段，并为该阶段<em>选择</em>配置。</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_01.png" alt></p>
+<p>来自先前阶段的配置总是被保留，在阶段开始时，该阶段的配置从环境的可用阶段列表中被挑选出来，然后按优先级排序到待处理列表中</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>在被选择时执行一些初始自我配置：</p>
+<ul>
+<li>配置的<em>伴生插件</em>（如果指定）被实例化</li>
+<li>配置的<em>引用映射</em>被加载和解析</li>
+</ul>
+<p>选择失败的配置从待处理列表中移除，不再被处理。</p>
+<h3 id="3-2-2-准备配置"><a href="#3-2-2-准备配置" class="headerlink" title="3.2.2 准备配置"></a>3.2.2 准备配置</h3><p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_02.png" alt></p>
+<p>通过筛选的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>随后会被初始化。初始化可能是一个相当漫长的操作，因为配置中的Mixin本身必须从磁盘加载和解析。</p>
+<p>每个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>包含3个独立的Mixin集——<em>服务器</em>、<em>客户端</em>和<em>通用</em>Mixin，其中<em>通用</em>Mixin首先被解析，然后根据检测到的<strong>端</strong>解析<em>客户端</em>或<em>服务器</em>集。</p>
+<h4 id="3-2-2-1-解析Mixin"><a href="#3-2-2-1-解析Mixin" class="headerlink" title="3.2.2.1 解析Mixin"></a>3.2.2.1 解析Mixin</h4><p>在准备阶段，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">配置</a>中的Mixin从磁盘加载，每个Mixin被解析为一个<a target="_blank" rel="noopener" href="https://github.com/Spongepowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>结构，它处理Mixin的初始解析，并作为所有生成的元数据的存储。</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_03.png" alt></p>
+<p>如果Mixin字节码成功加载，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>继续收集Mixin所需的信息：</p>
+<ul>
+<li><p>Mixin的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L162">State</a>被初始化。<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L162">State</a>是一个用于保存Mixin字节码和从Mixin类解析的未验证细节的结构。<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L162">State</a>作为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>中的独立结构维护，用于验证目的，并作为脚手架以便于应用生命周期后期的热交换。</p>
+</li>
+<li><p>为Mixin创建一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>在Mixin中被广泛使用。<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>用于访问和存储类元数据，而不使用反射（反射会触发类加载），方法是侧加载类并手动将其通过转换器链。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>存储与Java<code>Class</code>对象类似的信息，但重点关注Mixin所需的信息。为此，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>是可变的，记录哪些Mixin作用于哪些类，并记录Mixin所做的更改，从而让这些修改对其他Mixin可见。</p>
+<p>为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>目的而侧加载的类通过转换器链的一个子集，称为<em>委托列表</em>。<em>委托列表</em>在进入新阶段时更新，并有意排除任何已知会重入的转换器以及Mixin转换器本身。</p>
+<p>虽然侧加载的性能影响似乎很大，但在实践中，最昂贵的操作往往是转换器本身，因为当字节码第二次“真正”加载时，它通常已经存在于内存中，不会产生任何可测量的性能成本。</p>
+</blockquote>
+</li>
+<li><p>Mixin的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L452">SubType</a>被初始化。确定<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L452">SubType</a>的标准很简单：</p>
+<ul>
+<li><p>如果Mixin是一个<code>类</code>，它是一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L526">标准Mixin</a></p>
+</li>
+<li><p>如果Mixin是一个<code>接口</code>且只包含<em>访问器方法</em>，那么它是一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L601">访问器Mixin</a></p>
+</li>
+<li><p>否则它是一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L571">接口Mixin</a></p>
+</li>
+</ul>
+</li>
+<li><p>然后从<code>@Mixin</code>注解中解析Mixin<em>目标类</em>。首先解析作为类字面量指定的公共目标，然后解析作为字符串指定的软目标。</p>
+<p>每个目标首先根据Mixin配置的<em>伴生插件</em>（如果有）检查其合法性，然后为每个成功的目标获取一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>。如果目标不存在，准备阶段将在此处快速失败。</p>
+<p>成功发现的目标会根据<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L452">SubType</a>检查其合法性（例如，确保接口Mixin不以类为目标）。</p>
+</li>
+</ul>
+<h4 id="3-2-2-2-完成配置准备"><a href="#3-2-2-2-完成配置准备" class="headerlink" title="3.2.2.2 完成配置准备"></a>3.2.2.2 完成配置准备</h4><p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_02.png" alt></p>
+<p>当每个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>完成解析阶段时，父<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>将目标类纳入到自己本地的目标集中，这使得配置能够判断任意给定的目标类是否有Mixin需要应用。</p>
+<h3 id="3-2-3-验证配置"><a href="#3-2-3-验证配置" class="headerlink" title="3.2.3 验证配置"></a>3.2.3 验证配置</h3><p>准备<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>生成了该阶段的配置和Mixin的全集，此时我们知道该阶段的所有Mixin都已成功解析，所有预期的<em>目标类</em>都已知。</p>
+<p>在这个阶段，进行验证处理流程，访问每个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>并使其触发其子<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>的验证。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>的验证处理 访问保留了在解析阶段创建的初始<code>ClassNode</code>的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L162">State</a>。<em>State</em>对Mixin执行检查，以确保它相对于其解析的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L452">SubType</a>和<em>目标类</em>是合法的：</p>
+<ul>
+<li><p>构造一个<em>MixinPreProcessor</em>并执行<code>prepare</code>操作，然后对每个<em>目标类</em>执行<code>conform</code>（见后面关于一致化的章节）。该过程会为每个<em>目标类<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a></em>装饰已一致化的注入器方法。这是在前期阶段完成的，以便注入器处理器可以在应用阶段被阶段中的所有其他Mixin正确发现。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L452">SubType</a>进行基本的健全性检查。进行的主要检查之一是确保Mixin的直接父类出现在每个<em>目标类</em>的父类层次结构中。这需要使用<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>递归遍历类层次结构，并可能触发进一步的类侧加载以填充此阶段所需的额外元数据。对于<em>接口Mixin</em>和<em>访问器Mixin</em>，执行更基本的检查。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java#L162">State</a>本身进行基本的健全性检查。</p>
+</li>
+<li><p>访问Mixin中的内部类并内部存储，以便稍后处理。后面的章节有更多细节。</p>
+</li>
+</ul>
+<p>如果<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>验证处理流程失败，则记录错误，并从<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>的待处理Mixin集中移除该<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>。</p>
+<h3 id="3-2-4-激活配置"><a href="#3-2-4-激活配置" class="headerlink" title="3.2.4 激活配置"></a>3.2.4 激活配置</h3><p>通过准备阶段的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>被添加到转换器的活动配置集合中，然后重新排序以确保配置保持优先级顺序。</p>
+<h2 id="3-3-应用Mixin"><a href="#3-3-应用Mixin" class="headerlink" title="3.3 应用Mixin"></a>3.3 应用Mixin</h2><h3 id="3-3-1-初始步骤"><a href="#3-3-1-初始步骤" class="headerlink" title="3.3.1 初始步骤"></a>3.3.1 初始步骤</h3><p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTransformer.java">Mixin转换器</a>除了将Mixin应用到目标类之外，还执行其他任务。由于某些类需要在运行时生成，如果传入的字节码是<code>null</code>——意味着指定的类需要根据类转换器的一般约定进行生成——<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTransformer.java">MixinTransformer</a>首先委托给任何注册的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ext/IClassGenerator.java">IClassGenerator</a>。</p>
+<h4 id="3-3-1-1-内部类生成器"><a href="#3-3-1-1-内部类生成器" class="headerlink" title="3.3.1.1 内部类生成器"></a>3.3.1.1 内部类生成器</h4><p>Mixin中的内部类需要非常小心地处理。重要的是要注意，从JVM的角度来看，内部类并不是真正的<em>内部</em>，内部类所拥有的很多功能只是编译器创建的包私有结构的语法糖，用于创造内部的假象。</p>
+<p>这意味着对于内部类，需要为每个Mixin目标类仔细重建合成结构，内部类本身也是如此。因此，如果特定的Mixin<code>MixinFoo</code>有一个内部类<code>MixinFoo$Baz</code>并且作用于两个类<code>com.home.Foo</code>和<code>com.home.Bar</code>，则需要制作两个内部类副本：每个目标一个。</p>
+<p>我在应用时通过将类引用一致化为目标并附加唯一标识符（以避免恰好具有相同内部类名的多个Mixin之间的冲突！）来处理这种情况。因此，我们一致化的类名将是<code>com.home.Foo$Baz$abcdef0123</code>和<code>com.home.Bar$Baz$defecdb4567</code>。</p>
+<p>每个唯一的名称可以通过内部映射轻松反向推导到特定的目标和源类，因此<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/InnerClassGenerator.java">InnerClassGenerator</a>的任务是通过读取原始字节码并将对Mixin（原始外部类）的引用转换为所需的目标类来合成一致化的内部类的字节码。注意，访问转换是不必要的，因为任何“私有”成员都会有合成的包私有访问器来模拟原始的内部类行为。</p>
+<p>注意，对于<em>纯合成内部类</em>，如果类是静态的，我们不需要这样做，因为目前纯合成内部类的唯一来源是用于switch查找。对于这些类，我们只是按原样传递类字节码，以减少处理负担。这由<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinPostProcessor.java">MixinPostProcessor</a>处理。</p>
+<h4 id="3-3-1-2-参数类生成器"><a href="#3-3-1-2-参数类生成器" class="headerlink" title="3.3.1.2 参数类生成器"></a>3.3.1.2 参数类生成器</h4><p>目前使用的另一个类生成器是<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/invoke/arg/ArgsClassGenerator.java">ArgsClassGenerator</a>，它用于为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/ModifyArgs.java">ModifyArgs</a>注入器合成<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/invoke/arg/Args.java">Args</a>的子类。</p>
+<h3 id="3-3-2-准备Mixin以进行应用"><a href="#3-3-2-准备Mixin以进行应用" class="headerlink" title="3.3.2 准备Mixin以进行应用"></a>3.3.2 准备Mixin以进行应用</h3><p>对于每个传入的候选类，访问转换器活动集中的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>，检查它们是否有指定类的可用Mixin。记得此前提到，每个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>维护一个内部的目标类命中列表，因此选择过程非常快。</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_04.png" alt></p>
+<p>每个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinConfig.java">MixinConfig</a>将符合条件的Mixin添加到一个<code>TreeSet</code>，由于<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>实现了<code>Comparable&lt;MixinInfo&gt;</code>，使得Mixin的<code>priority</code>描述了其自然顺序，因此该集合按<code>priority</code>对Mixin进行排序。</p>
+<p>如果有任何符合条件的Mixin作用于目标，则继续处理，并为传入的目标类创建一个<code>ClassNode</code>，并将其包装在<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/TargetClassContext.java">TargetClassContext</a>中，以便在管线的其余部分中进行编组。目标的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>也从元数据池中检索，它在验证阶段就已创建，因此已预先装饰了来自声明Mixin的一致化成员。</p>
+<h4 id="3-3-2-1-创建应用器和预处理Mixin"><a href="#3-3-2-1-创建应用器和预处理Mixin" class="headerlink" title="3.3.2.1 创建应用器和预处理Mixin"></a>3.3.2.1 创建应用器和预处理Mixin</h4><p>创建<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinApplicatorStandard.java">Mixin应用器</a>的第一阶段是预处理符合条件的Mixin以准备应用。此过程混合了Mixin本身的两个上下文（以<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinInfo.java">MixinInfo</a>实例的形式）和<em>目标类</em>（以<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/TargetClassContext.java">TargetClassContext</a>的形式），将中间转换存储在结果<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTargetContext.java">MixinTargetContext</a>对象中。因此，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTargetContext.java">MixinTargetContext</a>表示当<strong>Mixin</strong>通过<strong>应用器</strong>时，在特定<strong>目标</strong>上下文中的Mixin。</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_05.png" alt></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinPreProcessorStandard.java">预处理器</a>分三个阶段工作，以生成所需的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTargetContext.java">MixinTargetContext</a>：</p>
+<ul>
+<li><p><strong>准备</strong><br>首先以非上下文特定的方式准备Mixin类，例如从影子方法和软实现方法中去除前缀。这些更改会装饰Mixin的底层<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>，以便可以跟踪重命名后的方法。</p>
+</li>
+<li><p><strong>一致化</strong><br><em>一致化</em>过程是一个目标上下文特定的操作，它通过给Mixin中的<em>唯一</em>方法（注入器处理器，以及任何用<code>@Unique</code>显式装饰的方法）提供保证在目标类层次结构中唯一的名称来准备它们。由于此过程在给定目标的上下文中是确定的，我们可以保证在此阶段生成的装饰名称，与早期验证处理流程中生成的一致化名称完全一致。</p>
+</li>
+<li><p><strong>附加</strong><br><em>附加</em>过程是最复杂的预处理器步骤，可以被认为是将Mixin<em>特化</em>为其目标。它对不同类型的方法和字段进行不同处理，因此需要完成多项工作：</p>
+<ul>
+<li><p>对于影子方法和字段，它确保影子目标存在于目标类中</p>
+</li>
+<li><p>对于<code>@Overwrite</code>方法，它确保目标存在</p>
+</li>
+<li><p>对于<code>@Unique</code>方法，它处理重命名私有方法以避免与目标中的成员冲突，如果公共方法冲突则引发错误</p>
+</li>
+<li><p>对于每个成员，它决定该成员是否应该保留在Mixin中以便应用到目标，还是因为不需要而被丢弃。例如，影子在验证后被丢弃，并改为注册到目标上下文，以便稍后可以访问它们。</p>
+</li>
+</ul>
+<p>一旦<em>附加</em>完成，只有需要合并到目标中的成员仍然存在于Mixin中，并且所有成员都已一致化为其最终签名以准备应用。</p>
+</li>
+</ul>
+<p>需要重点注意的是，在预处理阶段采取的许多操作，都会修饰<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>中Mixin成员的元数据，便于应用过程中稍后的操作。例如，一致化的注入器方法可以在子Mixin中被覆盖，但这样做需要一种将一致化的名称传达给派生Mixin的方法，而子Mixin——由于类加载的魔力——实际上可能在父Mixin之前被应用。这就是为什么在验证阶段运行<em>一致化</em>过程的原因，以便完全填充所需的元数据。<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>中的成员可以通过它们的原始名称和一致化名称被发现，便于稍后调用<code>isRenamed()</code>来确定重命名状态。这种重命名的传播也适用于带前缀的<em>影子</em>和<em>软实现</em>成员，它们可能在子Mixin中被覆盖或调用，并且需要知道相关的一致化名称以便转换这些调用。</p>
+<h3 id="3-3-3-应用Mixin"><a href="#3-3-3-应用Mixin" class="headerlink" title="3.3.3 应用Mixin"></a>3.3.3 应用Mixin</h3><p>在预处理阶段之后，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinApplicatorStandard.java">应用器</a>中存在一个已排序的（按<code>priority</code>顺序）<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTargetContext.java">MixinTargetContext</a>列表，应用器然后继续将准备好的Mixin应用到目标类。</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_06.png" alt></p>
+<p>Mixin的应用分三个阶段进行，按<code>priority</code>顺序访问Mixin。</p>
+<h4 id="3-3-3-1-主应用阶段"><a href="#3-3-3-1-主应用阶段" class="headerlink" title="3.3.3.1 主应用阶段"></a>3.3.3.1 主应用阶段</h4><p><strong>主</strong>应用阶段处理大部分Mixin应用逻辑，即获取准备好的Mixin代码并将其合并到<em>目标类</em>的业务。此阶段包括以下任务：</p>
+<ul>
+<li><p><strong>合并和应用</strong>Mixin与目标类的<em>泛型签名</em>。这采用将Mixin上声明的签名元素与目标类上声明的元素混合的形式。这由<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/util/ClassSignature.java">ClassSignature</a>结构处理，它们根据Mixin和<em>目标类</em>的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>元对象进行惰性求值。</p>
+</li>
+<li><p><strong>合并</strong>Mixin上声明的<em>接口</em>到目标类中。实际上是为Mixin上声明的每个实现添加一个<code>implements</code>子句。</p>
+</li>
+<li><p><strong>合并类属性</strong>，如类版本和源文件。这样做是为了例如，如果目标类是用Java 6编译的，但Mixin使用Java 8文件，则输出类具有正确的major.minor版本。</p>
+</li>
+<li><p><strong>合并</strong>类级别的<em>注解</em>。一些注解被丢弃（例如<code>@Mixin</code>注解本身），而大多数其他注解被合并到目标上。</p>
+</li>
+<li><p><strong>合并</strong>Mixin中的<em>字段</em>到目标中。大多数字段直接添加到目标中，影子在准备阶段已经被丢弃。然而，影子字段的注解会被合并。</p>
+</li>
+<li><p><strong>合并</strong>Mixin中的<em>方法</em>。这是最复杂的步骤，因为方法在合并之前需要特化，而且应用器还必须遵守Mixin建立的一些其他契约义务。</p>
+<p>当每个方法被处理时，它会被<em>转换</em>，此转换过程由<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/MixinTargetContext.java">MixinTargetContext</a>处理，大致包括遍历Mixin方法中的每个操作码，将对Mixin类的引用（例如方法和字段访问）更改为对新目标类的引用。</p>
+<p>对于目标类之外的方法和字段，使用<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>查找相关成员，如果需要检查新类，这可能导致额外的类侧加载。这是早期重命名应用于Mixin中对这些成员的实际调用的地方。</p>
+<p>Mixin中的<em>类型转换</em>以及方法和字段访问也会针对父Mixin进行特殊处理。Mixin代码范围内的任何对父Mixin的引用将被转换为<em>当前目标上下文中</em>该Mixin的<em>目标</em>。想理解其原理，看一个简单的例子会更清晰：</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_06a.png" alt></p>
+<p>在这个例子中，我们有3个Mixin，每个针对2个类，遵守层次结构规则。<code>MixinZ</code>访问<code>MixinX</code>中的字段<code>F</code>。当<code>MixinZ</code>应用到类<code>C</code>时，字段访问被转换为<code>A.F</code>，因为<code>MixinZ</code> <em>在目标</em><code>C</code>的上下文中具有父类<code>A</code>。同样，在目标<code>L</code>的上下文中，字段被转换为目标<code>J.F</code>。这就是<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins">层次结构遍历</a>在验证和Mixin特化后期阶段如此重要的根本原因。</p>
+<p>在Mixin代码中，有时也希望将Mixin类型转换为已知目标，这导致通过<code>Object</code>进行转换，因为Java编译器不允许直接转换为它事先“知道”会失败的<code>类</code>。所以我们经常会看到诸如<code>((TargetClass)(Object)this).somePublicMethod()</code>的代码。Mixin检测并删除这些双重转换以提高效率，这意味着结果代码的效率等同于简单地调用<code>this.somePublicMethod()</code>。</p>
+<p>一旦方法代码的转换完成，应用器继续将方法合并到目标中</p>
+<ul>
+<li><p>一般来说，方法预期会替换它们的目标，除非目标已经被另一个Mixin合并并且装饰了<code>@Final</code>，这意味着不允许进一步的覆盖操作。其他替换先前覆盖的<code>@Overwrite</code>方法只是记录警告消息。</p>
+<p>还有一种可能性是正在合并的方法在两个目标中都是<em>合成桥接</em>方法。如果是这种情况，则比较桥接的等价性。如果桥接匹配，则合并它们，否则引发错误。</p>
+</li>
+<li><p><code>@Intrinsic</code>方法也被另外处理，因为如果<code>displace</code>属性为true，它们可能需要替换其目标。否则，根据目标的存在与否，它们只是被跳过或合并。</p>
+</li>
+<li><p>合并后的方法也在它们被合并时添加到目标<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>合并</strong>Mixin中的<em>初始化器</em>。初始化器是合并Mixin比较棘手的方面之一，因为Java类中的构造方法是原始类不同部分的弗兰肯斯坦怪物。编译的构造函数可以包含：</p>
+<ul>
+<li><p>原始构造方法代码，包括对父类构造方法的显式或隐式调用。</p>
+</li>
+<li><p>类中的字段初始化器。</p>
+</li>
+<li><p>类中的实例初始化器。</p>
+</li>
+<li><p>类的合成方面的初始化代码，例如对外部类的引用到合成字段。</p>
+</li>
+</ul>
+<p>由于编译的构造方法是如此混乱的不同部分，Mixin限制了为初始化器合并提供的功能。在可能的情况下，字段初始化器通过基于行号的简单算法检测，并将检测到的初始化器范围合并到目标中的构造函数中。</p>
+<p>静态初始化器简单地附加到目标的静态初始化器中。</p>
+</li>
+</ul>
+<p>一旦<strong>主</strong>应用阶段完成，该类的所有Mixin都已完全与目标合并。应用器然后对合并的代码进行两次额外的处理流程，以处理<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Advanced-Mixin-Usage---Callback-Injectors">注入器</a>：</p>
+<h4 id="3-3-3-2-预注入应用阶段"><a href="#3-3-3-2-预注入应用阶段" class="headerlink" title="3.3.3.2 预注入应用阶段"></a>3.3.3.2 预注入应用阶段</h4><p>由于所有Mixin内容现在都存在于目标类中，可以访问注入器以确定哪些方法需要修改，并在候选方法中发现它们的目标操作码。</p>
+<p>访问每个方法并检查任何有效的注入操作码，这些操作码被解析为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionInfo.java">InjectionInfo</a>结构。繁重的工作由基类<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionInfo.java">InjectionInfo</a>处理，派生类型——特定于每个注入器——只负责实例化正确的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/code/Injector.java">Injector</a>（它执行实际的操作）并处理任何其他注入类型特定的解析操作。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionInfo.java">InjectionInfo</a>负责从注入器注解中解析信息，并根据解析的数据定位注入的候选目标方法。</p>
+<blockquote>
+<p>重要的是要注意，在<strong>预注入</strong>阶段，所有注入器对类中的方法进行初始扫描，以定位它们的目标方法，以及方法内所需的目标操作码。必须在所有注入器开始注入之前完成搜索，以便保留<code>ordinal</code>和其他代码敏感操作的语义。在Mixin的早期版本中，注入器是渐进应用的，早期注入器更改的操作码可能会改变后来注入器的结果。从0.5版本开始，注入现在分两遍执行。</p>
+</blockquote>
+<p>目标的解析和发现首先通过将定义的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/code/MethodSlice.java">代码片段</a>解析为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/code/MethodSlices.java">MethodSlices</a>持有者来开始。代码片段本身可以通过ID检索（尽管单代码片段注入器将始终使用空字符串的固定ID。</p>
+<p>首先会将注解中的字符串引用解析为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/MemberInfo.java">MemberInfo</a>结构，传入的字符串通过配置指定的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/refmap/ReferenceMapper.java">ReferenceMapper</a>进行处理，它使用编译时生成的<code>refMap</code>将编译的字符串转换为它们的混淆对应物。</p>
+<p>然后，解析的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/MemberInfo.java">MemberInfo</a>用作鉴别器来定位类中的匹配方法。匹配的方法被添加到内部<code>targets</code>队列中。</p>
+<p>最后，声明的注入点从注解中解析为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/InjectionPoint.java">InjectionPoint</a>实例，稍后将用于匹配发现的<code>targets</code>中的操作码。注入器现在已完全解析并准备好运行。</p>
+<h5 id="准备注入器"><a href="#准备注入器" class="headerlink" title="准备注入器"></a>准备注入器</h5><p>一旦解析完成，检查注入器的有效性（它已匹配一个或多个目标），如果没有识别到目标，则从进一步处理中丢弃它。</p>
+<p>为了执行查找处理流程，<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionInfo.java">InjectionInfo</a>访问其队列中的每个<code>targets</code>并为每个目标获取一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/Target.java">Target</a>包装对象。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/Target.java">Target</a>是从<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/TargetClassContext.java">TargetClassContext</a>获取的方法包装对象，它跟踪——对于所有注入器——每个注入器对方法所做的更改。这允许以可靠的方式操作诸如max-stack和max-locals之类的方面，而无需注入器自己跟踪此信息。它还——正如我们将在下面看到的——允许注入器观察其他注入器的效果并相应地行动。</p>
+</blockquote>
+<p>然后，已解析的注入点列表和<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/Target.java">Target</a>被输入到<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/code/Injector.java">Injector</a>的<code>find</code>方法中，该方法会在目标方法上执行注入点匹配。Injector不是直接存储匹配的<em>ASM“指令节点”（<code>AbstractInsnNode</code>）</em>，而是将每个找到的节点包装在<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/code/Injector.java#L65">TargetNode</a>中，这使得节点可以附带其对应的注入点信息，供后续引用。此过程向Injector返回一个唯一候选节点列表，表示待注入的指令集合。</p>
+<p>一旦确定了候选节点，它们就被提交给<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/Target.java">Target</a>，后者为每个候选节点创建一个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionNodes.java#L53">InjectionNode</a>。<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionNodes.java#L53">InjectionNode</a>表示每个底层指令的唯一句柄，可以跟踪指令何时被注入器替换。</p>
+<p>然后，返回的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionNodes.java#L53">InjectionNode</a>集合与<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/Target.java">Target</a>一起存储在<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionInfo.java">InjectionInfo</a>中，准备应用。</p>
+<p>最后阶段是从方法中去除注入注解，因为它们现在已完全解析，不再需要。</p>
+<h4 id="3-3-3-3-注入应用阶段"><a href="#3-3-3-3-注入应用阶段" class="headerlink" title="3.3.3.3 注入应用阶段"></a>3.3.3.3 注入应用阶段</h4><p>既然所有注入器都已确定其目标方法和候选节点，应用Mixin的最终处理流程是实际的<strong>注入</strong>阶段。</p>
+<p>正如你所想，来自上一处理流程的解析的<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionInfo.java">InjectionInfo</a>会被按顺序访问并将它们的更改注入各自的目标。为每个<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/Target.java">Target</a>和候选<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionNodes.java#L53">InjectionNode</a>的组合调用<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/code/Injector.java">Injector</a>以执行其注入。</p>
+<p>重要的是，注入器所做的任何指令<em>替换</em>或<em>添加</em>都通过<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/Target.java">Target</a>进行编组，如果被替换，它会用替换指令装饰<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionNodes.java#L53">InjectionNode</a>。后来的注入器可以动态决定它们是否关心指令被替换：例如，<code>@Redirect</code>注入器可以确定性地失败并给出有用的错误；而<code>@Inject</code>回调注入器可以愉快地继续，因为即使指令被替换，<em>位置</em>仍然完好无损。</p>
+<p>注入器也可以使用<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/struct/InjectionNodes.java#L53">InjectionNode</a>相互编组元数据。例如，<code>@Redirect</code>注入器可以通过将其身份和优先级装饰到注入节点上来遵守优先级语义。如果它遇到之前被优先级较低的注入器重定向的节点，它可以选择篡夺它，或者如果先前的注入器是<code>@Final</code>，则抛出错误。来自<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/injection/InjectionPoint.java">InjectionPoint</a>本身的元数据也可以以这种方式传播。</p>
+<h5 id="填充访问器"><a href="#填充访问器" class="headerlink" title="填充访问器"></a>填充访问器</h5><p>除了处理注入器外，最终<strong>注入</strong>阶段还通过生成具有适当代理指令的相关方法并将其附加到目标类，来访问在预处理器的<code>attach</code>阶段发现的所有<code>@Accessor</code>和<code>@Invoker</code>方法。</p>
+<p>与注入器类似，访问器和调用器首先分别解析为<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/gen/AccessorInfo.java">AccessorInfo</a>和<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/gen/InvokerInfo.java">InvokerInfo</a>，然后在第二遍中构造适当的生成器，生成方法并将其添加到目标类中。</p>
+<h4 id="3-3-3-4-升级阶段"><a href="#3-3-3-4-升级阶段" class="headerlink" title="3.3.3.4 升级阶段"></a>3.3.3.4 升级阶段</h4><p>升级是对Mixin的最终处理流程，处理影子与覆盖结合访问转换器时的一个有问题的副作用。</p>
+<p><img src="/2026/03/29/Flippin-Mixins-how-do-they-work/how_07.png" alt></p>
+<p>一般来说，<code>@Shadow</code>或<code>@Overwrite</code>的访问修饰符预期将与目标一致，或者在影子方法的情况下可能更宽松（完全可以使用<code>protected abstract</code>影子而不是<code>private</code>影子，因为这意味着可以省略方法体）。这意味着在几乎所有情况下，Mixin中对<code>private</code>影子方法的任何<em>调用</em>都将使用正确的<code>INVOKESPECIAL</code>操作码进行调用。</p>
+<p>然而，考虑这样一种情况：第三方在运行时使用<em>访问转换器</em>将基类方法的可见性从<code>private</code>提升到<code>protected</code>，以便在他们的自定义子类中重写该方法。如果Mixin代码仍然静默使用原始的<code>INVOKESPECIAL</code>，那么重写约定将失效，因为即使在派生类中，Mixin代码仍然会调用基类方法，因为<code>INVOKESPECIAL</code>将静态绑定到基类方法，不会使用虚方法表。</p>
+<p>Mixin的<em>升级</em>功能通过记录（在<code>attach</code>时）任何需要从<code>private</code>“升级”到更大可见性以匹配其目标的方法来解决这个问题，然后对<em>目标类中的所有调用</em>进行最终遍历，以确保使用正确的操作码调用方法。此更改已由访问转换器对传入代码进行，因此只需要对Mixin代码进行升级。</p>
+<h2 id="3-4-移动到新阶段"><a href="#3-4-移动到新阶段" class="headerlink" title="3.4 移动到新阶段"></a>3.4 移动到新阶段</h2><p>如果触发新阶段，处理流程再次返回到准备阶段，该阶段的配置由转换器加载。此时不会释放任何状态，因此现有配置、以<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/transformer/ClassInfo.java">ClassInfo</a>形式的现有类元数据不会被丢弃。新配置只是添加到状态中，处理像以前一样继续。</p>
+<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><p>Mixin乍看之下似乎把一个简单的工作——将字节码揉在一起——通过堆砌大量不必要的框架而把事情变得复杂。然而，大多数复杂性归根结底都是为了支持成功应用Mixin的以下核心要点：</p>
+<ul>
+<li><p>对Mixin及其目标范围之外的类的感知至关重要，这包括其他Mixin对类所做的更改，使得Mixin内部功能成为可能。</p>
+</li>
+<li><p>存储足够的类元信息以提供对类所做更改的感知，以便它们可以在传入代码中传播；即带前缀的影子方法和软实现方法。</p>
+</li>
+<li><p>检测和适配环境中其他转换器所做的更改：对传入代码运行转换器链是昂贵但不可避免的。</p>
+</li>
+<li><p>将Mixin特化到其目标的上下文比“从Mixin类获取代码并合并到目标类中”复杂得多，特别是对于lambda函数（在Java中，实际上是匿名方法）和父Mixin中方法的调用等方面。</p>
+</li>
+<li><p>其他功能的脚手架，如运行时导出、字节码验证、处理不同的混淆类型、就地审计检查和兼容性级别适应，都增加了额外的复杂层，需要仔细管理。</p>
+</li>
+<li><p>支持注入器代表了整个功能子系统，它依赖于Mixin核心。</p>
+</li>
+</ul>
+<h2 id="4-1-本文未涵盖的Mixin方面"><a href="#4-1-本文未涵盖的Mixin方面" class="headerlink" title="4.1 本文未涵盖的Mixin方面"></a>4.1 本文未涵盖的Mixin方面</h2><p>我毫不歉意地从本文中省略了一些主题，因为它们会使文章无目的地膨胀。我可能会在未来的技术文章中解决它们：</p>
+<h3 id="4-1-1-平台处理程序和平台特定功能"><a href="#4-1-1-平台处理程序和平台特定功能" class="headerlink" title="4.1.1 平台处理程序和平台特定功能"></a>4.1.1 平台处理程序和平台特定功能</h3><p>Mixin不存在于真空中。作为一个子系统，Mixin需要应用程序框架的合作才能加载和执行其功能。有相当多的功能用于与不同目标平台交互，以便将Mixin集成到目标环境中。然而，鉴于这些功能是极其平台特定的，除了引导之外与Mixin自己的操作无关，我在本文中省略了对它们的讨论。</p>
+<h3 id="4-1-2-注解处理器"><a href="#4-1-2-注解处理器" class="headerlink" title="4.1.2 注解处理器"></a>4.1.2 注解处理器</h3><p>作为框架，Mixin的一大核心特性，如前面的介绍系列文章“<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Obfuscation-and-Mixins">Mixin简介 - Mixin中的混淆</a>”中所讨论的，是需要跨越开发时与生产时之间的混淆边界。负责实现这一跨域的核心组件是Mixin<em>注解处理器（Annotation Processor）</em>，它在编译时为Mixin在混淆环境中正常运行生成所需的数据。</p>
+<p>虽然我在上面提到<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/blob/master/src/main/java/org/spongepowered/asm/mixin/refmap/ReferenceMapper.java">ReferenceMapper</a>时触及了这个系统的<em>输出</em>，但对AP本身的讨论超出了本文的范围。</p>
+<h3 id="4-1-3-审计功能"><a href="#4-1-3-审计功能" class="headerlink" title="4.1.3 审计功能"></a>4.1.3 审计功能</h3><p>Mixin操作的各个方面旨在为Mixin开发者提供开发时的体验优化。特别是导出和实时反编译后处理的字节码是Mixin的核心功能，以及用户可启用的模块，用于运行ASM的<code>CheckClassAdapter</code>和审计正在混入的特定接口的实现。</p>
+<p>由于Mixin核心的这些部分与Mixin的应用没有直接关系，为了清晰起见，我省略了它们。</p>
+<h2 id="4-2-最后的话"><a href="#4-2-最后的话" class="headerlink" title="4.2 最后的话"></a>4.2 最后的话</h2><p>Mixin在不断发展，我对Mixin的目标是坚持上面概述的核心原则，特别是<em>不造成伤害</em>。Mixin核心周围的几乎所有框架都是为了让它能够可靠高效地完成其工作。虽然这最终增加了Mixin作为一个整体的复杂性，但我相信保持整个系统的有效性是值得这种权衡的。我希望我已经成功证明Mixin所做的一切都是有原因的，我的动机是无私的。</p>
+<p>如果你读到这里，恭喜你。把你的留言写在明信片背面，然后来Espernet IRC的 <code>#spongedev</code>频道打个招呼吧。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2026/03/29/Flippin-Mixins-how-do-they-work/" data-title="该死的Mixin，到底是怎么工作的？ | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2026/03/29/PSA-Forward-Compatibility-Features-in-Mixin/"  title="Mixin中的前向兼容性特性">
+ <strong>下一篇：</strong><br/> 
+ <span>Mixin中的前向兼容性特性
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: '该死的Mixin，到底是怎么工作的？',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%8E%9F%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">1. 原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%8A%9F%E8%83%BD%E9%9B%86"><span class="toc-number">2.</span> <span class="toc-text">2. 功能集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%9B%AE%E6%A0%87%E7%B1%BB%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 目标类作用域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E2%80%9C%E8%BD%AF%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 “软”操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E5%AF%B9%E5%85%B6%E4%BB%96Mixin%E7%9A%84%E6%84%9F%E7%9F%A5"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 对其他Mixin的感知</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E5%BF%AB%E9%80%9F%E5%A4%B1%E8%B4%A5%E6%88%96%E5%AE%89%E5%85%A8%E5%A4%B1%E8%B4%A5"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 快速失败或安全失败</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E5%85%BC%E5%AE%B9%E6%80%A7%E5%92%8C%E7%8E%AF%E5%A2%83%E6%84%9F%E7%9F%A5"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 兼容性和环境感知</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E6%95%88%E7%8E%87"><span class="toc-number">2.6.</span> <span class="toc-text">2.5 效率</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">3.</span> <span class="toc-text">3. 生命周期</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%90%AF%E5%8A%A8"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E5%BC%80%E5%A7%8B%E4%B8%80%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 开始一个阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-1-%E9%80%89%E6%8B%A9%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.1.</span> <span class="toc-text">3.2.1 选择配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-2-%E5%87%86%E5%A4%87%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.2.</span> <span class="toc-text">3.2.2 准备配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-1-%E8%A7%A3%E6%9E%90Mixin"><span class="toc-number">3.2.2.1.</span> <span class="toc-text">3.2.2.1 解析Mixin</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-2-%E5%AE%8C%E6%88%90%E9%85%8D%E7%BD%AE%E5%87%86%E5%A4%87"><span class="toc-number">3.2.2.2.</span> <span class="toc-text">3.2.2.2 完成配置准备</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-3-%E9%AA%8C%E8%AF%81%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.3.</span> <span class="toc-text">3.2.3 验证配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-4-%E6%BF%80%E6%B4%BB%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.4.</span> <span class="toc-text">3.2.4 激活配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E5%BA%94%E7%94%A8Mixin"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 应用Mixin</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-1-%E5%88%9D%E5%A7%8B%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.3.1.</span> <span class="toc-text">3.3.1 初始步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-1-1-%E5%86%85%E9%83%A8%E7%B1%BB%E7%94%9F%E6%88%90%E5%99%A8"><span class="toc-number">3.3.1.1.</span> <span class="toc-text">3.3.1.1 内部类生成器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-1-2-%E5%8F%82%E6%95%B0%E7%B1%BB%E7%94%9F%E6%88%90%E5%99%A8"><span class="toc-number">3.3.1.2.</span> <span class="toc-text">3.3.1.2 参数类生成器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-2-%E5%87%86%E5%A4%87Mixin%E4%BB%A5%E8%BF%9B%E8%A1%8C%E5%BA%94%E7%94%A8"><span class="toc-number">3.3.2.</span> <span class="toc-text">3.3.2 准备Mixin以进行应用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-1-%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8%E5%99%A8%E5%92%8C%E9%A2%84%E5%A4%84%E7%90%86Mixin"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">3.3.2.1 创建应用器和预处理Mixin</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-3-%E5%BA%94%E7%94%A8Mixin"><span class="toc-number">3.3.3.</span> <span class="toc-text">3.3.3 应用Mixin</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-1-%E4%B8%BB%E5%BA%94%E7%94%A8%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.1.</span> <span class="toc-text">3.3.3.1 主应用阶段</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-2-%E9%A2%84%E6%B3%A8%E5%85%A5%E5%BA%94%E7%94%A8%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.2.</span> <span class="toc-text">3.3.3.2 预注入应用阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E6%B3%A8%E5%85%A5%E5%99%A8"><span class="toc-number">3.3.3.2.1.</span> <span class="toc-text">准备注入器</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-3-%E6%B3%A8%E5%85%A5%E5%BA%94%E7%94%A8%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.3.</span> <span class="toc-text">3.3.3.3 注入应用阶段</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A1%AB%E5%85%85%E8%AE%BF%E9%97%AE%E5%99%A8"><span class="toc-number">3.3.3.3.1.</span> <span class="toc-text">填充访问器</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-3-4-%E5%8D%87%E7%BA%A7%E9%98%B6%E6%AE%B5"><span class="toc-number">3.3.3.4.</span> <span class="toc-text">3.3.3.4 升级阶段</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E7%A7%BB%E5%8A%A8%E5%88%B0%E6%96%B0%E9%98%B6%E6%AE%B5"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 移动到新阶段</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">4. 总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E6%9C%AC%E6%96%87%E6%9C%AA%E6%B6%B5%E7%9B%96%E7%9A%84Mixin%E6%96%B9%E9%9D%A2"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 本文未涵盖的Mixin方面</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-1-%E5%B9%B3%E5%8F%B0%E5%A4%84%E7%90%86%E7%A8%8B%E5%BA%8F%E5%92%8C%E5%B9%B3%E5%8F%B0%E7%89%B9%E5%AE%9A%E5%8A%9F%E8%83%BD"><span class="toc-number">4.1.1.</span> <span class="toc-text">4.1.1 平台处理程序和平台特定功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-2-%E6%B3%A8%E8%A7%A3%E5%A4%84%E7%90%86%E5%99%A8"><span class="toc-number">4.1.2.</span> <span class="toc-text">4.1.2 注解处理器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-3-%E5%AE%A1%E8%AE%A1%E5%8A%9F%E8%83%BD"><span class="toc-number">4.1.3.</span> <span class="toc-text">4.1.3 审计功能</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E6%9C%80%E5%90%8E%E7%9A%84%E8%AF%9D"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 最后的话</span></a></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>12</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>16</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2026 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

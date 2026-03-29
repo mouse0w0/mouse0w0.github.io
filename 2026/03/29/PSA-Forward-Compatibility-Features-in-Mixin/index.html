@@ -1,0 +1,613 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>Mixin中的前向兼容性特性 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：PSA Forward Compatibility Features in Mixin  Mixin包含许多特性和设计考量，不仅旨在提供向后兼容性，还致力于解决前向兼容性问题。由于这些特性的用途可能不太明显，我将在此详细说明。不过，本篇PSA的重点在于Mixin配置中minVersion键的使用，以及其对应用程序稳定性的影响。 1. Mixin配置属性minVersionminVer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mixin中的前向兼容性特性">
+<meta property="og:url" content="https://mouse0w0.github.io/2026/03/29/PSA-Forward-Compatibility-Features-in-Mixin/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：PSA Forward Compatibility Features in Mixin  Mixin包含许多特性和设计考量，不仅旨在提供向后兼容性，还致力于解决前向兼容性问题。由于这些特性的用途可能不太明显，我将在此详细说明。不过，本篇PSA的重点在于Mixin配置中minVersion键的使用，以及其对应用程序稳定性的影响。 1. Mixin配置属性minVersionminVer">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-29T02:51:31.000Z">
+<meta property="article:modified_time" content="2026-03-29T06:10:06.630Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2026/03/29/PSA-Forward-Compatibility-Features-in-Mixin/" title="Mixin中的前向兼容性特性" itemprop="url">Mixin中的前向兼容性特性</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2026-03-29T02:51:31.000Z" itemprop="datePublished"> 发表于 2026-03-29</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Mixin%E9%85%8D%E7%BD%AE%E5%B1%9E%E6%80%A7minVersion"><span class="toc-number">1.</span> <span class="toc-text">1. Mixin配置属性minVersion</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1-Mixin%E5%85%B3%E4%BA%8E%E5%90%91%E5%90%8E%E5%85%BC%E5%AE%B9%E6%80%A7%E7%9A%84%E4%B8%80%E8%88%AC%E7%BA%A6%E5%AE%9A"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 Mixin关于向后兼容性的一般约定</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-%E4%BD%BF%E7%94%A8%E6%9E%84%E5%BB%BA%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99minVersion"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 使用构建脚本编写minVersion</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Mixin%E9%85%8D%E7%BD%AE%E5%B1%9E%E6%80%A7compatibilityLevel"><span class="toc-number">2.</span> <span class="toc-text">2. Mixin配置属性compatibilityLevel</span></a></li></ol>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/PSA-Forward-Compatibility-Features-in-Mixin">PSA Forward Compatibility Features in Mixin</a></p>
+</blockquote>
+<p>Mixin包含许多特性和设计考量，不仅旨在提供向后兼容性，还致力于解决<em>前向兼容性</em>问题。由于这些特性的用途可能不太明显，我将在此详细说明。不过，本篇PSA的重点在于Mixin配置中<code>minVersion</code>键的使用，以及其对应用程序稳定性的影响。</p>
+<h4 id="1-Mixin配置属性minVersion"><a href="#1-Mixin配置属性minVersion" class="headerlink" title="1. Mixin配置属性minVersion"></a>1. Mixin配置属性<code>minVersion</code></h4><p><code>minVersion</code>属性是您可用的最重要的前向兼容性基础设施，不应被忽视。使用<code>minVersion</code>属性的安全做法是始终将其设置为您构建时所用的Mixin版本。但是，如果您没有使用构建版本中的特性，手动维护该值可以提供更大的灵活性。</p>
+<p>那么<code>minVersion</code>键有什么作用呢？</p>
+<p>假设有两个库<code>ModA</code>和<code>ModB</code>，它们都使用Mixin，被应用程序环境加载。<code>ModA</code>打包了Mixin的<code>0.6</code>版本，<code>ModB</code>包含<code>0.7</code>版本。两个库都在其配置中指定了正确的<code>minVersion</code>。</p>
+<p>如果<code>ModA</code>恰好在<code>ModB</code>之前加载，加载的Mixin版本将是<code>0.6</code>。当<code>ModB</code>尝试添加其Mixin配置时，应用程序可以快速失败（fail-fast），因为它检测到加载的Mixin版本太旧，无法支持<code>ModB</code>的Mixin所需的特性。</p>
+<p>然而，如果<code>ModB</code>忘记更新配置中的<code>minVersion</code>属性，应用程序将在稍后以非确定性方式失败。根据具体情况，后续出现的错误可能看起来晦涩难懂，甚至可能不会暗示问题与过时的Mixin版本有关。</p>
+<p>在配置中使用<code>minVersion</code>可以确保这种快速失败行为。</p>
+<h5 id="1-1-Mixin关于向后兼容性的一般约定"><a href="#1-1-Mixin关于向后兼容性的一般约定" class="headerlink" title="1.1 Mixin关于向后兼容性的一般约定"></a>1.1 Mixin关于向后兼容性的一般约定</h5><p>由于Mixin库的一般约定是，Mixin将始终保证为旧版本编写的Mixin要么继续工作，要么以确定性方式快速失败，因此运行时存在更高版本不会造成问题。</p>
+<p>相反，如果存在比所需版本更旧的版本，可能会产生不可预测的结果，这可以通过包含<code>minVersion</code>属性来轻松解决。</p>
+<h5 id="1-2-使用构建脚本编写minVersion"><a href="#1-2-使用构建脚本编写minVersion" class="headerlink" title="1.2 使用构建脚本编写minVersion"></a>1.2 使用构建脚本编写<code>minVersion</code></h5><p><code>minVersion</code>属性本身被解析为字符串形式的语义版本号（semver-compatible version number），在其他情况下会被忽略。这意味着在<code>minVersion</code>属性中使用替换标记（例如<code>$&#123;version&#125;</code>）并在构建脚本中于编译时替换该标记是完全可行的。”无效”值在您的开发环境中会被忽略，而正确的值将出现在您编译后的产物中。</p>
+<h4 id="2-Mixin配置属性compatibilityLevel"><a href="#2-Mixin配置属性compatibilityLevel" class="headerlink" title="2. Mixin配置属性compatibilityLevel"></a>2. Mixin配置属性<code>compatibilityLevel</code></h4><p>随着Java新版本的发布，Mixin添加了新特性以支持这些新的语言特性。<code>compatibilityLevel</code>属性可用于将Mixin的运行级别提升到您希望使用的特性集所需的级别。默认级别是<code>JAVA_6</code>。</p>
+<p>目前，每个级别都能支持其下级语言级别的所有特性，可以预期这种情况将持续下去。</p>
+<p>提升兼容性级别有两个目的：</p>
+<ul>
+<li>首先，如果当前运行时不支持请求的特性集（例如，在运行Java 8时尝试提升到<code>JAVA_9</code>），则操作可以快速失败。</li>
+<li>其次，如果未来的Java版本阻止与旧语言版本的安全互操作（例如，如果Java 12出现并需要进行与Java 6的破坏性更改，使得Java 6 Mixin在该平台上无法支持），那么这种情况也可以快速失败和/或将Mixin集合划分为当前代和遗留模式。</li>
+</ul>
+<p>这意味着与<code>minVersion</code>属性一样，维护<code>compatibilityLevel</code>属性对于库的长期稳定性很重要。<code>compatibilityLevel</code>应始终设置为您的Mixin所需的最高级别。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2026/03/29/PSA-Forward-Compatibility-Features-in-Mixin/" data-title="Mixin中的前向兼容性特性 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2026/03/29/Flippin-Mixins-how-do-they-work/" title="该死的Mixin，到底是怎么工作的？">
+  <strong>上一篇：</strong><br/>
+  <span>
+  该死的Mixin，到底是怎么工作的？</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2026/03/29/About-Hierarchy-Validation-in-Mixins/"  title="Mixin中的层次结构验证">
+ <strong>下一篇：</strong><br/> 
+ <span>Mixin中的层次结构验证
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: 'Mixin中的前向兼容性特性',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Mixin%E9%85%8D%E7%BD%AE%E5%B1%9E%E6%80%A7minVersion"><span class="toc-number">1.</span> <span class="toc-text">1. Mixin配置属性minVersion</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1-1-Mixin%E5%85%B3%E4%BA%8E%E5%90%91%E5%90%8E%E5%85%BC%E5%AE%B9%E6%80%A7%E7%9A%84%E4%B8%80%E8%88%AC%E7%BA%A6%E5%AE%9A"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 Mixin关于向后兼容性的一般约定</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-2-%E4%BD%BF%E7%94%A8%E6%9E%84%E5%BB%BA%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99minVersion"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 使用构建脚本编写minVersion</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Mixin%E9%85%8D%E7%BD%AE%E5%B1%9E%E6%80%A7compatibilityLevel"><span class="toc-number">2.</span> <span class="toc-text">2. Mixin配置属性compatibilityLevel</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>12</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>16</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2026 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

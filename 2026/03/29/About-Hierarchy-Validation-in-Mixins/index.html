@@ -1,0 +1,654 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="yEuEEZ7phu" />
+  
+    <title>Mixin中的层次结构验证 | 耗子的博客</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Mouse0w0">
+    
+
+    
+    <meta name="description" content="本文翻译自：About Hierarchy Validation in Mixins  到现在我应该不需要再提醒你Mixin不是类了吧？希望如此。然而，从纯机械的角度来看，Mixin和普通Java类一样都是使用javac编译的，因此在编写它们时有一些需要注意的事项，其中许多我已在之前的章节中介绍过。 Mixin变得棘手的一个场景是：当多个Mixin应用到形成类层次结构的多个类时。如果没有辅助接口">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mixin中的层次结构验证">
+<meta property="og:url" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/index.html">
+<meta property="og:site_name" content="耗子的博客">
+<meta property="og:description" content="本文翻译自：About Hierarchy Validation in Mixins  到现在我应该不需要再提醒你Mixin不是类了吧？希望如此。然而，从纯机械的角度来看，Mixin和普通Java类一样都是使用javac编译的，因此在编写它们时有一些需要注意的事项，其中许多我已在之前的章节中介绍过。 Mixin变得棘手的一个场景是：当多个Mixin应用到形成类层次结构的多个类时。如果没有辅助接口">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_0.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_1.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_2.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_3.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_4.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_5.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_6.png">
+<meta property="og:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_7.png">
+<meta property="article:published_time" content="2026-03-29T02:05:21.000Z">
+<meta property="article:modified_time" content="2026-03-29T06:10:06.597Z">
+<meta property="article:author" content="Mouse0w0">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Bytecode">
+<meta property="article:tag" content="Mixin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_0.png">
+
+    
+    <link rel="alternative" href="./atom.xml" title="耗子的博客" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="耗子的博客">耗子的博客</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/archives">全部博文</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://afdian.com/@mouse">捐助作者</a></li>
+					
+						<li><a target="_blank" rel="noopener" href="https://github.com/Mouse0w0/mouse0w0.github.io/issues/new">反馈建议</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:mouse0w0.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2026/03/29/About-Hierarchy-Validation-in-Mixins/" title="Mixin中的层次结构验证" itemprop="url">Mixin中的层次结构验证</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Mouse0w0" target="_blank" itemprop="author">Mouse0w0</a>
+		
+  <p class="article-time">
+    <time datetime="2026-03-29T02:05:21.000Z" itemprop="datePublished"> 发表于 2026-03-29</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Mixin%E4%B8%8E%E5%B9%B6%E8%A1%8C%E4%BC%AA%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">Mixin与并行伪层次结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mixin%E2%80%9D%E7%BB%A7%E6%89%BF%E2%80%9D"><span class="toc-number"></span> <span class="toc-text">Mixin”继承”</span></a>
+		
+		</div>
+		
+		<blockquote>
+<p>本文翻译自：<a target="_blank" rel="noopener" href="https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins">About Hierarchy Validation in Mixins</a></p>
+</blockquote>
+<p>到现在我应该不需要再提醒你<strong>Mixin不是类</strong>了吧？希望如此。然而，从纯机械的角度来看，Mixin和普通Java类一样都是<em>使用javac编译</em>的，因此在编写它们时有一些需要注意的事项，其中许多我已在之前的章节中介绍过。</p>
+<p>Mixin变得棘手的一个场景是：当多个Mixin应用到形成类层次结构的多个类时。如果没有辅助接口来访问父类中Mixin提供的字段和方法，Mixin之间的互操作可能会很麻烦。</p>
+<p>正如我们在前面章节所看到的，通常Mixin预期继承其<strong>目标类</strong>的直接父类，或者<strong>目标类</strong>层次结构中的某个父类（直到并包括<code>java.lang.Object</code>）。</p>
+<p>本节涵盖Mixin实现中较技术性的一个方面：验证Mixin继承自有效的父类。</p>
+<h4 id="Mixin与并行伪层次结构"><a href="#Mixin与并行伪层次结构" class="headerlink" title="Mixin与并行伪层次结构"></a>Mixin与并行伪层次结构</h4><p>对于典型的类层次结构，我们很容易遇到如下场景，每个Mixin都继承其目标的父类：</p>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_0.png" alt></p>
+<p>从这个图中我们可以很容易看出，Mixin本身形成了一个乍看之下像是层次结构的结构，它镜像了其目标类的层次结构。然而，重要的是要意识到，Mixin本身<strong>并不</strong>实际上形成层次结构，它们之间不存在超越概念层面的直接关联。</p>
+<p>这种场景的一个好处是验证极其简单，我们可以通过在每个目标类的层次结构中查找Mixin的父类来轻松检查其是否有效。</p>
+<p>让我们看看如何验证<code>MixinEntityPlayer</code>。这个Mixin目标是<code>EntityPlayer</code>并继承<code>EntityLiving</code>。要执行验证，我们只需沿<code>EntityPlayer</code>的父类层次结构向上遍历，直到找到（或未找到）<code>EntityLiving</code>。</p>
+<p>我们可以用递归方式表达这个朴素的验证算法：</p>
+<ol>
+<li>如果我是<strong>父类</strong>，停止并<strong>返回true</strong>。</li>
+<li>如果我是<code>Object</code>，停止并<strong>返回false</strong>。</li>
+<li>向上走到<strong>我的</strong>父类，然后从步骤1重复并返回结果。</li>
+</ol>
+<p>从视觉上看，我们的验证过程是这样的：</p>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_1.png" alt></p>
+<p>如我们所见，使用此算法对此场景的验证只需两步：</p>
+<ol>
+<li>首先遍历到Mixin目标类<code>EntityPlayer</code></li>
+<li>接着沿层次结构向上走1步到达<code>EntityPlayer</code>的父类，此时验证成功，因为找到了父类。</li>
+</ol>
+<p>然而这种效率是有代价的：由于我们的Mixin实际上并不互相继承，因此无法立即访问由Mixin添加到父类中的字段或方法。</p>
+<p>例如，假设<code>MixinEntityLiving</code>向其目标类添加了一个新的protected<code>field</code>。现在由于<code>MixinEntityPlayer</code>继承<code>EntityLiving</code>，在<strong>实践中</strong>字段<code>foo</code>将可以从<code>EntityPlayer</code>访问，但是<code>EntityPlayer</code>的Mixin对这个新字段一无所知，因此在<strong>编译时</strong>无法引用它：</p>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_2.png" alt></p>
+<h3 id="Mixin”继承”"><a href="#Mixin”继承”" class="headerlink" title="Mixin”继承”"></a>Mixin”继承”</h3><p>我们可以通过允许Mixin不仅继承目标层次结构中的类，还可以继承其他Mixin来解决这个问题，这使我们在概念上可以创建这样的结构：</p>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_3.png" alt></p>
+<p>然而，虽然这种结构对人类来说容易设计和理解，但对Mixin子系统来说验证起来相当困难，这是因为单个Mixin无法知道其（声明的）父类最终是否会出现在其<strong>目标</strong>的父类层次结构中。</p>
+<p>看着上面的图表，可能会认为验证很简单甚至不需要，但由于Mixin可以有多个目标，多个Mixin也可以目标同一个类，当Mixin和目标的层次结构不那么简单时，验证会很快变得非常复杂：</p>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_4.png" alt></p>
+<p>父类验证很重要，因为这是在应用Mixin之前验证Mixin中的静态绑定调用是否合理、是否会在应用时正确解析的唯一方法，因此简单地跳过验证并祈祷一切顺利是不安全的。然而我们需要验证尽可能高效，因为它必须在加载时对每个Mixin运行。</p>
+<p>重要的是要意识到<strong>每个Mixin</strong>都必须在<strong>其每个目标</strong>的上下文中进行验证，因为正如已经展示的，Mixin目标可能有截然不同的层次结构。这意味着假设一个目标的层次结构可以合理解析就认为所有其他目标也是合理的，这是不安全的，仍需对每个目标进行验证。</p>
+<p>当我们应用之前朴素的验证方案，简单地在目标层次结构中查找Mixin的父类时，我们遇到了问题，验证失败：</p>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_5.png" alt></p>
+<p>现在我们<strong>可以</strong>通过沿Mixin层次结构向上遍历来解决这个问题，对于<em>每个</em>父Mixin，在所讨论的Mixin目标的父类层次结构中查找其每个目标。然而这种方法在处理多目标Mixin时很快会变得非常昂贵，因为对于<em>每个</em>父Mixin目标，我们必须搜索派生Mixin的<em>每个</em>目标的父类层次结构来找到匹配。这可能导致对于一个表面上很简单的验证任务进行大量查找。</p>
+<p>解决方案实际上相当简单：我们只需将Mixin加载分成两个不同的<strong>阶段</strong>。在<strong>第一阶段</strong>，我们生成一些额外的元数据，用于填补我们对层次结构认知的空白。具体来说，我们让每个加载的Mixin用指向自身的指针”标记”其目标类。这意味着目标类现在<em>知道</em>哪些Mixin正在目标它：</p>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_6.png" alt></p>
+<p>有了这个新信息，我们可以在<strong>第二阶段</strong>执行验证，知道我们的层次结构信息是完整的，并修改我们的递归算法以利用新数据：</p>
+<ol>
+<li>如果我是<strong>父类</strong>，停止并<strong>返回true</strong>。</li>
+<li>如果我是<code>Object</code>，停止并<strong>返回false</strong>。</li>
+<li>向上走到<strong>我的</strong>父类，然后从步骤1重复并记录结果。</li>
+<li>如果步骤3的结果是<strong>false</strong>，检查每个已标记的Mixin：<ul>
+<li>如果<strong>任何Mixin</strong>是我们寻找的<strong>父类</strong>，<strong>返回true</strong></li>
+<li>如果<strong>没有Mixin</strong>是我们寻找的<strong>父类</strong>，<strong>返回false</strong></li>
+</ul>
+</li>
+</ol>
+<p><img src="/2026/03/29/About-Hierarchy-Validation-in-Mixins/mixin_hier_7.png" alt></p>
+<p>如你所见，验证仍然是<em>深度优先搜索</em>。然而现在我们有了一个次要策略可在搜索失败时使用，即在沿树返回时检查已标记的Mixin。这最终意味着我们搜索的复杂度是线性的，只比之前略贵一些，因为仍然需要完整遍历目标的父类层次结构，但每个目标最多一次，这要可接受得多。</p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Mixin/">Mixin</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Java/">Java</a><a href="/tags/Bytecode/">Bytecode</a><a href="/tags/Mixin/">Mixin</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://mouse0w0.github.io/2026/03/29/About-Hierarchy-Validation-in-Mixins/" data-title="Mixin中的层次结构验证 | 耗子的博客" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2026/03/29/PSA-Forward-Compatibility-Features-in-Mixin/" title="Mixin中的前向兼容性特性">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Mixin中的前向兼容性特性</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2022/03/01/Mixins-on-Minecraft-Forge/"  title="在Minecraft Forge中使用Mixin">
+ <strong>下一篇：</strong><br/> 
+ <span>在Minecraft Forge中使用Mixin
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+
+
+	
+  <div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+var gitalk = new Gitalk({
+  clientID: '7aa03b00f01b00627546',
+  clientSecret: '3b6ba50fa682ea7b0acced5106630a95921bfd92',
+  repo: 'mouse0w0.github.io',
+  owner: 'Mouse0w0',
+  admin: ['Mouse0w0'],
+  id: 'Mixin中的层次结构验证',      // Ensure uniqueness and length less than 50
+  distractionFreeMode: false  // Facebook-like distraction free mode
+})
+gitalk.render('gitalk-container')
+</script>
+  
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#Mixin%E4%B8%8E%E5%B9%B6%E8%A1%8C%E4%BC%AA%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">Mixin与并行伪层次结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mixin%E2%80%9D%E7%BB%A7%E6%89%BF%E2%80%9D"><span class="toc-number"></span> <span class="toc-text">Mixin”继承”</span></a>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="Mouse0w0" data-theme="medium"></div>
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+
+
+
+  
+<div class="afdian-card">
+<p class="asidetitle">给作者发电</p>
+<iframe class="afdian_iframe" src="https://afdian.com/leaflet?slug=mouse" height="260" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/Mixin/" title="Mixin">Mixin<sup>12</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Java/" title="Java">Java<sup>16</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Bytecode/" title="Bytecode">Bytecode<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Mixin/" title="Mixin">Mixin<sup>12</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/C-C/" title="C/C++">C/C++<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Tool/" title="Tool">Tool<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Windows/" title="Windows">Windows<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Script/" title="Script">Script<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Design-Pattern/" title="Design Pattern">Design Pattern<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Forge/" title="Forge">Forge<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/VSCode/" title="VSCode">VSCode<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Android/" title="Android">Android<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Linux/" title="Linux">Linux<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Nukkit/" title="Nukkit">Nukkit<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Kotlin/" title="Kotlin">Kotlin<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL/" title="OpenGL">OpenGL<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Graphics/" title="Graphics">Graphics<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Math/" title="Math">Math<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Web/" title="Web">Web<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="http://www.mcbbs.net/group-1181-1.html" target="_blank" title="一个综合性开发团队">未知之域</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://mouse0w0.github.io/lwjglbook-CN-Translation/" target="_blank" title="《用LWJGL3开发3D游戏》中文翻译">《用LWJGL3开发3D游戏》中文翻译</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/BungeeCordChineseTutorial" target="_blank" title="BungeeCord插件开发中文教程">BungeeCord插件开发中文教程</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://github.com/Mouse0w0/MinecraftDeveloperGuide" target="_blank" title="Minecraft开发者中文指南">Minecraft开发者中文指南</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  <div class="rsspart">
+	<a href="./atom.xml" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> 这是耗子的博客。 <br/>
+			想要变强。</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/Mouse0w0" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+				<div class="cc-license">
+          <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+            <img src="/img/cc-by-nc-sa.svg" alt="Creative Commons" />
+          </a>
+        </div>
+    
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2026 
+		
+		<a href="/about" target="_blank" title="Mouse0w0">Mouse0w0</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ], processEscapes: true } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } });
+    </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Queue(function() { var all = MathJax.Hub.getAllJax(), i; for(i=0; i
+        < all.length; i +=1 ) { all[i].SourceElement().parentNode.className +=' has-jax' ; } }); </script>
+
+            <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+            </script>
+            
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
