@@ -49,9 +49,9 @@ return cw.toByteArray();
 
 ## 2.1 目标类作用域
 
-Mixin中导致最多支撑代码的功能之一是支持超出目标类范围的操作，特别是引用超类或同一类上其他Mixin添加的成员的操作。
+Mixin中导致最多支撑代码的功能之一是支持超出目标类范围的操作，特别是引用父类或同一类上其他Mixin添加的成员的操作。
 
-验证层次结构操作最复杂的方面之一是访问目标类超类上的字段和方法，而这些字段和方法本身是由另一个Mixin添加的，这是通过让派生Mixin扩展超Mixin来实现的。这是一个如此复杂的话题，以至于它已经有了[自己的文章](https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins)。
+验证层次结构操作最复杂的方面之一是访问目标类父类上的字段和方法，而这些字段和方法本身是由另一个Mixin添加的，这是通过让派生Mixin扩展超Mixin来实现的。这是一个如此复杂的话题，以至于它已经有了[自己的文章](https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins)。
 
 ## 2.2 “软”操作
 
@@ -295,7 +295,7 @@ Mixin的应用分三个阶段进行，按`priority`顺序访问Mixin。
 
   ![](./Flippin-Mixins-how-do-they-work/how_06a.png)
 
-  在这个例子中，我们有3个Mixin，每个针对2个类，遵守层次结构规则。`MixinZ`访问`MixinX`中的字段`F`。当`MixinZ`应用到类`C`时，字段访问被转换为`A.F`，因为`MixinZ` *在目标*`C`的上下文中具有超类`A`。同样，在目标`L`的上下文中，字段被转换为目标`J.F`。这就是[层次结构遍历](https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins)在验证和Mixin特化后期阶段如此重要的根本原因。
+  在这个例子中，我们有3个Mixin，每个针对2个类，遵守层次结构规则。`MixinZ`访问`MixinX`中的字段`F`。当`MixinZ`应用到类`C`时，字段访问被转换为`A.F`，因为`MixinZ` *在目标*`C`的上下文中具有父类`A`。同样，在目标`L`的上下文中，字段被转换为目标`J.F`。这就是[层次结构遍历](https://github.com/SpongePowered/Mixin/wiki/About-Hierarchy-Validation-in-Mixins)在验证和Mixin特化后期阶段如此重要的根本原因。
 
   在Mixin代码中，有时也希望将Mixin类型转换为已知目标，这导致通过`Object`进行转换，因为Java编译器不允许直接转换为它事先“知道”会失败的`类`。所以我们经常会看到诸如`((TargetClass)(Object)this).somePublicMethod()`的代码。Mixin检测并删除这些双重转换以提高效率，这意味着结果代码的效率等同于简单地调用`this.somePublicMethod()`。
 

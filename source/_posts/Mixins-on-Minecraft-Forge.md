@@ -137,7 +137,7 @@ mixin {
 **MixinGradle**使用所有必需的选项配置AP。但是，Mixin AP选项可以通过`mixin`闭包进行操纵。以下是一些实用选项：
 
 - `boolean disableTargetValidator`
-  禁用目标验证器（验证Mixin目标是否合理（例如，目标层次结构中存在超类））
+  禁用目标验证器（验证Mixin目标是否合理（例如，目标层次结构中存在父类））
 - `boolean disableOverwriteChecker`
   禁用重写方法检查器，它用来确保`@Overwrite`方法的JavaDoc含有`@author`和`@reason`标记
 - `String overwriteErrorLevel`

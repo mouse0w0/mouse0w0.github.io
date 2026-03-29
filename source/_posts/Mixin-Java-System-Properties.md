@@ -82,7 +82,7 @@ categories: Mixin
     <tr>
       <td valign="top"><code>mixin.checks.interfaces</code></td>
       <td valign="top">
-        <p>启用<i>接口实现审计模式</i>。启用此模式后，Mixin处理器将为每个应用的Mixin输出一个审计报告，该报告提供了由类方法声明但<i>未由类或任何超类实现</i>的接口方法的摘要，实际上，那些方法在被调用时会导致抛出<code>AbstractMethodError</code>。</p>
+        <p>启用<i>接口实现审计模式</i>。启用此模式后，Mixin处理器将为每个应用的Mixin输出一个审计报告，该报告提供了由类方法声明但<i>未由类或任何父类实现</i>的接口方法的摘要，实际上，那些方法在被调用时会导致抛出<code>AbstractMethodError</code>。</p>
         <p>报告被生成到<code>标准错误（STDERR）</code>输出，也会写入你的运行目录下的<code>.mixin.out</code>文件夹下的平面文件。</p>
       </td>
     </tr>
