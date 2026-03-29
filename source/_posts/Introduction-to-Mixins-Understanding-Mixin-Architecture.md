@@ -4,7 +4,6 @@ date: 2018-11-01 08:09:56
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
 ---
-
 > 本文翻译自：[Introduction to Mixins Understanding Mixin Architecture](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture)
 
 在开始开发Mixin之前，要使它们产生效果，最重要的是对其基本概念的理解。本文简要介绍了这些概念。尽管您可能熟悉这里所述的所有内容，但我建议至少略读前三个部分，因为它们介绍了我将用来演示如何使用Mixin的示例案例，以及Java和JVM中大量使用Mixin的一些特殊部分。

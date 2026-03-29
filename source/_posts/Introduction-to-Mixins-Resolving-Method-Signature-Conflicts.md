@@ -4,7 +4,7 @@ date: 2018-11-06 11:15:29
 tags: [Java, Bytecode, Mixin]
 categories: Mixin
 ---
-> 本教程翻译自：[Introduction to Mixins Resolving Method Signature Conflicts](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Resolving-Method-Signature-Conflicts)
+> 本文翻译自：[Introduction to Mixins Resolving Method Signature Conflicts](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Resolving-Method-Signature-Conflicts)
 
 Mixin为我们提供了很大的权力来操作现有的类，其中最有用的就是如[本系列第一部分所说](https://github.com/SpongePowered/Mixin/wiki/Introduction-to-Mixins---Understanding-Mixin-Architecture)将新接口动态添加到现有类中。
 
